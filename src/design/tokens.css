@@ -1,0 +1,38 @@
+/* ── LiveTile Design Tokens ─────────────────────────────────────────────────── */
+
+:root {
+  /* Typography — Segoe UI Variable with fallbacks */
+  --font-sans: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Font sizes */
+  --fs-xs:  0.5rem;    /*  8px */
+  --fs-sm:  0.5625rem; /*  9px */
+  --fs-md:  0.625rem;  /* 10px */
+  --fs-lg:  0.6875rem; /* 11px */
+  --fs-xl:  0.75rem;   /* 12px */
+  --fs-xxl: 0.875rem;  /* 14px */
+
+  /* Spacing scale (4px base) */
+  --space-0:  0;
+  --space-1:  0.25rem;  /*  4px */
+  --space-2:  0.5rem;   /*  8px */
+  --space-3:  0.75rem;  /* 12px */
+  --space-4:  1rem;     /* 16px */
+  --space-5:  1.25rem;  /* 20px */
+  --space-6:  1.5rem;   /* 24px */
+  --space-8:  2rem;     /* 32px */
+
+  /* Border radius */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 100px;
+
+  /* Transitions */
+  --dur-fast:   120ms;
+  --dur-normal: 200ms;
+  --dur-slow:   350ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}

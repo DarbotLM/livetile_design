@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiveTile Design Studio -- Batch 2 (Slides 9-16)</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gw:1280px;--gh:720px;--cols:12;--rows:7;
+  --bg:#0d1117;--surface:rgba(22,27,34,.95);--surface2:#161b22;
+  --accent:#3b82f6;--accent-lt:#60a5fa;--accent-glow:rgba(59,130,246,.15);
+  --border:rgba(255,255,255,.08);--border-lt:rgba(255,255,255,.14);
+  --text:#e6edf3;--text-mid:#b1bac4;--text-dim:#6e7681;
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'Cascadia Code','Fira Code',Consolas,monospace;
+}
+.t-blue{--accent:#3b82f6;--accent-lt:#60a5fa;--accent-glow:rgba(59,130,246,.15)}
+.t-emerald{--accent:#10b981;--accent-lt:#34d399;--accent-glow:rgba(16,185,129,.15)}
+.t-crimson{--accent:#ef4444;--accent-lt:#f87171;--accent-glow:rgba(239,68,68,.15)}
+.t-violet{--accent:#8b5cf6;--accent-lt:#a78bfa;--accent-glow:rgba(139,92,246,.15)}
+.t-gold{--accent:#f59e0b;--accent-lt:#fbbf24;--accent-glow:rgba(245,158,11,.15)}
+.t-cyan{--accent:#06b6d4;--accent-lt:#22d3ee;--accent-glow:rgba(6,182,212,.15)}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden;height:100vh;display:flex;flex-direction:column}
+.top-bar{display:flex;align-items:center;gap:8px;padding:5px 16px;background:#010409;border-bottom:1px solid var(--border);flex-shrink:0}
+.brand{font-size:12px;font-weight:600;color:var(--text-dim);margin-right:10px;white-space:nowrap;letter-spacing:.4px}
+.tb{width:18px;height:18px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s}
+.tb:hover,.tb.on{border-color:#fff}
+.nav-grp{margin-left:auto;display:flex;gap:4px}
+.nb{padding:3px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);font-size:10px;cursor:pointer;font-family:var(--mono);transition:all .15s}
+.nb:hover{color:var(--text);border-color:var(--border-lt)}
+.nb.on{color:var(--accent-lt);border-color:var(--accent);background:var(--accent-glow)}
+.thumb-strip{display:flex;gap:5px;padding:5px 16px;background:#010409;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.thumb{width:110px;height:62px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;transition:border-color .2s;overflow:hidden}
+.thumb:hover{border-color:var(--border-lt)}
+.thumb.on{border-color:var(--accent);box-shadow:0 0 6px var(--accent-glow)}
+.thumb-lbl{position:absolute;bottom:2px;left:4px;font-size:8px;color:var(--text-dim);font-family:var(--mono)}
+.viewer{flex:1;display:flex;justify-content:center;align-items:center;overflow:auto;padding:8px}
+.slide{width:var(--gw);height:var(--gh);display:none;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);gap:5px;padding:5px;background:var(--bg);border-radius:6px}
+.slide.on{display:grid}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:7px;position:relative;overflow:hidden;perspective:800px;cursor:pointer;animation:tIn .4s ease forwards;animation-delay:var(--d,0s);opacity:0}
+@keyframes tIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.tile{animation:none;opacity:1}}
+.tile .front,.tile .back{position:absolute;inset:0;backface-visibility:hidden;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.tile .front{padding:8px 10px;display:flex;flex-direction:column;overflow:hidden}
+.tile .back{transform:rotateY(180deg);background:var(--surface2);padding:8px 10px;overflow:auto;color:var(--text-dim);font-family:var(--mono);font-size:9px;line-height:1.5;white-space:pre-wrap;overflow-wrap:break-word}
+.tile.flip .front{transform:rotateY(180deg)}
+.tile.flip .back{transform:rotateY(0)}
+.tt{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.2;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ts{font-size:10px;color:var(--text-dim);margin-bottom:3px;flex-shrink:0}
+.ca{flex:1;min-height:0;position:relative;overflow:hidden}
+.ca svg{width:100%;height:100%;display:block}
+.kv{font-size:28px;font-weight:700;color:var(--accent-lt);line-height:1.1}
+.kl{font-size:11px;color:var(--text-dim);margin-top:2px}
+.ttbl{width:100%;height:100%;border-collapse:collapse;font-size:11px;color:var(--text)}
+.ttbl th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border-lt);color:var(--text-mid);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.ttbl td{padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.ttbl tr:hover td{background:rgba(255,255,255,.03)}
+.sg{display:flex;flex-wrap:wrap;gap:3px;padding:2px 0}
+.sd{width:18px;height:18px;border-radius:4px}
+
+.tile:hover{border-color:var(--border-lt);box-shadow:0 0 12px rgba(0,0,0,.3)}
+.tile::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.3;z-index:1}
+.bh{font-size:8px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+</style>
+</head>
+<body class="t-blue">
+<div class="top-bar">
+  <span class="brand">BATCH 2 / SLIDES 9-16</span>
+  <button class="tb on" data-t="blue" style="background:#3b82f6" onclick="setT(this)"></button>
+  <button class="tb" data-t="emerald" style="background:#10b981" onclick="setT(this)"></button>
+  <button class="tb" data-t="crimson" style="background:#ef4444" onclick="setT(this)"></button>
+  <button class="tb" data-t="violet" style="background:#8b5cf6" onclick="setT(this)"></button>
+  <button class="tb" data-t="gold" style="background:#f59e0b" onclick="setT(this)"></button>
+  <button class="tb" data-t="cyan" style="background:#06b6d4" onclick="setT(this)"></button>
+  <div class="nav-grp">
+    <button class="nb" onclick="prev()">Prev</button>
+    <button class="nb" onclick="next()">Next</button>
+  </div>
+</div>
+<div class="thumb-strip" id="thumbs"></div>
+<div class="viewer" id="viewer"></div>
+
+<script>
+let cur=0;
+const SN=8;
+function setT(el){document.body.className='t-'+el.dataset.t;document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b===el))}
+function show(i){cur=i;document.querySelectorAll('.slide').forEach((s,j)=>s.classList.toggle('on',j===i));document.querySelectorAll('.thumb').forEach((t,j)=>t.classList.toggle('on',j===i))}
+function prev(){show((cur-1+SN)%SN)}
+function next(){show((cur+1)%SN)}
+
+// Build slides
+const viewer=document.getElementById('viewer');
+const thumbs=document.getElementById('thumbs');
+for(let i=0;i<SN;i++){
+  const s=document.createElement('div');s.className='slide';s.id='s'+i;viewer.appendChild(s);
+  const t=document.createElement('div');t.className='thumb'+(i===0?' on':'');
+  t.innerHTML='<span class="thumb-lbl">Slide '+(i+9)+'</span>';
+  t.onclick=()=>show(i);thumbs.appendChild(t);
+}
+document.querySelector('.slide').classList.add('on');
+
+function hl(o){
+  let s=JSON.stringify(o,null,2);
+  s=s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s=s.replace(/"([^"]+)"(?=\s*:)/g,'<span style="color:#79c0ff">"$1"</span>');
+  s=s.replace(/: "([^"]*)"/g,': <span style="color:#a5d6a7">"$1"</span>');
+  s=s.replace(/: (-?\d+\.?\d*)/g,': <span style="color:#fbbf24">$1</span>');
+  s=s.replace(/: (true|false)/g,': <span style="color:#f0883e">$1</span>');
+  return s;
+}
+function T(sid,c1,c2,r1,r2,html,cfg,d){
+  const schema={
+    "$schema":"https://livetile.design/schema/tile/v1.json",
+    id:sid+'-'+cfg.type+'-c'+c1+'r'+r1,
+    type:cfg.type, version:"2.0",
+    title:cfg.title||cfg.type,
+    slide:{index:parseInt(sid[1])+9,id:sid},
+    grid:{column:{start:c1,end:c2},row:{start:r1,end:r2}},
+    renderer:{type:cfg.type,config:cfg.config||{}},
+    data:cfg.data||{},
+    animation:{entrance:"tileIn",delay:d,duration:0.4,easing:"ease"},
+    interaction:{flip:true,trigger:"click"},
+    layer:1, theme:"inherit"
+  };
+  const el=document.createElement('div');el.className='tile';
+  el.style.gridColumn=c1+'/'+(c2+1);el.style.gridRow=r1+'/'+(r2+1);
+  el.style.setProperty('--d',d+'s');
+  el.innerHTML='<div class="front">'+html+'</div><div class="back"><div class="bh">'+schema.id+' SCHEMA</div>'+hl(schema)+'</div>';
+  el.addEventListener('click',()=>el.classList.toggle('flip'));
+  document.getElementById(sid).appendChild(el);
+}
+
+/* ===== RENDERERS ===== */
+
+function rHero(title,sub){
+  return '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;gap:8px;text-align:center">'+
+    '<div style="font-size:22px;font-weight:700;color:var(--text);line-height:1.2">'+title+'</div>'+
+    (sub?'<div style="font-size:12px;color:var(--text-dim);max-width:80%">'+sub+'</div>':'')+
+    '<div style="width:40px;height:2px;background:var(--accent);border-radius:2px;margin-top:6px"></div></div>';
+}
+
+function rKpi(label,value,delta){
+  return '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center">'+
+    '<div class="kl">'+label+'</div><div class="kv">'+value+'</div>'+
+    (delta?'<div style="font-size:10px;color:'+(String(delta).startsWith('-')?'#f87171':'#34d399')+'">'+delta+'</div>':'')+
+    '</div>';
+}
+
+function rMetric(label,value){
+  return '<div style="display:flex;flex-direction:column;justify-content:center;height:100%">'+
+    '<div class="tt">'+label+'</div><div class="kv" style="font-size:24px">'+value+'</div></div>';
+}
+
+function rPipeline(stages){
+  const n=stages.length;
+  let html='<div class="tt">Pipeline</div>';
+  html+='<div style="display:flex;align-items:center;justify-content:center;flex:1;gap:0;padding:4px 12px">';
+  stages.forEach((s,i)=>{
+    html+='<div style="display:flex;flex-direction:column;align-items:center">';
+    html+='<div style="width:52px;height:52px;border-radius:50%;border:2px solid var(--accent);background:var(--accent-glow);display:flex;align-items:center;justify-content:center">';
+    html+='<span style="font-size:9px;font-weight:600;color:var(--text);text-align:center;line-height:1.1;font-family:var(--mono)">'+s+'</span>';
+    html+='</div></div>';
+    if(i<n-1){
+      html+='<svg width="36" height="12" viewBox="0 0 36 12" style="flex-shrink:0"><path d="M2 6h26m-5-4l5 4-5 4" stroke="var(--accent)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+  });
+  html+='</div>';
+  return html;
+}
+
+function rBar(title,data){
+  const max=Math.max(...data.map(d=>d.value)),n=data.length;
+  const pad=24,w=180,h=100,bw=Math.min(22,(w-pad)/(n*1.3));
+  let svg='<svg viewBox="0 0 '+w+' '+(h+14)+'" preserveAspectRatio="xMidYMid meet">';
+  for(let i=0;i<4;i++){
+    const y=h-(i+1)*h/4;
+    svg+='<line x1="'+pad+'" y1="'+y+'" x2="'+w+'" y2="'+y+'" stroke="var(--border)" stroke-width=".5"/>';
+    svg+='<text x="'+(pad-3)+'" y="'+(y+3)+'" text-anchor="end" fill="var(--text-dim)" font-size="9">'+Math.round(max*(i+1)/4)+'</text>';
+  }
+  data.forEach((d,i)=>{
+    const bh=(d.value/max)*(h-4);
+    const x=pad+i*((w-pad)/n)+((w-pad)/n-bw)/2;
+    const y=h-bh;
+    svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="2" fill="var(--accent)" opacity=".85"/>';
+    svg+='<text x="'+(x+bw/2)+'" y="'+(h+10)+'" text-anchor="middle" fill="var(--text-dim)" font-size="9">'+d.label+'</text>';
+    svg+='<text x="'+(x+bw/2)+'" y="'+(y-2)+'" text-anchor="middle" fill="var(--text-mid)" font-size="8">'+d.value+'</text>';
+  });
+  svg+='<line x1="'+pad+'" y1="0" x2="'+pad+'" y2="'+h+'" stroke="var(--text-dim)" stroke-width=".5"/>';
+  svg+='<line x1="'+pad+'" y1="'+h+'" x2="'+w+'" y2="'+h+'" stroke="var(--text-dim)" stroke-width=".5"/>';
+  svg+='</svg>';
+  return '<div class="tt">'+title+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rLine(title,data){
+  const w=180,h=80,pad=4;
+  const max=Math.max(...data),min=Math.min(...data);
+  const range=max-min||1;
+  const pts=data.map((d,i)=>(pad+i*((w-2*pad)/(data.length-1)))+','+(h-pad-(d-min)/range*(h-2*pad))).join(' ');
+  let svg='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet">';
+  for(let i=1;i<=3;i++) svg+='<line x1="0" y1="'+(h*i/4)+'" x2="'+w+'" y2="'+(h*i/4)+'" stroke="var(--border)" stroke-width=".4"/>';
+  svg+='<polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  const fp=pts.split(' ')[0].split(','),lp=pts.split(' ').pop().split(',');
+  svg+='<circle cx="'+fp[0]+'" cy="'+fp[1]+'" r="3" fill="var(--accent)"/>';
+  svg+='<circle cx="'+lp[0]+'" cy="'+lp[1]+'" r="3" fill="var(--accent)"/>';
+  svg+='</svg>';
+  return '<div class="tt">'+title+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rArea(title,data){
+  const w=180,h=80,pad=4;
+  const max=Math.max(...data);
+  const pts=data.map((d,i)=>(pad+i*((w-2*pad)/(data.length-1)))+','+(h-pad-d/max*(h-2*pad)));
+  const poly=pad+','+(h-pad)+' '+pts.join(' ')+' '+(w-pad)+','+(h-pad);
+  let svg='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet">';
+  for(let i=1;i<=3;i++) svg+='<line x1="0" y1="'+(h*i/4)+'" x2="'+w+'" y2="'+(h*i/4)+'" stroke="var(--border)" stroke-width=".4"/>';
+  svg+='<polygon points="'+poly+'" fill="var(--accent-glow)"/>';
+  svg+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>';
+  svg+='</svg>';
+  return '<div class="tt">'+title+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rPie(title,data){
+  const total=data.reduce((s,d)=>s+d.value,0);
+  const cx=55,cy=55,r=50,ir=28;
+  let a=0;
+  let svg='<svg viewBox="0 0 170 120" preserveAspectRatio="xMidYMid meet">';
+  const colors=['var(--accent)','#34d399','#fbbf24','#f87171','#a78bfa','#22d3ee'];
+  data.forEach((d,i)=>{
+    const angle=d.value/total*Math.PI*2;
+    const x1=cx+r*Math.sin(a),y1=cy-r*Math.cos(a);
+    const x2=cx+r*Math.sin(a+angle),y2=cy-r*Math.cos(a+angle);
+    const ix1=cx+ir*Math.sin(a),iy1=cy-ir*Math.cos(a);
+    const ix2=cx+ir*Math.sin(a+angle),iy2=cy-ir*Math.cos(a+angle);
+    const lg=angle>Math.PI?1:0;
+    svg+='<path d="M'+ix1+' '+iy1+' L'+x1+' '+y1+' A'+r+' '+r+' 0 '+lg+' 1 '+x2+' '+y2+' L'+ix2+' '+iy2+' A'+ir+' '+ir+' 0 '+lg+' 0 '+ix1+' '+iy1+'" fill="'+colors[i%6]+'" opacity=".85"/>';
+    a+=angle;
+  });
+  data.forEach((d,i)=>{
+    svg+='<rect x="118" y="'+(8+i*22)+'" width="10" height="10" rx="2" fill="'+colors[i%6]+'"/>';
+    svg+='<text x="132" y="'+(17+i*22)+'" fill="var(--text-mid)" font-size="10">'+d.label+': '+d.value+'%</text>';
+  });
+  svg+='</svg>';
+  return '<div class="tt">'+title+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rRadar(title,data){
+  const cx=85,cy=78,r=58,n=data.length,step=Math.PI*2/n;
+  let svg='<svg viewBox="0 0 170 168" preserveAspectRatio="xMidYMid meet">';
+  for(let ring=1;ring<=4;ring++){
+    const rr=r*ring/4;
+    const pts=Array.from({length:n},(_,i)=>(cx+rr*Math.sin(i*step))+','+(cy-rr*Math.cos(i*step))).join(' ');
+    svg+='<polygon points="'+pts+'" fill="none" stroke="var(--border)" stroke-width=".5"/>';
+  }
+  data.forEach((_,i)=>{
+    svg+='<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+r*Math.sin(i*step))+'" y2="'+(cy-r*Math.cos(i*step))+'" stroke="var(--border)" stroke-width=".3"/>';
+  });
+  const pts=data.map((d,i)=>{const v=d.value/100*r;return(cx+v*Math.sin(i*step))+','+(cy-v*Math.cos(i*step))}).join(' ');
+  svg+='<polygon points="'+pts+'" fill="var(--accent-glow)" stroke="var(--accent)" stroke-width="2"/>';
+  data.forEach((d,i)=>{
+    const v=d.value/100*r;
+    svg+='<circle cx="'+(cx+v*Math.sin(i*step))+'" cy="'+(cy-v*Math.cos(i*step))+'" r="3.5" fill="var(--accent)"/>';
+    const lx=cx+(r+14)*Math.sin(i*step),ly=cy-(r+14)*Math.cos(i*step);
+    svg+='<text x="'+lx+'" y="'+(ly+4)+'" text-anchor="middle" fill="var(--text-mid)" font-size="10" font-weight="500">'+d.label+'</text>';
+  });
+  svg+='</svg>';
+  return '<div class="tt">'+title+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rScatter(title,data){
+  const w=180,h=100,pad=18;
+  let svg='<svg viewBox="0 0 '+w+' '+(h+10)+'" preserveAspectRatio="xMidYMid meet">';
+  for(let i=1;i<=4;i++){
+    svg+='<line x1="'+pad+'" y1="'+(h-i*h/5)+'" x2="'+w+'" y2="'+(h-i*h/5)+'" stroke="var(--border)" stroke-width=".3"/>';
+    svg+='<line x1="'+(pad+i*(w-pad)/5)+'" y1="0" x2="'+(pad+i*(w-pad)/5)+'" y2="'+h+'" stroke="var(--border)" stroke-width=".3"/>';
+  }
+  svg+='<line x1="'+pad+'" y1="0" x2="'+pad+'" y2="'+h+'" stroke="var(--text-dim)" stroke-width=".5"/>';
+  svg+='<line x1="'+pad+'" y1="'+h+'" x2="'+w+'" y2="'+h+'" stroke="var(--text-dim)" stroke-width=".5"/>';
+  data.forEach(d=>{
+    const x=pad+d.x/100*(w-pad), y=h-d.y/100*h;
+    svg+='<circle cx="'+x+'" cy="'+y+'" r="4" fill="'+d.color+'" opacity=".8"/>';
+  });
+  svg+='</svg>';
+  return '<div class="tt">'+title+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rHeatmap(title,matrix,xlabels,ylabels){
+  const rows=matrix.length,cols=matrix[0].length;
+  const maxXLbl=xlabels?Math.max(...xlabels.map(l=>l.length)):0;
+  // cell width based on longest header label; cell height stays compact
+  const cw=Math.max(36,maxXLbl*6+8),ch=26,lw=36;
+  const topPad=20,w=lw+cols*cw,h=topPad+rows*ch;
+  let svg='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet">';
+  matrix.forEach((row,ri)=>{
+    row.forEach((val,ci)=>{
+      const pct=typeof val==='number'?val:50;
+      const hue=Math.round(pct*1.2);
+      svg+='<rect x="'+(lw+ci*cw)+'" y="'+(topPad+ri*ch)+'" width="'+(cw-2)+'" height="'+(ch-2)+'" rx="3" fill="hsl('+hue+',65%,45%)" opacity=".85"/>';
+      svg+='<text x="'+(lw+ci*cw+cw/2)+'" y="'+(topPad+ri*ch+ch/2+3)+'" text-anchor="middle" fill="#fff" font-size="9" font-weight="500">'+Math.round(pct)+'</text>';
+    });
+  });
+  if(xlabels) xlabels.slice(0,cols).forEach((l,i)=>{
+    svg+='<text x="'+(lw+i*cw+cw/2)+'" y="13" text-anchor="middle" fill="var(--text-mid)" font-size="8">'+l+'</text>';
+  });
+  if(ylabels) ylabels.slice(0,rows).forEach((l,i)=>{
+    svg+='<text x="'+(lw-4)+'" y="'+(topPad+i*ch+ch/2+3)+'" text-anchor="end" fill="var(--text-mid)" font-size="8.5">'+l+'</text>';
+  });
+  svg+='</svg>';
+  return '<div class="tt">'+title+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rGauge(label,value,maxV){
+  maxV=maxV||100;
+  const pct=Math.min(value/maxV,1);
+  const cx=70,cy=62,r=50;
+  const startA=-Math.PI*0.8,endA=Math.PI*0.8,range=endA-startA;
+  const valA=startA+range*pct;
+  const x1=cx+r*Math.cos(startA),y1=cy+r*Math.sin(startA);
+  const x2=cx+r*Math.cos(endA),y2=cy+r*Math.sin(endA);
+  const vx=cx+r*Math.cos(valA),vy=cy+r*Math.sin(valA);
+  let svg='<svg viewBox="0 0 140 90" preserveAspectRatio="xMidYMid meet">';
+  svg+='<path d="M'+x1+' '+y1+' A'+r+' '+r+' 0 1 1 '+x2+' '+y2+'" fill="none" stroke="var(--border)" stroke-width="12" stroke-linecap="round"/>';
+  const lg=range*pct>Math.PI?1:0;
+  svg+='<path d="M'+x1+' '+y1+' A'+r+' '+r+' 0 '+lg+' 1 '+vx+' '+vy+'" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round"/>';
+  svg+='<text x="'+cx+'" y="'+(cy+6)+'" text-anchor="middle" fill="var(--text)" font-size="20" font-weight="700">'+value+(maxV===100?'%':'')+'</text>';
+  svg+='</svg>';
+  return '<div class="tt">'+label+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rBullet(label,value,target){
+  const w=180,h=22,pct=Math.min(value/target,1.2);
+  let svg='<svg viewBox="0 0 '+(w+44)+' '+(h+6)+'" preserveAspectRatio="xMidYMid meet">';
+  svg+='<rect x="0" y="3" width="'+w+'" height="'+h+'" rx="4" fill="var(--border)"/>';
+  svg+='<rect x="0" y="3" width="'+(w*pct)+'" height="'+h+'" rx="4" fill="var(--accent)" opacity=".7"/>';
+  svg+='<line x1="'+w+'" y1="0" x2="'+w+'" y2="'+(h+6)+'" stroke="var(--accent-lt)" stroke-width="2.5"/>';
+  svg+='<text x="'+(w+5)+'" y="18" fill="var(--text)" font-size="11" font-weight="600">'+value+'/'+target+'</text>';
+  svg+='</svg>';
+  return '<div class="ts">'+label+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rSparkline(data){
+  const w=100,h=32;
+  const max=Math.max(...data),min=Math.min(...data),range=max-min||1;
+  const pts=data.map((d,i)=>(i*(w/(data.length-1)))+','+(h-3-(d-min)/range*(h-6))).join(' ');
+  let svg='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet">';
+  const poly='0,'+(h-3)+' '+pts+' '+w+','+(h-3);
+  svg+='<polygon points="'+poly+'" fill="var(--accent-glow)" opacity=".4"/>';
+  svg+='<polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  svg+='</svg>';
+  return '<div class="ca" style="display:flex;align-items:center;justify-content:center;height:100%">'+svg+'</div>';
+}
+
+function rProgressRing(value,label){
+  const r=34,c=r*2*Math.PI,dash=value/100*c;
+  let svg='<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">';
+  svg+='<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="var(--border)" stroke-width="8"/>';
+  svg+='<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="'+dash+' '+c+'" stroke-linecap="round" transform="rotate(-90 50 50)"/>';
+  svg+='<text x="50" y="54" text-anchor="middle" fill="var(--text)" font-size="18" font-weight="700">'+value+'%</text>';
+  svg+='</svg>';
+  return '<div class="tt" style="text-align:center">'+label+'</div><div class="ca">'+svg+'</div>';
+}
+
+function rStatusGrid(items){
+  const dots=items.map(i=>'<div style="display:flex;flex-direction:column;align-items:center;gap:3px"><div class="sd" style="background:'+i.color+'"></div><span style="font-size:10px;color:var(--text-mid);font-family:var(--mono)">'+
+    (i.label||'')+'</span></div>').join('');
+  return '<div class="tt">Service Health</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;justify-content:center">'+dots+'</div>';
+}
+
+function rTable(headers,rows){
+  let h='<thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead>';
+  let b='<tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody>';
+  return '<div style="overflow:auto;flex:1;display:flex;flex-direction:column"><table class="ttbl" style="flex:1">'+h+b+'</table></div>';
+}
+
+function rTimeline(events){
+  const n=events.length,w=n*52;
+  let svg='<svg viewBox="0 0 '+w+' 40" preserveAspectRatio="xMidYMid meet">';
+  svg+='<line x1="12" y1="20" x2="'+(w-12)+'" y2="20" stroke="var(--accent)" stroke-width="2" opacity=".4"/>';
+  events.forEach((e,i)=>{
+    const cx=i*(w/n)+w/n/2;
+    svg+='<circle cx="'+cx+'" cy="20" r="5" fill="var(--accent)"/>';
+    svg+='<text x="'+cx+'" y="10" text-anchor="middle" fill="var(--text)" font-size="9" font-weight="500">'+e.label+'</text>';
+    svg+='<text x="'+cx+'" y="35" text-anchor="middle" fill="var(--text-dim)" font-size="9">'+e.time+'</text>';
+  });
+  svg+='</svg>';
+  return '<div class="tt">Deployment Timeline</div><div class="ca">'+svg+'</div>';
+}
+
+function rComparison(left,right){
+  let html='<div class="tt">Champion vs Challenger</div>';
+  html+='<div style="display:flex;gap:8px;flex:1;font-size:12px">';
+  html+='<div style="flex:1;background:var(--accent-glow);border-radius:6px;padding:12px;display:flex;flex-direction:column">';
+  html+='<div style="font-weight:700;color:var(--accent-lt);margin-bottom:8px;font-size:13px">'+left.name+'</div>';
+  html+='<div style="flex:1;display:flex;flex-direction:column;justify-content:space-evenly">';
+  Object.keys(left).filter(k=>k!=='name').forEach(k=>{
+    html+='<div style="display:flex;justify-content:space-between;color:var(--text-mid);padding:6px 0;border-bottom:1px solid var(--border)"><span>'+k+'</span><span style="color:var(--text);font-weight:600">'+left[k]+'</span></div>';
+  });
+  html+='</div></div>';
+  html+='<div style="flex:1;background:rgba(255,255,255,.03);border-radius:6px;padding:12px;display:flex;flex-direction:column">';
+  html+='<div style="font-weight:700;color:var(--text-mid);margin-bottom:8px;font-size:13px">'+right.name+'</div>';
+  html+='<div style="flex:1;display:flex;flex-direction:column;justify-content:space-evenly">';
+  Object.keys(right).filter(k=>k!=='name').forEach(k=>{
+    html+='<div style="display:flex;justify-content:space-between;color:var(--text-dim);padding:6px 0;border-bottom:1px solid var(--border)"><span>'+k+'</span><span style="font-weight:600">'+right[k]+'</span></div>';
+  });
+  html+='</div></div></div>';
+  return html;
+}
+
+function rStackedBar(title,categories,series){
+  const w=180,h=90,pad=30,n=categories.length;
+  const bh=Math.min(18,(h-8)/n);
+  const maxTotal=Math.max(...categories.map((_,i)=>series.reduce((s,sr)=>s+sr.data[i],0)));
+  const colors=['var(--accent)','#34d399','#fbbf24','#f87171','#a78bfa'];
+  let svg='<svg viewBox="0 0 '+w+' '+(h+18)+'" preserveAspectRatio="xMidYMid meet">';
+  categories.forEach((cat,ci)=>{
+    const y=ci*(bh+5)+4;
+    let x=pad;
+    series.forEach((sr,si)=>{
+      const bw=sr.data[ci]/maxTotal*(w-pad-4);
+      svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+colors[si%5]+'" opacity=".8" rx="2"/>';
+      x+=bw;
+    });
+    svg+='<text x="'+(pad-3)+'" y="'+(y+bh/2+4)+'" text-anchor="end" fill="var(--text-mid)" font-size="9">'+cat+'</text>';
+  });
+  series.forEach((sr,si)=>{
+    svg+='<rect x="'+(pad+si*44)+'" y="'+(h+3)+'" width="10" height="10" rx="2" fill="'+colors[si%5]+'"/>';
+    svg+='<text x="'+(pad+si*44+13)+'" y="'+(h+12)+'" fill="var(--text-mid)" font-size="9">'+sr.name+'</text>';
+  });
+  svg+='</svg>';
+  return '<div class="tt">'+title+'</div><div class="ca">'+svg+'</div>';
+}
+
+
+/* ===== SLIDE DATA ===== */
+
+// Slide 9: Multi-Agent Orchestration Hub
+T('s0',1,6,1,2,rHero('Multi-Agent Orchestration Hub','Autonomous pipeline coordination & monitoring'),{type:'hero',title:'Multi-Agent Orchestration Hub',config:{subtitle:'Autonomous pipeline coordination & monitoring',accentBar:true}},0);
+T('s0',7,12,1,2,rRadar('Agent Capabilities',[{label:'Routing',value:85},{label:'Planning',value:78},{label:'Execution',value:92},{label:'Validation',value:88},{label:'Memory',value:70}]),{type:'radar',title:'Agent Capabilities',config:{rings:4,scale:[0,100]},data:{series:[{label:'Routing',value:85},{label:'Planning',value:78},{label:'Execution',value:92},{label:'Validation',value:88},{label:'Memory',value:70}]}},0.05);
+T('s0',1,12,3,4,rPipeline(['Router','Planner','Executor','Validator','Response']),{type:'pipeline',title:'Orchestration Pipeline',config:{direction:'horizontal',arrows:true},data:{stages:['Router','Planner','Executor','Validator','Response']}},0.1);
+T('s0',1,6,5,7,rBar('Tool Call Distribution',[{label:'Search',value:340},{label:'Code',value:220},{label:'DB',value:180},{label:'API',value:150},{label:'File',value:90}]),{type:'barChart',title:'Tool Call Distribution',config:{orientation:'vertical',showValues:true,showGrid:true},data:{series:[{label:'Search',value:340},{label:'Code',value:220},{label:'DB',value:180},{label:'API',value:150},{label:'File',value:90}]}},0.15);
+T('s0',7,12,5,7,rPie('Token Usage by Agent',[{label:'Planner',value:35},{label:'Executor',value:40},{label:'Validator',value:15},{label:'Router',value:10}]),{type:'pieChart',title:'Token Usage by Agent',config:{donut:true,innerRadius:28,outerRadius:50},data:{series:[{label:'Planner',value:35},{label:'Executor',value:40},{label:'Validator',value:15},{label:'Router',value:10}]}},0.2);
+
+// Slide 10: Feature Store Dashboard
+T('s1',1,8,1,5,rTable(['Name','Type','Freshness','Drift','Coverage'],[
+  ['user_session_count','int','1h','0.02','98%'],
+  ['avg_handle_time','float','2h','0.01','99%'],
+  ['sentiment_score','float','1.5h','0.03','97%'],
+  ['purchase_value','float','3h','0.04','96%'],
+  ['click_rate','float','0.5h','0.01','99.5%'],
+  ['conversion_rate','float','4h','0.05','95%']
+]),{type:'table',title:'Feature Store Registry',config:{headers:['Name','Type','Freshness','Drift','Coverage']},data:{rowCount:6}},0);
+T('s1',9,12,1,5,rHeatmap('Feature Correlation',[[100,80,60,40,20],[80,100,70,50,30],[60,70,100,60,40],[40,50,60,100,50],[20,30,40,50,100]],['F1','F2','F3','F4','F5'],['F1','F2','F3','F4','F5']),{type:'heatmap',title:'Feature Correlation',config:{colorScale:'hsl',range:[0,100]},data:{matrix:'5x5',labels:['F1','F2','F3','F4','F5']}},0.08);
+T('s1',1,3,6,7,rKpi('Total Features','847'),{type:'kpi',title:'Total Features',config:{format:'integer'},data:{value:847}},0.12);
+T('s1',4,6,6,7,rKpi('Coverage','99.4%'),{type:'kpi',title:'Coverage',config:{format:'percentage'},data:{value:'99.4%'}},0.16);
+T('s1',7,9,6,7,rKpi('Avg Freshness','2.3h'),{type:'kpi',title:'Avg Freshness',config:{format:'duration'},data:{value:'2.3h'}},0.2);
+T('s1',10,12,6,7,rSparkline([20,30,25,40,35,50,45,55,48,60]),{type:'sparkline',title:'Trend',config:{fill:true,stroke:2},data:{values:[20,30,25,40,35,50,45,55,48,60]}},0.24);
+
+// Slide 11: DevOps DORA Metrics
+T('s2',1,6,1,4,rRadar('DORA Metrics',[{label:'Deploy Freq',value:80},{label:'Lead Time',value:70},{label:'MTTR',value:60},{label:'Change Fail',value:90},{label:'Availability',value:95}]),{type:'radar',title:'DORA Metrics',config:{rings:4,scale:[0,100]},data:{series:[{label:'Deploy Freq',value:80},{label:'Lead Time',value:70},{label:'MTTR',value:60},{label:'Change Fail',value:90},{label:'Availability',value:95}]}},0);
+T('s2',7,12,1,2,rBullet('Deploy Frequency (per day)',12,15),{type:'bullet',title:'Deploy Frequency',config:{unit:'per day'},data:{value:12,target:15}},0.05);
+T('s2',7,12,3,4,rBullet('MTTR (minutes)',18,15),{type:'bullet',title:'MTTR',config:{unit:'minutes'},data:{value:18,target:15}},0.1);
+T('s2',1,6,5,7,rStatusGrid([
+  {color:'#3fb950',label:'Auth'},{color:'#3fb950',label:'Gateway'},{color:'#3fb950',label:'Cache'},
+  {color:'#3fb950',label:'Queue'},{color:'#3fb950',label:'Store'},{color:'#3fb950',label:'Search'},
+  {color:'#3fb950',label:'ML'},{color:'#3fb950',label:'Log'},{color:'#e3b341',label:'CDN'},
+  {color:'#e3b341',label:'DNS'},{color:'#e3b341',label:'Monitor'},{color:'#f85149',label:'Backup'}
+]),{type:'statusGrid',title:'Service Health',config:{colorMap:{green:'healthy',amber:'degraded',red:'down'}},data:{items:12,healthy:8,degraded:3,down:1}},0.15);
+T('s2',7,9,5,7,rProgressRing(84,'Sprint Velocity'),{type:'progressRing',title:'Sprint Velocity',config:{max:100},data:{value:84}},0.2);
+T('s2',10,12,5,7,rMetric('Uptime','99.97%'),{type:'metric',title:'Uptime',config:{format:'percentage',precision:2},data:{value:'99.97%'}},0.25);
+
+// Slide 12: Deployment Pipeline
+T('s3',1,12,1,2,rTimeline([{label:'Build',time:'10:00'},{label:'Test',time:'10:05'},{label:'Stage',time:'10:10'},{label:'Canary',time:'10:15'},{label:'Prod',time:'10:20'}]),{type:'timeline',title:'Deployment Timeline',config:{direction:'horizontal'},data:{events:[{label:'Build',time:'10:00'},{label:'Test',time:'10:05'},{label:'Stage',time:'10:10'},{label:'Canary',time:'10:15'},{label:'Prod',time:'10:20'}]}},0);
+T('s3',1,8,3,5,rArea('Canary vs Baseline Error Rate',[5,10,8,12,6,9,7,11,8,6,5,4]),{type:'areaChart',title:'Canary vs Baseline Error Rate',config:{fill:true,strokeWidth:2},data:{points:12}},0.06);
+T('s3',9,12,3,4,rGauge('Canary Health',96),{type:'gauge',title:'Canary Health',config:{max:100,thresholds:{green:80,amber:50}},data:{value:96}},0.1);
+T('s3',9,12,5,5,rGauge('Rollback Risk',20),{type:'gauge',title:'Rollback Risk',config:{max:100,invertColor:true},data:{value:20}},0.14);
+T('s3',1,3,6,7,rKpi('Deploys Today','8'),{type:'kpi',title:'Deploys Today',config:{format:'integer'},data:{value:8}},0.18);
+T('s3',4,6,6,7,rKpi('Rollback Rate','2.1%'),{type:'kpi',title:'Rollback Rate',config:{format:'percentage'},data:{value:'2.1%'}},0.22);
+T('s3',7,12,6,7,rBar('Deploy Duration (min)',[{label:'Auth',value:5},{label:'Gateway',value:7},{label:'ML',value:4},{label:'Store',value:6}]),{type:'barChart',title:'Deploy Duration',config:{unit:'minutes'},data:{series:[{label:'Auth',value:5},{label:'Gateway',value:7},{label:'ML',value:4},{label:'Store',value:6}]}},0.26);
+
+// Slide 13: GPU Cluster Monitor
+T('s4',1,3,1,3,rGauge('GPU Utilization',78),{type:'gauge',title:'GPU Utilization',config:{max:100,unit:'%'},data:{value:78}},0);
+T('s4',4,6,1,3,rGauge('Memory',64),{type:'gauge',title:'Memory',config:{max:100,unit:'%'},data:{value:64}},0.04);
+T('s4',7,9,1,3,rGauge('Temperature',72),{type:'gauge',title:'Temperature',config:{max:100,unit:'C'},data:{value:72}},0.08);
+T('s4',10,12,1,3,rGauge('Power (W)',285,400),{type:'gauge',title:'Power',config:{max:400,unit:'W'},data:{value:285}},0.12);
+T('s4',1,6,4,7,rStackedBar('GPU Allocation',['A100','V100','T4','K80'],[
+  {name:'Training',data:[40,20,30,10]},
+  {name:'Inference',data:[30,35,25,20]},
+  {name:'Research',data:[20,25,30,40]},
+  {name:'Dev',data:[10,20,15,30]}
+]),{type:'stackedBar',title:'GPU Allocation',config:{orientation:'horizontal'},data:{categories:['A100','V100','T4','K80'],series:['Training','Inference','Research','Dev']}},0.16);
+T('s4',7,12,4,7,rLine('GPU Utilization 24h',[70,75,80,85,78,82,79,84,77,81,76,80,75,79,74,78,73,77,72,76,71,75,70,74]),{type:'lineChart',title:'GPU Utilization 24h',config:{strokeWidth:2,dots:true},data:{points:24,range:[70,85]}},0.2);
+
+// Slide 14: Data Quality Dashboard
+T('s5',1,8,1,4,rHeatmap('Quality Scores',[
+  [92,88,95,90],[78,94,82,85],[96,76,88,92],[85,90,79,87],[93,82,91,88],[80,86,94,83]
+],['Complete','Accurate','Consistent','Timely'],['DS1','DS2','DS3','DS4','DS5','DS6']),{type:'heatmap',title:'Quality Scores',config:{colorScale:'hsl',range:[0,100]},data:{matrix:'6x4',xlabels:['Complete','Accurate','Consistent','Timely'],ylabels:['DS1','DS2','DS3','DS4','DS5','DS6']}},0);
+T('s5',9,12,1,4,rBar('Failed Validations',[{label:'Null',value:50},{label:'Range',value:40},{label:'Format',value:30},{label:'Dup',value:18}]),{type:'barChart',title:'Failed Validations',config:{orientation:'vertical'},data:{series:[{label:'Null',value:50},{label:'Range',value:40},{label:'Format',value:30},{label:'Dup',value:18}]}},0.06);
+T('s5',1,3,5,6,rKpi('Pass Rate','97.8%'),{type:'kpi',title:'Pass Rate',config:{format:'percentage'},data:{value:'97.8%'}},0.1);
+T('s5',4,6,5,6,rKpi('Anomalies','23'),{type:'kpi',title:'Anomalies',config:{format:'integer'},data:{value:23}},0.14);
+T('s5',7,9,5,6,rProgressRing(94,'Quality Index'),{type:'progressRing',title:'Quality Index',config:{max:100},data:{value:94}},0.18);
+T('s5',10,12,5,6,rStatusGrid([
+  {color:'#3fb950',label:'DS1'},{color:'#3fb950',label:'DS2'},{color:'#3fb950',label:'DS3'},
+  {color:'#3fb950',label:'DS4'},{color:'#e3b341',label:'DS5'},{color:'#f85149',label:'DS6'}
+]),{type:'statusGrid',title:'Dataset Health',config:{},data:{items:6,healthy:4,degraded:1,down:1}},0.22);
+T('s5',1,12,7,7,rTable(['Timestamp','Dataset','Issue','Severity'],[
+  ['2024-10-01 12:00','DS1','Missing Values','High'],
+  ['2024-10-01 13:00','DS2','Data Drift','Medium'],
+  ['2024-10-01 14:00','DS3','Schema Mismatch','Low']
+]),{type:'table',title:'Recent Issues',config:{headers:['Timestamp','Dataset','Issue','Severity']},data:{rowCount:3}},0.26);
+
+// Slide 15: Hyperparameter Sweep
+const scatterD=[];
+for(let i=0;i<25;i++){
+  const cols=['#3b82f6','#34d399','#a78bfa'];
+  scatterD.push({x:Math.round(Math.random()*90+5),y:Math.round(Math.random()*90+5),color:cols[i%3]});
+}
+T('s6',1,6,1,5,rScatter('LR vs F1 by Optimizer',scatterD),{type:'scatterPlot',title:'LR vs F1 by Optimizer',config:{xAxis:'Learning Rate',yAxis:'F1 Score'},data:{points:25,colors:3}},0);
+T('s6',7,12,1,3,rLine('Best F1 over Sweep',[80,85,88,90,92,94,95,96,96.5,96.7]),{type:'lineChart',title:'Best F1 over Sweep',config:{strokeWidth:2},data:{points:10,range:[80,96.7]}},0.06);
+T('s6',7,12,4,5,rTable(['LR','Batch','Dropout','F1'],[
+  ['0.001','32','0.1','0.967'],
+  ['0.0005','64','0.2','0.965'],
+  ['0.001','32','0.15','0.964'],
+  ['0.002','16','0.1','0.962']
+]),{type:'table',title:'Top Configurations',config:{headers:['LR','Batch','Dropout','F1']},data:{rowCount:4}},0.1);
+T('s6',1,3,6,7,rKpi('Total Trials','256'),{type:'kpi',title:'Total Trials',config:{format:'integer'},data:{value:256}},0.14);
+T('s6',4,6,6,7,rKpi('Best F1','0.967'),{type:'kpi',title:'Best F1',config:{format:'decimal',precision:3},data:{value:0.967}},0.18);
+T('s6',7,9,6,7,rKpi('Compute Cost','$1,847'),{type:'kpi',title:'Compute Cost',config:{format:'currency'},data:{value:1847}},0.22);
+T('s6',10,12,6,7,rSparkline([10,20,40,60,80,90,95,98,99,100]),{type:'sparkline',title:'Trial Progress',config:{fill:true},data:{values:[10,20,40,60,80,90,95,98,99,100]}},0.26);
+
+// Slide 16: Model Registry
+T('s7',1,8,1,3,rTable(['Model','Version','Stage','F1','Latency','Owner'],[
+  ['BERT','1.0','Production','0.95','50ms','TeamA'],
+  ['GPT','2.1','Staging','0.96','60ms','TeamB'],
+  ['ResNet','3.2','Champion','0.94','40ms','TeamC'],
+  ['LSTM','4.0','Dev','0.92','70ms','TeamD'],
+  ['CNN','5.1','Archive','0.90','80ms','TeamE'],
+  ['Transformer','6.0','Production','0.97','45ms','TeamF']
+]),{type:'table',title:'Model Registry',config:{headers:['Model','Version','Stage','F1','Latency','Owner']},data:{rowCount:6}},0);
+T('s7',9,12,1,3,rComparison(
+  {name:'v3.2 (new)',F1:'0.96',Latency:'50ms',Memory:'2GB'},
+  {name:'v3.1 (prev)',F1:'0.94',Latency:'60ms',Memory:'2.5GB'}
+),{type:'comparison',title:'Champion vs Challenger',config:{layout:'sideBySide'},data:{left:{name:'v3.2',F1:0.96,Latency:'50ms',Memory:'2GB'},right:{name:'v3.1',F1:0.94,Latency:'60ms',Memory:'2.5GB'}}},0.06);
+T('s7',1,12,4,5,rPipeline(['Development','Staging','Champion','Production','Archive']),{type:'pipeline',title:'Model Lifecycle',config:{direction:'horizontal',arrows:true},data:{stages:['Development','Staging','Champion','Production','Archive']}},0.1);
+T('s7',1,3,6,7,rKpi('Models','47'),{type:'kpi',title:'Models',config:{format:'integer'},data:{value:47}},0.14);
+T('s7',4,6,6,7,rKpi('In Production','12'),{type:'kpi',title:'In Production',config:{format:'integer'},data:{value:12}},0.18);
+T('s7',7,9,6,7,rKpi('Avg Age','34d'),{type:'kpi',title:'Avg Age',config:{format:'duration'},data:{value:'34d'}},0.22);
+T('s7',10,12,6,7,rKpi('Shadow Tests','8'),{type:'kpi',title:'Shadow Tests',config:{format:'integer'},data:{value:8}},0.26);
+
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')next();
+  if(e.key==='ArrowLeft')prev();
+});
+</script>
+</body>
+</html>

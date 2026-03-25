@@ -1,0 +1,195 @@
+/* ── LiveTile Global Styles ─────────────────────────────────────────────────── */
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  background: #08090f;
+  color: #e8edf8;
+  min-height: 100dvh;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* ── Tile Flip Animation ── */
+.tile-flip-container {
+  perspective: 800px;
+}
+
+.tile-flip-inner {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.tile-flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.tile-flip-front,
+.tile-flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.tile-flip-back {
+  transform: rotateY(180deg);
+  overflow: auto;
+}
+
+/* ── Logo Pulse Animation ── */
+@keyframes logoPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(96, 165, 250, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.6), 0 0 40px rgba(96, 165, 250, 0.15);
+  }
+}
+
+.logo-tile {
+  animation: logoPulse 2.5s ease-in-out infinite;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.logo-tile:hover {
+  transform: scale(1.12);
+}
+
+.logo-tile:active {
+  transform: scale(0.95);
+}
+
+/* ── Settings Slider ── */
+.settings-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(96, 165, 250, 0.6);
+  box-shadow: 0 0 6px rgba(96, 165, 250, 0.3);
+  cursor: pointer;
+  transition: box-shadow 120ms ease;
+}
+
+.settings-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+}
+
+.settings-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(96, 165, 250, 0.6);
+  box-shadow: 0 0 6px rgba(96, 165, 250, 0.3);
+  cursor: pointer;
+}
+
+/* ── Settings Panel Transitions ── */
+.settings-backdrop {
+  animation: fadeIn 200ms ease forwards;
+}
+
+.settings-panel {
+  animation: panelSlideIn 250ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Canvas Gradient Mesh ── */
+.canvas-area {
+  position: relative;
+}
+
+.canvas-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 30%, rgba(59, 130, 246, 0.04), transparent),
+    radial-gradient(ellipse 500px 350px at 80% 70%, rgba(139, 92, 246, 0.03), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Focus ring ── */
+:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.6);
+  outline-offset: 2px;
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(96, 165, 250, 0.3);
+}
