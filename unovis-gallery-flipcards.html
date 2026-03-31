@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unovis Gallery Flipcards</title>
+<link rel="icon" href="data:,">
+<style>
+:root {
+  color-scheme: light dark;
+  --font-sans: "Segoe UI", Inter, system-ui, sans-serif;
+  --font-mono: Consolas, "SFMono-Regular", "Cascadia Code", monospace;
+  --bg: #f6f8fc;
+  --bg-accent: rgba(14, 165, 233, 0.10);
+  --surface: #ffffff;
+  --surface-2: #edf2f8;
+  --surface-3: #e2e8f0;
+  --text: #0f172a;
+  --text-dim: #475569;
+  --text-soft: #64748b;
+  --border: rgba(15, 23, 42, 0.10);
+  --border-bright: rgba(15, 23, 42, 0.22);
+  --shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 8px 30px rgba(15, 23, 42, 0.12);
+  --focus: #0284c7;
+  --back-bg: #0f172a;
+  --back-text: #dbeafe;
+  --back-text-dim: #93c5fd;
+  --back-border: rgba(147, 197, 253, 0.20);
+  --back-header: rgba(15, 23, 42, 0.50);
+  --code: #86efac;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #07111f;
+    --bg-accent: rgba(56, 189, 248, 0.10);
+    --surface: #0f172a;
+    --surface-2: #162235;
+    --surface-3: #1e293b;
+    --text: #e2e8f0;
+    --text-dim: #cbd5e1;
+    --text-soft: #94a3b8;
+    --border: rgba(148, 163, 184, 0.14);
+    --border-bright: rgba(148, 163, 184, 0.28);
+    --shadow: 0 4px 20px rgba(2, 6, 23, 0.30);
+    --shadow-hover: 0 8px 30px rgba(2, 6, 23, 0.45);
+    --focus: #38bdf8;
+    --back-bg: #020617;
+    --back-text: #dbeafe;
+    --back-text-dim: #7dd3fc;
+    --back-border: rgba(125, 211, 252, 0.20);
+    --back-header: rgba(2, 6, 23, 0.50);
+    --code: #bbf7d0;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(circle at top left, var(--bg-accent), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.08), transparent 28%),
+    var(--bg);
+  color: var(--text);
+}
+a { color: inherit; }
+
+/* Page layout */
+.page { max-width: 1440px; margin: 0 auto; padding: 28px 20px 72px; }
+.page-header { display: grid; gap: 18px; margin-bottom: 26px; }
+.title-block { display: grid; gap: 8px; }
+.title-block h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1.05; letter-spacing: -0.03em; }
+.subtitle { margin: 0; max-width: 920px; color: var(--text-dim); font-size: 15px; line-height: 1.6; }
+.source-line { color: var(--text-soft); font-size: 13px; }
+.source-line a { color: var(--focus); text-decoration: none; }
+.source-line a:hover, .source-line a:focus-visible { text-decoration: underline; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
+.stat-value { display: block; font-size: 28px; font-weight: 700; letter-spacing: -0.03em; }
+.stat-label { display: block; margin-top: 4px; font-size: 11px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* Controls */
+.controls { display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); }
+.controls-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.search { flex: 1 1 320px; min-width: 240px; appearance: none; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--surface-2); color: var(--text); font: inherit; }
+.search:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+.search-help { font-size: 13px; color: var(--text-soft); }
+
+/* Filter chips */
+.chip-bar { display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-chip {
+  appearance: none; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim);
+  border-radius: 999px; padding: 8px 12px; font: inherit; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s;
+}
+.filter-chip:hover, .filter-chip:focus-visible { transform: translateY(-1px); border-color: var(--focus); }
+.filter-chip[aria-pressed="true"] {
+  background: var(--chip-soft, rgba(14, 165, 233, 0.14));
+  color: var(--chip-solid, var(--focus));
+  border-color: var(--chip-solid, var(--focus));
+}
+
+/* Collections */
+.collections { display: grid; gap: 28px; }
+.collection { display: grid; gap: 16px; }
+.collection-header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px; align-items: flex-start; }
+.collection-title-wrap { display: grid; gap: 6px; }
+.collection-title { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.collection-title h2 { margin: 0; font-size: clamp(22px, 3vw, 30px); letter-spacing: -0.03em; }
+.collection-marker { width: 12px; height: 12px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); flex: 0 0 auto; }
+.collection-desc { margin: 0; max-width: 840px; color: var(--text-dim); font-size: 14px; line-height: 1.6; }
+.collection-desc a { color: var(--accent); text-decoration: none; }
+.collection-desc a:hover, .collection-desc a:focus-visible { text-decoration: underline; }
+.collection-count { border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); border-radius: 999px; padding: 10px 14px; color: var(--text-dim); font-size: 12px; white-space: nowrap; }
+
+/* -- Flip Card (proven pattern from flipcard-pattern-library) -- */
+.flip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+.flip-card { perspective: 1000px; cursor: pointer; position: relative; outline: none; }
+.flip-card:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 14px; }
+.flip-inner { position: relative; width: 100%; min-height: 380px; transition: transform 0.5s ease; transform-style: preserve-3d; }
+.flip-card[aria-pressed="true"] .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.flip-front { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.flip-front:hover { border-color: var(--border-bright); box-shadow: var(--shadow-hover); }
+.flip-back { transform: rotateY(180deg); background: var(--back-bg); border: 1px solid var(--back-border); color: var(--back-text); }
+
+/* Card header */
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.flip-back .card-header { border-bottom-color: var(--back-border); }
+.card-badge {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 80%; min-width: 0;
+  padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent);
+}
+.card-badge span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.flip-hint { font-size: 10px; color: var(--text-soft); opacity: 0; transition: opacity 0.15s; white-space: nowrap; }
+.flip-card:hover .flip-hint, .flip-card:focus-visible .flip-hint { opacity: 1; }
+.flip-back .flip-hint { opacity: 1; color: var(--back-text-dim); }
+
+/* Hero illustration area */
+.card-hero {
+  position: relative;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--accent-soft), transparent 70%), var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+}
+.card-hero svg { display: block; width: 100%; max-width: 260px; height: 80px; }
+
+/* Front body */
+.front-body { display: flex; flex-direction: column; gap: 10px; padding: 14px; flex: 1 1 auto; }
+.example-title { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+.example-path {
+  display: inline-flex; align-items: center; align-self: start; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--border);
+  padding: 5px 10px; border-radius: 999px;
+}
+
+/* KPI-style meta rows */
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.meta-cell { display: flex; flex-direction: column; gap: 2px; }
+.meta-cell-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); }
+.meta-cell-value { font-size: 14px; font-weight: 600; color: var(--text); }
+
+/* Mini bar indicator */
+.position-bar { display: flex; gap: 3px; align-items: center; margin-top: 2px; }
+.position-pip { width: 100%; max-width: 28px; height: 5px; border-radius: 3px; background: var(--surface-3); }
+.position-pip.active { background: var(--accent); }
+
+/* Language badges */
+.lang-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.lang-badge {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 600; padding: 2px 7px;
+  border-radius: 5px; text-transform: uppercase; letter-spacing: 0.04em;
+  background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border);
+}
+
+/* Action links */
+.link-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 6px; }
+.card-link, .back-link, .copy-btn {
+  appearance: none; border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+  border-radius: 8px; padding: 8px 12px; font: inherit; font-size: 11px; font-weight: 600;
+  text-decoration: none; cursor: pointer; transition: transform 0.18s, border-color 0.18s;
+}
+.card-link:hover, .card-link:focus-visible, .back-link:hover, .back-link:focus-visible,
+.copy-btn:hover, .copy-btn:focus-visible { transform: translateY(-1px); border-color: var(--focus); }
+.flip-back .back-link, .flip-back .copy-btn { background: var(--back-header); color: var(--back-text); border-color: var(--back-border); }
+.flip-back .copy-btn[data-state="copied"] { color: var(--code); border-color: var(--code); }
+
+/* Back body */
+.back-body { display: flex; flex-direction: column; gap: 10px; flex: 1 1 auto; min-height: 0; padding: 12px 14px; }
+.back-title { font-size: 13px; font-weight: 700; color: var(--back-text); }
+.back-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.back-copy-row { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.schema-controls { display: grid; gap: 8px; flex: 1 1 auto; min-width: 0; }
+.schema-picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.schema-label { font-size: 11px; color: var(--back-text-dim); font-weight: 600; white-space: nowrap; }
+.schema-select {
+  min-width: 180px; max-width: 100%;
+  appearance: none; border: 1px solid var(--back-border); border-radius: 8px;
+  background: var(--back-header); color: var(--back-text);
+  font: inherit; font-size: 11px; padding: 8px 10px;
+}
+.schema-select:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+.schema-summary { font-size: 11px; line-height: 1.5; color: var(--back-text-dim); }
+.json-block {
+  margin: 0; padding: 12px; flex: 1 1 auto; min-height: 0; overflow: auto;
+  border: 1px solid var(--back-border); border-radius: 12px; background: rgba(2, 6, 23, 0.42);
+  color: var(--code); font-family: var(--font-mono); font-size: 11px; line-height: 1.55;
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* Empty / Footer */
+.empty-state { border: 1px dashed var(--border); background: var(--surface); border-radius: 16px; padding: 22px; text-align: center; color: var(--text-dim); box-shadow: var(--shadow); }
+.page-footer { margin-top: 32px; color: var(--text-soft); font-size: 12px; line-height: 1.6; }
+.hidden { display: none !important; }
+
+@media (max-width: 760px) {
+  .page { padding-inline: 14px; }
+  .controls { padding: 14px; }
+  .flip-grid { grid-template-columns: 1fr; }
+  .flip-inner { min-height: 360px; }
+  .meta-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const GALLERY_URL = "https://unovis.dev/gallery";
+const GALLERY_VIEW_URL = "https://unovis.dev/gallery/view";
+const GITHUB_REPO_URL = "https://github.com/f5/unovis";
+const SOURCE_BASE = "https://github.com/f5/unovis/tree/main/packages/shared/examples";
+const EXAMPLES_LIST_URL = "https://github.com/f5/unovis/blob/main/packages/shared/examples/examples-list.tsx";
+const AC_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json";
+const AC_VERSION = "1.5";
+const PATTERN_LIBRARY_PAGE = "flipcard-pattern-library.html";
+const PATTERN_LIBRARY_SOURCE = "flipcard-pattern-library.html";
+const ADAPTIVE_CARDS_RAW_BASE = "https://raw.githubusercontent.com/microsoft/AdaptiveCards/main/samples";
+const FLIP_HINT = "Click to flip";
+const TIMESTAMP = new Date().toISOString();
+
+const UNOVIS_COLLECTIONS = [
+  {
+    title: "Line Charts",
+    description: "Time-series and categorical line visualizations with gap handling and multi-series support.",
+    examples: [
+      { title: "Basic Line Chart", pathname: "basic-line-chart", desc: "Single-series line with default axis configuration", kind: "unovis" },
+      { title: "Multi Line Chart", pathname: "multi-line-chart", desc: "Multiple series with automatic color assignment", kind: "unovis" },
+      { title: "Line Chart with Data Gaps", pathname: "data-gap-line-chart", desc: "Graceful handling of null/undefined data points", kind: "unovis" },
+      { title: "Patchy Line Chart with Data Gaps", pathname: "patchy-line-chart", desc: "Segmented rendering for sparse time-series data", kind: "unovis" },
+      { title: "Basic Timeline", pathname: "basic-timeline", desc: "Horizontal timeline with event positioning", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Area Charts",
+    description: "Filled region charts for cumulative, stacked, and baseline-relative data.",
+    examples: [
+      { title: "Non-Stacked Area Chart", pathname: "non-stacked-area-chart", desc: "Overlapping area series without stacking", kind: "unovis" },
+      { title: "Stacked Area Chart with XYLabels", pathname: "stacked-area-chart", desc: "Cumulative stacking with inline axis labels", kind: "unovis" },
+      { title: "Stacked Area Chart with attributes", pathname: "stacked-area-chart-with-attributes", desc: "Custom fill/stroke attributes per series", kind: "unovis" },
+      { title: "Area with Baseline", pathname: "baseline-area-chart", desc: "Area fill relative to a configurable baseline value", kind: "unovis" },
+      { title: "Step Area Chart", pathname: "step-area-chart", desc: "Discrete step interpolation for categorical data", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Bar Charts",
+    description: "Grouped and stacked bar visualizations with horizontal/vertical orientation.",
+    examples: [
+      { title: "Basic Grouped Bar Chart", pathname: "basic-grouped-bar", desc: "Side-by-side grouped bars with category axis", kind: "unovis" },
+      { title: "Horizontal Stacked Bar Chart with Tooltip and Legend", pathname: "horizontal-stacked-bar-chart", desc: "Horizontal orientation with tooltip and interactive legend", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Scatter Plots",
+    description: "Point-based visualizations with size and shape encoding for multivariate data.",
+    examples: [
+      { title: "Basic Scatter Plot", pathname: "basic-scatter-plot", desc: "Simple X/Y point distribution", kind: "unovis" },
+      { title: "Scatter Plot with Varied Size", pathname: "sized-scatter-plot", desc: "Point radius mapped to a third variable", kind: "unovis" },
+      { title: "Scatter Plot with Varied Shape", pathname: "shaped-scatter-plot", desc: "Shape encoding for categorical differentiation", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Maps",
+    description: 'Geospatial visualizations using <a href="https://github.com/topojson/topojson" target="_blank" rel="noreferrer">TopoJSON</a>, <a href="https://github.com/Leaflet/Leaflet" target="_blank" rel="noreferrer">Leaflet</a>, and <a href="https://maplibre.org/" target="_blank" rel="noreferrer">MapLibre</a>.',
+    examples: [
+      { title: "Basic Leaflet Map", pathname: "basic-leaflet-map", desc: "Tile-based interactive map with Leaflet integration", kind: "unovis" },
+      { title: "Leaflet Flow Map", pathname: "leaflet-flow-map", desc: "Directional flow lines overlaid on a Leaflet map", kind: "unovis" },
+      { title: "Advanced Leaflet Map", pathname: "advanced-leaflet-map", desc: "MapLibre GL rendering with advanced tile layers", kind: "unovis" },
+      { title: "Choropleth World Map with Custom Legend", pathname: "topojson-map", desc: "TopoJSON geometry with color-coded regions and legend", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Networks and Flows",
+    description: "Graph, Sankey, and hierarchical layout visualizations for relationship data.",
+    examples: [
+      { title: "Basic Sankey", pathname: "basic-sankey", desc: "Flow diagram with proportional link widths", kind: "unovis" },
+      { title: "Expandable Sankey", pathname: "expandable-sankey", desc: "Interactive expand/collapse of Sankey node groups", kind: "unovis" },
+      { title: "Dagre Layout Graph", pathname: "dagre-graph", desc: "Directed acyclic graph using Dagre layout engine", kind: "unovis" },
+      { title: "Force Layout Graph", pathname: "force-graph", desc: "Physics-based force-directed node placement", kind: "unovis" },
+      { title: "Parallel Layout Graph", pathname: "parallel-graph", desc: "Parallel (left-to-right) hierarchical graph layout", kind: "unovis" },
+      { title: "ELK Layered Graph Layout", pathname: "elk-layered-graph", desc: "Eclipse Layout Kernel layered algorithm", kind: "unovis" },
+      { title: "Custom Nodes Graph with tooltips", pathname: "custom-nodes-graph", desc: "SVG/HTML custom node rendering with hover tooltips", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Circular Charts",
+    description: "Radial visualizations including donut, chord, and sunburst layouts.",
+    examples: [
+      { title: "Basic Donut Chart", pathname: "basic-donut-chart", desc: "Ring chart with proportional arc segments", kind: "unovis" },
+      { title: "Hierarchical Chord Diagram", pathname: "hierarchical-chord-diagram", desc: "Nested group chords showing inter-group flows", kind: "unovis" },
+      { title: "Sunburst Nested Donut", pathname: "sunburst-nested-donut", desc: "Multi-level concentric rings for hierarchical data", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Treemap",
+    description: "Nested rectangular partitioning for hierarchical data proportions.",
+    examples: [
+      { title: "Treemap", pathname: "treemap", desc: "Space-filling hierarchical rectangle layout", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Composite Charts",
+    description: "Multi-component overlays combining different chart types on shared axes.",
+    examples: [
+      { title: "Dual Axis Chart", pathname: "dual-axis-chart", desc: "Two Y-axes with independent scales and chart types", kind: "unovis" },
+      { title: "Range Plot", pathname: "range-plot", desc: "Vertical range bands showing min/max intervals", kind: "unovis" }
+    ]
+  },
+  {
+    title: "Auxiliary Components",
+    description: "Interactive overlays: annotations, brushes, crosshairs, plot bands, and legends.",
+    examples: [
+      { title: "Chart Annotations", pathname: "basic-annotations", desc: "Text and marker annotations on chart elements", kind: "unovis" },
+      { title: "Stacked Bar Chart with Crosshair", pathname: "crosshair-stacked-bar", desc: "Vertical crosshair cursor with value readout", kind: "unovis" },
+      { title: "Grouped Bar with Brush and Interactive Legend", pathname: "brush-grouped-bar", desc: "Axis brush selection with legend-driven series toggle", kind: "unovis" },
+      { title: "Scatter Plot with Free Brush", pathname: "free-brush-scatters", desc: "Rectangular free-form brush for point selection", kind: "unovis" },
+      { title: "Plot bands and plot lines", pathname: "plotband-plotline", desc: "Shaded bands and reference lines overlaid on chart area", kind: "unovis" }
+    ]
+  }
+];
+
+const PALETTE = [
+  { solid: "#0284c7", soft: "rgba(2, 132, 199, 0.14)" },
+  { solid: "#0f766e", soft: "rgba(15, 118, 110, 0.14)" },
+  { solid: "#7c3aed", soft: "rgba(124, 58, 237, 0.14)" },
+  { solid: "#b45309", soft: "rgba(180, 83, 9, 0.14)" },
+  { solid: "#047857", soft: "rgba(4, 120, 87, 0.14)" },
+  { solid: "#be123c", soft: "rgba(190, 18, 60, 0.14)" },
+  { solid: "#4338ca", soft: "rgba(67, 56, 202, 0.14)" },
+  { solid: "#6d28d9", soft: "rgba(109, 40, 217, 0.14)" },
+  { solid: "#0f766e", soft: "rgba(15, 118, 110, 0.14)" },
+  { solid: "#374151", soft: "rgba(55, 65, 81, 0.14)" }
+];
+
+const DEFAULT_UNOVIS_LANGS = ["React", "Angular", "Svelte", "Vue", "Solid"];
+const DEFAULT_PATTERN_LANGS = ["HTML", "CSS", "JavaScript"];
+const CARD_SCHEMAS = new Map();
+const COLLECTIONS = [...UNOVIS_COLLECTIONS, ...buildPatternLibraryCollections()];
+const STATE = { query: "", collection: "All" };
+
+function esc(v) {
+  return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function slugify(v) {
+  return String(v).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function prettyJson(value) {
+  return JSON.stringify(value, null, 2);
+}
+
+function totalExamples() {
+  return COLLECTIONS.reduce((s, c) => s + c.examples.length, 0);
+}
+
+function galleryUrl(col, title) {
+  return GALLERY_VIEW_URL + "?collection=" + encodeURIComponent(col) + "&title=" + encodeURIComponent(title);
+}
+
+function sourceUrl(p) { return SOURCE_BASE + "/" + p; }
+
+function sampleUrl(p) { return ADAPTIVE_CARDS_RAW_BASE + "/" + p; }
+
+function liveTileGrid(ci, ei) {
+  return {
+    col: (ei % 3) * 4 + 1,
+    row: Math.floor(ei / 3) * 2 + 1,
+    colSpan: 4,
+    rowSpan: 2
+  };
+}
+
+function patternLinks(ex) {
+  const links = [{ label: "Pattern Library", url: PATTERN_LIBRARY_PAGE }];
+  if (ex.referenceUrl) links.push({ label: ex.referenceLabel || "Reference", url: ex.referenceUrl });
+  return links;
+}
+
+function optionShape(key, label, title, summary, json) {
+  return { key, label, title, summary, json };
+}
+
+function buildPortfolioLayerCard(layer) {
+  return {
+    $schema: AC_SCHEMA_URL,
+    type: "AdaptiveCard",
+    version: AC_VERSION,
+    body: [
+      {
+        type: "Container",
+        style: "emphasis",
+        bleed: true,
+        items: [
+          { type: "TextBlock", text: "AGENT LAYER", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+          { type: "TextBlock", text: layer.name, size: "ExtraLarge", weight: "Bolder", wrap: true, spacing: "Small" },
+          { type: "TextBlock", text: layer.role, size: "Medium", wrap: true, isSubtle: true, spacing: "Small" }
+        ]
+      },
+      {
+        type: "ColumnSet",
+        spacing: "Medium",
+        columns: [
+          {
+            type: "Column",
+            width: "stretch",
+            items: [
+              { type: "TextBlock", text: "Degree", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+              { type: "TextBlock", text: String(layer.degree), size: "Large", weight: "Bolder", spacing: "None" }
+            ]
+          },
+          {
+            type: "Column",
+            width: "stretch",
+            items: [
+              { type: "TextBlock", text: "Schema", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+              { type: "TextBlock", text: layer.schema, size: "Large", weight: "Bolder", spacing: "None" }
+            ]
+          },
+          {
+            type: "Column",
+            width: "stretch",
+            items: [
+              { type: "TextBlock", text: "Signals", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+              { type: "TextBlock", text: String(layer.signals), size: "Large", weight: "Bolder", spacing: "None" }
+            ]
+          }
+        ]
+      },
+      {
+        type: "Container",
+        items: [
+          { type: "TextBlock", text: "CONNECTED NODES", size: "Small", weight: "Bolder", color: "Accent" },
+          {
+            type: "FactSet",
+            facts: layer.connections
+              .map(c => ({ title: c.rel, value: c.target }))
+              .concat(layer.signal_names.map(s => ({ title: "exposes_signal", value: s })))
+          }
+        ]
+      }
+    ],
+    actions: [
+      { type: "Action.OpenUrl", title: "Open in 3DKG Viewer", url: layer.viewerUrl }
+    ]
+  };
+}
+
+function buildPatternLibraryCollections() {
+  const flipProps = {
+    component: "FlipCard",
+    file: "src/components/ui/FlipCard.tsx",
+    props: {
+      front: "ReactNode (required)",
+      back: "ReactNode (custom back face)",
+      backJson: "unknown (auto-rendered JSON)",
+      backTitle: "string (default: 'JSON')",
+      minHeight: "string | number (default: '260px')",
+      flipped: "boolean (controlled)",
+      onFlip: "(flipped: boolean) => void",
+      flipHint: "string (default: 'Click to flip')",
+      showFlipHint: "boolean (default: true)",
+      defaultFlipped: "boolean (default: false)",
+      className: "string"
+    },
+    css: {
+      perspective: "1000px",
+      transform: "rotateY(180deg)",
+      transition: "500ms ease",
+      backfaceVisibility: "hidden"
+    }
+  };
+
+  const adaptiveSamples = [
+    ["Flight Itinerary", "v1.5/Scenarios/FlightItinerary.json"],
+    ["Weather Forecast", "v1.5/Scenarios/WeatherCompact.json"],
+    ["Expense Report", "v1.5/Scenarios/ExpenseReport.json"],
+    ["Stock Update", "v1.5/Scenarios/StockUpdate.json"],
+    ["Food Order", "v1.5/Scenarios/FoodOrder.json"],
+    ["Activity Update", "v1.5/Scenarios/ActivityUpdate.json"],
+    ["Input Form", "v1.5/Scenarios/InputForm.json"],
+    ["Restaurant", "v1.5/Scenarios/Restaurant.json"]
+  ];
+
+  const bicScores = {
+    Relevance: 91,
+    Completeness: 84,
+    Coherence: 78,
+    "Tool Accuracy": 72
+  };
+
+  const donutSchema = {
+    type: "AdaptiveCard",
+    version: AC_VERSION,
+    $schema: AC_SCHEMA_URL,
+    _note: "Donut chart simulated via ColumnSet proportional widths. In Copilot Studio, values are bound via Power Fx: Topic.PassRate, Topic.FailRate, Topic.SkipRate",
+    body: [
+      { type: "TextBlock", text: "EVALUATION BREAKDOWN", size: "Small", weight: "Bolder", color: "Accent" },
+      { type: "TextBlock", text: "${Topic.EvalTitle}", size: "Medium", weight: "Bolder", spacing: "Small" },
+      {
+        type: "ColumnSet",
+        spacing: "Medium",
+        columns: [
+          { type: "Column", width: "stretch", items: [{ type: "TextBlock", text: "${Topic.TotalRuns}", size: "ExtraLarge", weight: "Bolder" }, { type: "TextBlock", text: "Total Runs", size: "Small", isSubtle: true, spacing: "None" }] },
+          { type: "Column", width: "stretch", items: [{ type: "TextBlock", text: "${Text(Topic.PassRate, \"#%\")}", size: "ExtraLarge", weight: "Bolder", color: "Good" }, { type: "TextBlock", text: "Pass Rate", size: "Small", isSubtle: true, spacing: "None" }] }
+        ]
+      },
+      {
+        type: "ColumnSet",
+        columns: [
+          { type: "Column", width: "${Topic.Passed}", style: "good", minHeight: "24px", items: [{ type: "TextBlock", text: "${Topic.Passed} passed", size: "Small", weight: "Bolder" }] },
+          { type: "Column", width: "${Topic.Failed}", style: "attention", minHeight: "24px", items: [{ type: "TextBlock", text: "${Topic.Failed} failed", size: "Small", weight: "Bolder" }] },
+          { type: "Column", width: "${Topic.Skipped}", style: "warning", minHeight: "24px", items: [{ type: "TextBlock", text: "${Topic.Skipped} skipped", size: "Small" }] }
+        ]
+      }
+    ]
+  };
+
+  const horizontalBarSchema = {
+    type: "AdaptiveCard",
+    version: AC_VERSION,
+    $schema: AC_SCHEMA_URL,
+    _note: "Horizontal bar chart via ColumnSet proportional widths. Power Fx: Topic.BICScores collection with .dim and .score fields",
+    body: [
+      { type: "TextBlock", text: "BIC Scores by Dimension", size: "Medium", weight: "Bolder" },
+      { type: "TextBlock", text: "${Topic.EvalConfigName}", size: "Small", isSubtle: true, spacing: "None" },
+      ...Object.entries(bicScores).map(([dim, pct]) => ({
+        type: "ColumnSet",
+        spacing: "Small",
+        columns: [
+          { type: "Column", width: "80px", items: [{ type: "TextBlock", text: dim, size: "Small", weight: "Bolder" }] },
+          { type: "Column", width: String(pct), style: "accent", minHeight: "20px", items: [{ type: "TextBlock", text: pct + "%", size: "Small", weight: "Bolder", color: "Light" }] },
+          { type: "Column", width: String(100 - pct), items: [] }
+        ]
+      }))
+    ]
+  };
+
+  const faqTemplate = {
+    type: "AdaptiveCard",
+    version: AC_VERSION,
+    $schema: AC_SCHEMA_URL,
+    _note: "FAQ agent card template. Questions bound via Power Fx: Topic.FAQItems collection. ShowCard reveals each answer inline.",
+    body: [
+      {
+        type: "Container",
+        style: "emphasis",
+        bleed: true,
+        items: [
+          { type: "TextBlock", text: "FAQ ASSISTANT", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+          { type: "TextBlock", text: "${Topic.AgentName}", size: "Large", weight: "Bolder", spacing: "Small" },
+          { type: "TextBlock", text: "${Topic.AgentDescription}", wrap: true, isSubtle: true, spacing: "Small" }
+        ]
+      },
+      { type: "TextBlock", text: "Frequently Asked Questions", size: "Medium", weight: "Bolder", spacing: "Medium" }
+    ],
+    actions: [
+      { type: "Action.ShowCard", title: "What is Copilot Studio?", card: { type: "AdaptiveCard", body: [{ type: "TextBlock", text: "Microsoft Copilot Studio is a low-code platform for building AI-powered conversational agents.", wrap: true }] } },
+      { type: "Action.ShowCard", title: "How do I connect a knowledge source?", card: { type: "AdaptiveCard", body: [{ type: "TextBlock", text: "Use Add knowledge to ground answers in SharePoint, Dataverse, files, or websites.", wrap: true }] } },
+      { type: "Action.ShowCard", title: "What authentication modes are supported?", card: { type: "AdaptiveCard", body: [{ type: "TextBlock", text: "No authentication, Authenticate with Microsoft, and Manual authentication are supported.", wrap: true }] } }
+    ]
+  };
+
+  const portfolioLayers = [
+    {
+      id: "security",
+      name: "Security Layer",
+      role: "Identity, access policy, and agent-connectivity gates",
+      degree: 12,
+      signals: 4,
+      schema: "Security Schema",
+      cluster: "Security",
+      viewerUrl: "http://127.0.0.1:8123/copilot-studio-agent-3dkg.html#node=Security%20Layer",
+      signal_names: ["Authentication Mode: Authenticate with Microsoft", "Authentication Trigger: Always", "Access Control: Selected users", "Agent Connectable: True"],
+      connections: [
+        { rel: "has_layer", target: "Studio Steve" },
+        { rel: "maps_layer", target: "Composition" },
+        { rel: "structures", target: "Security Schema" },
+        { rel: "authenticates_users_for", target: "Microsoft Teams" }
+      ]
+    },
+    {
+      id: "identity",
+      name: "Identity Layer",
+      role: "Inner core identity surface",
+      degree: 8,
+      signals: 4,
+      schema: "Identity Schema",
+      cluster: "Identity",
+      viewerUrl: "http://127.0.0.1:8123/copilot-studio-agent-3dkg.html#node=Identity%20Layer",
+      signal_names: ["Display Name: Studio Steve", "Schema Name: dayour_copilotStudioExper...", "Description: expert Copilot Studio gui...", "Published State: Published"],
+      connections: [
+        { rel: "has_layer", target: "Studio Steve" },
+        { rel: "maps_layer", target: "Composition" },
+        { rel: "structures", target: "Identity Schema" },
+        { rel: "stored_in", target: "Dataverse Environment" }
+      ]
+    },
+    {
+      id: "channel",
+      name: "Channel Layer",
+      role: "Where the agent surfaces to users and platforms",
+      degree: 12,
+      signals: 3,
+      schema: "Channel Schema",
+      cluster: "Channel",
+      viewerUrl: "http://127.0.0.1:8123/copilot-studio-agent-3dkg.html#node=Channel%20Layer",
+      signal_names: ["Channel: MsTeams", "Channel: Microsoft365Copilot", "Direct Line: Available"],
+      connections: [
+        { rel: "has_layer", target: "Studio Steve" },
+        { rel: "maps_layer", target: "Composition" },
+        { rel: "structures", target: "Channel Schema" },
+        { rel: "publishes_to", target: "Microsoft Teams" },
+        { rel: "publishes_to", target: "Microsoft 365 Copilot" }
+      ]
+    },
+    {
+      id: "ai-settings",
+      name: "AI Settings Layer",
+      role: "Model, planner, grounding, and file-analysis controls",
+      degree: 11,
+      signals: 5,
+      schema: "AI Settings Schema",
+      cluster: "AI Settings",
+      viewerUrl: "http://127.0.0.1:8123/copilot-studio-agent-3dkg.html#node=AI%20Settings%20Layer",
+      signal_names: ["Model: GPT51ChatThinky", "Use Model Knowledge: True", "Semantic Search: True", "File Analysis: True", "Generative Actions: True"],
+      connections: [
+        { rel: "has_layer", target: "Studio Steve" },
+        { rel: "maps_layer", target: "Composition" },
+        { rel: "structures", target: "AI Settings Schema" }
+      ]
+    }
+  ];
+
+  const securitySettings = [
+    {
+      id: "auth-mode",
+      name: "Authentication Mode",
+      field: "authenticationconfiguration.mode",
+      current_value: "Authenticate with Microsoft",
+      target_value: "Authenticate with Microsoft",
+      state: "ok",
+      description: "Require Entra ID authentication before any user can interact with the agent.",
+      recommendation: "Keep authentication mode set to 'Authenticate with Microsoft' to enforce Entra ID SSO for all sessions.",
+      impact: "All users must sign in via Entra ID before the agent responds.",
+      schema_ref: "BotAuthenticationConfiguration",
+      layer: "Security"
+    },
+    {
+      id: "auth-trigger",
+      name: "Authentication Trigger",
+      field: "authenticationconfiguration.trigger",
+      current_value: "Always",
+      target_value: "Always",
+      state: "ok",
+      description: "Controls when the authentication prompt appears. 'Always' means every new session requires sign-in.",
+      recommendation: "Set trigger to 'Always' for compliance-sensitive agents. Use 'As needed' only for low-risk public FAQ bots.",
+      impact: "Prevents anonymous sessions; every conversation starts authenticated.",
+      schema_ref: "AuthenticationTrigger",
+      layer: "Security"
+    },
+    {
+      id: "access-control",
+      name: "Access Control",
+      field: "accesscontrol.audience",
+      current_value: "Selected users",
+      target_value: "Selected users",
+      state: "ok",
+      description: "Restricts which users or groups can interact with the agent.",
+      recommendation: "Use 'Selected users' for internal-facing agents. Only use 'Everyone' for public customer-facing bots.",
+      impact: "Prevents unauthorized users from discovering or chatting with the agent.",
+      schema_ref: "AccessControl",
+      layer: "Security"
+    },
+    {
+      id: "web-channel-sec",
+      name: "Web Channel Security",
+      field: "iswebchannelsecurityenabled",
+      current_value: false,
+      target_value: true,
+      state: "critical",
+      description: "When disabled, the Direct Line token endpoint is open.",
+      recommendation: "Enable secured access on web channel. Require token exchange validation for all non-Teams channels.",
+      impact: "Blocks unauthorized embedding of the agent in external websites.",
+      schema_ref: "ChannelDefinition.webSecurity",
+      layer: "Channel"
+    },
+    {
+      id: "agent-connectable",
+      name: "Agent Connectivity",
+      field: "isagentconnectable",
+      current_value: true,
+      target_value: true,
+      state: "warn",
+      description: "Allows other Copilot Studio agents to call this agent as a sub-agent.",
+      recommendation: "Review which agents can call this one. Ensure only trusted orchestrators have invoke permissions.",
+      impact: "Other agents can pass prompts and receive responses from this agent.",
+      schema_ref: "ConnectedAgent",
+      layer: "Security"
+    },
+    {
+      id: "generative-actions",
+      name: "Generative Actions",
+      field: "aisettings.generativeActionsEnabled",
+      current_value: true,
+      target_value: "Review",
+      state: "warn",
+      description: "Enables the LLM to autonomously select and invoke plugin actions without explicit topic routing.",
+      recommendation: "Audit all connected plugins and connectors. Disable for agents handling sensitive data unless each action is allow-listed.",
+      impact: "The model can call any enabled plugin action on behalf of the user.",
+      schema_ref: "AISettings.generativeActions",
+      layer: "AI Settings"
+    },
+    {
+      id: "file-analysis",
+      name: "File Upload Analysis",
+      field: "aisettings.fileAnalysisEnabled",
+      current_value: true,
+      target_value: "Review",
+      state: "warn",
+      description: "Allows users to upload files which the LLM will parse and analyze within the conversation context.",
+      recommendation: "Evaluate DLP exposure. Disable if the agent handles sensitive environments.",
+      impact: "User-uploaded documents become part of the LLM prompt context.",
+      schema_ref: "AISettings.fileAnalysis",
+      layer: "AI Settings"
+    }
+  ];
+
+  return [
+    {
+      title: "Reusable FlipCard Component",
+      description: "Core reusable flip surface extracted from the pattern library.",
+      examples: [
+        {
+          kind: "pattern",
+          title: "FlipCard Props",
+          pathname: "flipcard-props",
+          pathLabel: "pattern-library/s1/flipcard-props",
+          desc: "Shared component contract with front/back slots, JSON auto-rendering, and controlled state.",
+          sourceFile: "src/components/ui/FlipCard.tsx",
+          languages: ["React", "TypeScript"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "Component contract", "FlipCard Props -- interface", "Exact prop contract summarized from the pattern library reusable component section.", flipProps)
+        }
+      ]
+    },
+    {
+      title: "Adaptive Cards Gallery",
+      description: "Official Adaptive Cards sample descriptors carried over from the pattern library gallery section.",
+      examples: adaptiveSamples.map(([title, samplePath]) => ({
+        kind: "pattern",
+        title,
+        pathname: slugify(title),
+        pathLabel: "pattern-library/s2/" + slugify(title),
+        desc: "Official Adaptive Cards scenario sample rendered in the pattern library front face and exposed as raw JSON on the back.",
+        sourceFile: samplePath,
+        languages: ["Adaptive Cards", "JSON"],
+        referenceUrl: sampleUrl(samplePath),
+        referenceLabel: "Raw sample",
+        sourceSchemaFactory: () => optionShape(
+          "source",
+          "Adaptive Card source",
+          title + " -- source schema",
+          "Source descriptor for the official microsoft/AdaptiveCards sample used in the pattern library.",
+          {
+            $schema: AC_SCHEMA_URL,
+            type: "AdaptiveCard",
+            version: AC_VERSION,
+            metadata: {
+              sample: title,
+              sample_path: samplePath,
+              source_repo: "microsoft/AdaptiveCards",
+              render_host: "AdaptiveCards SDK",
+              fetched_live: true
+            },
+            actions: [
+              { type: "Action.OpenUrl", title: "Open raw sample", url: sampleUrl(samplePath) }
+            ]
+          }
+        )
+      }))
+    },
+    {
+      title: "Adaptive Tiles Library",
+      description: "Tile schema patterns with Power Fx bindings mirrored from the pattern library.",
+      examples: [
+        {
+          kind: "pattern",
+          title: "Donut Chart",
+          pathname: "donut-chart-tile",
+          pathLabel: "pattern-library/s3/donut-chart",
+          desc: "Analytics tile schema using proportional columns to simulate a donut breakdown.",
+          sourceFile: "AdaptiveTilesLibraryPage.tsx",
+          languages: ["Adaptive Cards", "Power Fx"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "Tile source", "Donut Chart -- Power Fx schema", "Power Fx-backed tile schema lifted from the pattern library donut chart tile.", donutSchema)
+        },
+        {
+          kind: "pattern",
+          title: "Horizontal Bar Chart",
+          pathname: "horizontal-bar-chart-tile",
+          pathLabel: "pattern-library/s3/horizontal-bar-chart",
+          desc: "Analytics tile schema using ColumnSet widths to encode score percentages.",
+          sourceFile: "AdaptiveTilesLibraryPage.tsx",
+          languages: ["Adaptive Cards", "Power Fx"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "Tile source", "Horizontal Bar Chart -- Power Fx schema", "Power Fx-backed tile schema lifted from the pattern library horizontal bar chart tile.", horizontalBarSchema)
+        }
+      ]
+    },
+    {
+      title: "LiveTile Studio Canvas",
+      description: "Adaptive live tile patterns, including the same additional schema views on every live tile card.",
+      examples: [
+        {
+          kind: "pattern",
+          title: "Eval Configs",
+          pathname: "eval-configs-live-tile",
+          pathLabel: "pattern-library/s4/eval-configs",
+          desc: "KPI live tile showing evaluation configuration count and trend delta.",
+          sourceFile: "LiveTileLibrary.tsx",
+          languages: ["JavaScript", "Dashboard JSON"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "LiveTile source", "Eval Configs -- source tile", "Source live tile schema from the pattern library LiveTile Studio Canvas section.", {
+            id: "m1",
+            type: "kpi",
+            grid: { col: 1, row: 2, colSpan: 3, rowSpan: 2 },
+            content: { label: "Eval Configs", value: "12", delta: "+2", up: true }
+          })
+        },
+        {
+          kind: "pattern",
+          title: "Live Weather",
+          pathname: "live-weather-tile",
+          pathLabel: "pattern-library/s4/live-weather",
+          desc: "Live weather tile populated from Open-Meteo with current conditions and a compact forecast strip.",
+          sourceFile: "LiveTileLibrary.tsx",
+          languages: ["JavaScript", "REST API", "Dashboard JSON"],
+          referenceUrl: "https://api.open-meteo.com/v1/forecast",
+          referenceLabel: "Open-Meteo",
+          sourceSchemaFactory: () => optionShape("source", "LiveTile source", "Live Weather -- source tile", "Source weather live tile schema from the pattern library LiveTile Studio Canvas section.", {
+            _note: "Populated from Open-Meteo API",
+            api: "https://api.open-meteo.com/v1/forecast",
+            params: { latitude: 47.6062, longitude: -122.3321, temperature_unit: "fahrenheit" },
+            current_weather: null
+          })
+        },
+        {
+          kind: "pattern",
+          title: "BIC Scores",
+          pathname: "bic-scores-live-tile",
+          pathLabel: "pattern-library/s4/bic-scores",
+          desc: "Score breakdown live tile rendered as dashboard bars over a dark surface.",
+          sourceFile: "LiveTileLibrary.tsx",
+          languages: ["JavaScript", "Dashboard JSON"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "LiveTile source", "BIC Scores -- source tile", "Source bar-chart live tile schema from the pattern library LiveTile Studio Canvas section.", {
+            id: "bar",
+            type: "bar-chart",
+            grid: { col: 1, row: 4, colSpan: 7, rowSpan: 4 },
+            content: { dataKey: "score", xKey: "dim", data: "BIC_DATA", title: "BIC Scores by Dimension" }
+          })
+        }
+      ]
+    },
+    {
+      title: "Component Showcase",
+      description: "Pattern library demo cards covering a simple adaptive card and a dashboard template surface.",
+      examples: [
+        {
+          kind: "pattern",
+          title: "Hello World Card",
+          pathname: "hello-world-card",
+          pathLabel: "pattern-library/s5/hello-world",
+          desc: "Minimal hello-world adaptive card demo used in the component showcase section.",
+          sourceFile: "ComponentShowcaseWeb.tsx",
+          languages: ["Adaptive Cards", "React"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "Showcase source", "Hello World Card -- source schema", "Minimal adaptive card source used in the component showcase.", {
+            type: "AdaptiveCard",
+            version: AC_VERSION,
+            $schema: AC_SCHEMA_URL,
+            body: [{ type: "TextBlock", text: "Hello World" }]
+          })
+        },
+        {
+          kind: "pattern",
+          title: "Dashboard Template",
+          pathname: "dashboard-template",
+          pathLabel: "pattern-library/s5/dashboard-template",
+          desc: "Dashboard template card showing a 12-column, 7-row layout with 7 tiles.",
+          sourceFile: "ComponentShowcaseWeb.tsx",
+          languages: ["React", "Dashboard JSON"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "Showcase source", "Dashboard Template -- source schema", "Dashboard template source used in the component showcase.", {
+            template: "dashboard",
+            theme: "midnight-sapphire",
+            tiles: 7,
+            grid: { columns: 12, rows: 7 }
+          })
+        }
+      ]
+    },
+    {
+      title: "Discover Templates",
+      description: "FAQ-driven Copilot card template surfaced through the pattern library Discover section.",
+      examples: [
+        {
+          kind: "pattern",
+          title: "FAQ Chatbot",
+          pathname: "faq-chatbot-template",
+          pathLabel: "pattern-library/s6/faq-chatbot",
+          desc: "FAQ assistant template with ShowCard-based answers and Power Fx data bindings.",
+          sourceFile: "DiscoverPage.tsx",
+          languages: ["Adaptive Cards", "Power Fx"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "Template source", "FAQ Chatbot -- Power Fx template", "FAQ template schema carried into the gallery from the pattern library Discover section.", faqTemplate)
+        }
+      ]
+    },
+    {
+      title: "Evaluation Tiles",
+      description: "Evaluation KPI surfaces with explicit JSON schema views mirrored from the pattern library.",
+      examples: [
+        {
+          kind: "pattern",
+          title: "Eval Configs",
+          pathname: "eval-configs-evaluation-tile",
+          pathLabel: "pattern-library/s7/eval-configs",
+          desc: "Evaluation KPI tile summarizing configuration count for the environment.",
+          sourceFile: "EnvironmentEvaluationsPage.tsx",
+          languages: ["React", "Dashboard JSON"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "Evaluation source", "Eval Configs -- source schema", "Evaluation tile schema sourced from the pattern library.", {
+            id: "eval-configs",
+            label: "Eval Configs",
+            scopeLabel: "Environment",
+            dataStream: "msdyn_aievaluationconfigurations",
+            value: 12,
+            description: "Native Copilot Studio evaluation configurations",
+            preview: { entity: "msdyn_aievaluationconfiguration", count: 12, latestRun: TIMESTAMP }
+          })
+        },
+        {
+          kind: "pattern",
+          title: "Pass Rate",
+          pathname: "pass-rate-evaluation-tile",
+          pathLabel: "pattern-library/s7/pass-rate",
+          desc: "Combined pass-rate KPI tile with run totals and week-over-week trend.",
+          sourceFile: "EnvironmentEvaluationsPage.tsx",
+          languages: ["React", "Dashboard JSON"],
+          referenceUrl: PATTERN_LIBRARY_SOURCE,
+          referenceLabel: "Source HTML",
+          sourceSchemaFactory: () => optionShape("source", "Evaluation source", "Pass Rate -- source schema", "Evaluation tile schema sourced from the pattern library.", {
+            id: "pass-rate",
+            label: "Pass Rate",
+            scopeLabel: "Combined",
+            dataStream: "agent_studio_eval_runs",
+            value: 87,
+            suffix: "%",
+            description: "Aggregate pass rate across all evaluation runs",
+            preview: { totalRuns: 48, passed: 42, failed: 6, weekOverWeekDelta: "+3% week over week" }
+          })
+        }
+      ]
+    },
+    {
+      title: "Security Summary",
+      description: "Summary metric cards extracted from the pattern library security admin section.",
+      examples: [
+        { kind: "pattern", title: "Total Agents", pathname: "total-agents", pathLabel: "pattern-library/s8a/total-agents", desc: "Environment-wide agent count summary metric.", sourceFile: "SecurityAdminPage.tsx", languages: ["React", "JSON"], referenceUrl: PATTERN_LIBRARY_SOURCE, referenceLabel: "Source HTML", sourceSchemaFactory: () => optionShape("source", "Metric source", "Total Agents -- source schema", "Security summary metric from the pattern library.", { metric: "total_agents", value: 24, scope: "environment" }) },
+        { kind: "pattern", title: "No Authentication", pathname: "no-authentication", pathLabel: "pattern-library/s8a/no-authentication", desc: "Critical summary metric highlighting agents without authentication.", sourceFile: "SecurityAdminPage.tsx", languages: ["React", "JSON"], referenceUrl: PATTERN_LIBRARY_SOURCE, referenceLabel: "Source HTML", sourceSchemaFactory: () => optionShape("source", "Metric source", "No Authentication -- source schema", "Security summary metric from the pattern library.", { metric: "no_auth", value: 3, severity: "critical", recommendation: "Enable Integrated (Entra ID) authentication" }) },
+        { kind: "pattern", title: "Microsoft Auth", pathname: "microsoft-auth", pathLabel: "pattern-library/s8a/microsoft-auth", desc: "Summary metric showing agents already using Microsoft authentication.", sourceFile: "SecurityAdminPage.tsx", languages: ["React", "JSON"], referenceUrl: PATTERN_LIBRARY_SOURCE, referenceLabel: "Source HTML", sourceSchemaFactory: () => optionShape("source", "Metric source", "Microsoft Auth -- source schema", "Security summary metric from the pattern library.", { metric: "microsoft_auth", value: 19, authMode: "Integrated (Entra ID SSO)" }) },
+        { kind: "pattern", title: "Web Security Off", pathname: "web-security-off", pathLabel: "pattern-library/s8a/web-security-off", desc: "Critical summary metric tracking unsecured web channel exposure.", sourceFile: "SecurityAdminPage.tsx", languages: ["React", "JSON"], referenceUrl: PATTERN_LIBRARY_SOURCE, referenceLabel: "Source HTML", sourceSchemaFactory: () => optionShape("source", "Metric source", "Web Security Off -- source schema", "Security summary metric from the pattern library.", { metric: "web_security_disabled", value: 2, field: "iswebchannelsecurityenabled", recommendation: "Enable secured access on web channel" }) }
+      ]
+    },
+    {
+      title: "Portfolio Scope",
+      description: "3DKG portfolio layer cards mirrored from the security admin scope subsection.",
+      examples: portfolioLayers.map(layer => ({
+        kind: "pattern",
+        title: layer.name,
+        pathname: slugify(layer.name),
+        pathLabel: "pattern-library/s8b/" + slugify(layer.name),
+        desc: layer.role,
+        sourceFile: "SecurityAdminPage.tsx",
+        languages: ["Adaptive Cards", "JSON"],
+        referenceUrl: PATTERN_LIBRARY_SOURCE,
+        referenceLabel: "Source HTML",
+        sourceSchemaFactory: () => optionShape("source", "Layer card source", layer.name + " -- 3DKG Adaptive Card", "Full adaptive card generated for the 3DKG portfolio layer in the pattern library.", buildPortfolioLayerCard(layer))
+      }))
+    },
+    {
+      title: "Security Settings",
+      description: "Actionable security setting cards with compliance state and recommended target values.",
+      examples: securitySettings.map(setting => ({
+        kind: "pattern",
+        title: setting.name,
+        pathname: setting.id,
+        pathLabel: "pattern-library/s8c/" + setting.id,
+        desc: setting.description,
+        sourceFile: "SecurityAdminPage.tsx",
+        languages: ["React", "JSON"],
+        referenceUrl: PATTERN_LIBRARY_SOURCE,
+        referenceLabel: "Source HTML",
+        sourceSchemaFactory: () => optionShape("source", "Security config", setting.name + " -- config schema", "Recommended configuration JSON carried over from the pattern library security settings subsection.", {
+          setting: setting.id,
+          name: setting.name,
+          field: setting.field,
+          current_value: setting.current_value,
+          target_value: setting.target_value,
+          state: setting.state,
+          layer: setting.layer,
+          schema_ref: setting.schema_ref,
+          recommendation: setting.recommendation,
+          impact: setting.impact,
+          assessed_at: TIMESTAMP
+        })
+      }))
+    }
+  ];
+}
+
+/* ── Inline SVG illustrations per category (self-contained, zero external deps) ── */
+function heroSvg(categoryTitle, accent) {
+  const a = accent;
+  const a30 = accent + "4D"; // 30% alpha hex
+  const a60 = accent + "99";
+  switch (categoryTitle) {
+    case "Line Charts":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="20" y1="70" x2="240" y2="70" stroke="${a30}" stroke-width="1"/>
+        <line x1="20" y1="10" x2="20" y2="70" stroke="${a30}" stroke-width="1"/>
+        <polyline points="30,55 60,40 90,48 120,22 150,35 180,18 210,30 240,12" stroke="${a}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <polyline points="30,60 60,52 90,58 120,42 150,50 180,38 210,45 240,35" stroke="${a60}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-dasharray="4 3"/>
+        ${[30,60,90,120,150,180,210,240].map((x,i)=>`<circle cx="${x}" cy="${[55,40,48,22,35,18,30,12][i]}" r="3" fill="${a}"/>`).join("")}
+      </svg>`;
+
+    case "Area Charts":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="20" y1="70" x2="240" y2="70" stroke="${a30}" stroke-width="1"/>
+        <path d="M30,55 Q70,20 120,35 T210,18 L240,25 L240,70 L30,70 Z" fill="${a30}"/>
+        <path d="M30,55 Q70,20 120,35 T210,18 L240,25" stroke="${a}" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M30,62 Q80,40 130,50 T220,35 L240,40 L240,70 L30,70 Z" fill="${a}" fill-opacity="0.12"/>
+        <path d="M30,62 Q80,40 130,50 T220,35 L240,40" stroke="${a60}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>`;
+
+    case "Bar Charts":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="20" y1="70" x2="240" y2="70" stroke="${a30}" stroke-width="1"/>
+        ${[[35,25],[55,40],[80,15],[100,35],[125,45],[145,20],[170,30],[190,50]].map(([x,h],i)=>
+          `<rect x="${x}" y="${70-h}" width="14" height="${h}" rx="3" fill="${i%2===0?a:a60}"/>`
+        ).join("")}
+      </svg>`;
+
+    case "Scatter Plots":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="20" y1="70" x2="240" y2="70" stroke="${a30}" stroke-width="1"/>
+        <line x1="20" y1="10" x2="20" y2="70" stroke="${a30}" stroke-width="1"/>
+        ${[[40,50,4],[65,35,6],[90,55,3],[110,25,5],[135,42,7],[160,18,4],[180,48,5],[205,30,6],[230,15,4],[55,62,3],[145,58,3],[195,40,4]].map(([cx,cy,r])=>
+          `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${a}" fill-opacity="0.5" stroke="${a}" stroke-width="1"/>`
+        ).join("")}
+      </svg>`;
+
+    case "Maps":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="25" y="8" width="210" height="64" rx="6" fill="${a}" fill-opacity="0.06" stroke="${a30}" stroke-width="1"/>
+        <path d="M60,20 Q80,15 95,22 Q110,30 100,40 Q90,48 70,45 Q55,40 60,30 Z" fill="${a30}" stroke="${a60}" stroke-width="1"/>
+        <path d="M120,18 Q145,12 160,20 Q175,30 170,42 Q160,52 140,48 Q125,42 120,30 Z" fill="${a30}" stroke="${a60}" stroke-width="1"/>
+        <path d="M180,25 Q195,18 210,28 Q215,38 200,42 Q185,40 180,32 Z" fill="${a30}" stroke="${a60}" stroke-width="1"/>
+        <circle cx="85" cy="32" r="3" fill="${a}"/><circle cx="150" cy="30" r="3" fill="${a}"/><circle cx="195" cy="32" r="3" fill="${a}"/>
+        <line x1="85" y1="32" x2="150" y2="30" stroke="${a}" stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="150" y1="30" x2="195" y2="32" stroke="${a}" stroke-width="1" stroke-dasharray="3 2"/>
+      </svg>`;
+
+    case "Networks and Flows":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="55" y1="20" x2="130" y2="15" stroke="${a60}" stroke-width="1.5"/>
+        <line x1="55" y1="20" x2="130" y2="45" stroke="${a60}" stroke-width="1.5"/>
+        <line x1="55" y1="60" x2="130" y2="45" stroke="${a60}" stroke-width="1.5"/>
+        <line x1="55" y1="60" x2="130" y2="65" stroke="${a60}" stroke-width="1.5"/>
+        <line x1="130" y1="15" x2="205" y2="25" stroke="${a60}" stroke-width="1.5"/>
+        <line x1="130" y1="45" x2="205" y2="25" stroke="${a60}" stroke-width="1.5"/>
+        <line x1="130" y1="45" x2="205" y2="55" stroke="${a60}" stroke-width="1.5"/>
+        <line x1="130" y1="65" x2="205" y2="55" stroke="${a60}" stroke-width="1.5"/>
+        <circle cx="55" cy="20" r="8" fill="${a30}" stroke="${a}" stroke-width="1.5"/>
+        <circle cx="55" cy="60" r="8" fill="${a30}" stroke="${a}" stroke-width="1.5"/>
+        <circle cx="130" cy="15" r="7" fill="${a30}" stroke="${a}" stroke-width="1.5"/>
+        <circle cx="130" cy="45" r="9" fill="${a30}" stroke="${a}" stroke-width="1.5"/>
+        <circle cx="130" cy="65" r="6" fill="${a30}" stroke="${a}" stroke-width="1.5"/>
+        <circle cx="205" cy="25" r="8" fill="${a30}" stroke="${a}" stroke-width="1.5"/>
+        <circle cx="205" cy="55" r="7" fill="${a30}" stroke="${a}" stroke-width="1.5"/>
+      </svg>`;
+
+    case "Circular Charts":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="130" cy="40" r="32" fill="none" stroke="${a30}" stroke-width="12"/>
+        <circle cx="130" cy="40" r="32" fill="none" stroke="${a}" stroke-width="12" stroke-dasharray="60 141" stroke-dashoffset="0" stroke-linecap="round"/>
+        <circle cx="130" cy="40" r="32" fill="none" stroke="${a60}" stroke-width="12" stroke-dasharray="40 161" stroke-dashoffset="-65" stroke-linecap="round"/>
+        <circle cx="130" cy="40" r="18" fill="var(--surface-2)"/>
+      </svg>`;
+
+    case "Treemap":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="25" y="8" width="120" height="40" rx="4" fill="${a}" fill-opacity="0.3" stroke="${a}" stroke-width="1"/>
+        <rect x="150" y="8" width="85" height="25" rx="4" fill="${a60}" fill-opacity="0.4" stroke="${a}" stroke-width="1"/>
+        <rect x="150" y="37" width="40" height="35" rx="4" fill="${a}" fill-opacity="0.2" stroke="${a}" stroke-width="1"/>
+        <rect x="195" y="37" width="40" height="35" rx="4" fill="${a30}" stroke="${a}" stroke-width="1"/>
+        <rect x="25" y="52" width="55" height="20" rx="4" fill="${a60}" fill-opacity="0.3" stroke="${a}" stroke-width="1"/>
+        <rect x="85" y="52" width="60" height="20" rx="4" fill="${a}" fill-opacity="0.15" stroke="${a}" stroke-width="1"/>
+      </svg>`;
+
+    case "Composite Charts":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="20" y1="70" x2="240" y2="70" stroke="${a30}" stroke-width="1"/>
+        ${[[40,35],[70,20],[100,40],[130,25],[160,45],[190,15],[220,30]].map(([x,h])=>
+          `<rect x="${x-8}" y="${70-h}" width="16" height="${h}" rx="3" fill="${a30}"/>`
+        ).join("")}
+        <polyline points="40,30 70,18 100,35 130,20 160,40 190,12 220,25" stroke="${a}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        ${[[40,30],[70,18],[100,35],[130,20],[160,40],[190,12],[220,25]].map(([x,y])=>
+          `<circle cx="${x}" cy="${y}" r="2.5" fill="${a}"/>`
+        ).join("")}
+      </svg>`;
+
+    case "Auxiliary Components":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="80" y="10" width="60" height="60" rx="4" fill="${a}" fill-opacity="0.08" stroke="${a}" stroke-width="1" stroke-dasharray="4 2"/>
+        <line x1="20" y1="70" x2="240" y2="70" stroke="${a30}" stroke-width="1"/>
+        <polyline points="30,55 60,40 90,48 120,22 150,35 180,28 210,20 240,15" stroke="${a60}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <line x1="150" y1="10" x2="150" y2="70" stroke="${a}" stroke-width="1" stroke-dasharray="3 2"/>
+        <circle cx="150" cy="35" r="4" fill="${a}"/>
+        <rect x="155" y="28" width="50" height="18" rx="4" fill="var(--surface)" stroke="${a}" stroke-width="1"/>
+        <text x="162" y="40" font-size="8" fill="${a}" font-family="var(--font-mono)">val: 35</text>
+        <line x1="30" y1="45" x2="50" y2="25" stroke="${a}" stroke-width="1"/>
+        <circle cx="50" cy="25" r="2" fill="${a}"/>
+        <rect x="52" y="18" width="24" height="14" rx="3" fill="var(--surface)" stroke="${a}" stroke-width="0.8"/>
+        <text x="56" y="28" font-size="7" fill="${a}" font-family="var(--font-mono)">A1</text>
+      </svg>`;
+
+    case "LiveTile Studio Canvas":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="28" y="14" width="60" height="24" rx="6" fill="${a30}" stroke="${a}" stroke-width="1"/>
+        <rect x="96" y="14" width="56" height="24" rx="6" fill="${a30}" stroke="${a}" stroke-width="1"/>
+        <rect x="160" y="14" width="72" height="52" rx="8" fill="${a30}" stroke="${a}" stroke-width="1"/>
+        <rect x="28" y="46" width="124" height="20" rx="6" fill="${a60}" fill-opacity="0.18" stroke="${a}" stroke-width="1"/>
+        <line x1="170" y1="58" x2="220" y2="34" stroke="${a}" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="170" cy="58" r="3" fill="${a}"/><circle cx="195" cy="48" r="3" fill="${a}"/><circle cx="220" cy="34" r="3" fill="${a}"/>
+      </svg>`;
+
+    case "Adaptive Cards Gallery":
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="36" y="10" width="188" height="60" rx="10" fill="${a30}" stroke="${a}" stroke-width="1.5"/>
+        <rect x="52" y="22" width="88" height="8" rx="4" fill="${a}"/>
+        <rect x="52" y="36" width="122" height="6" rx="3" fill="${a60}"/>
+        <rect x="52" y="48" width="76" height="6" rx="3" fill="${a60}"/>
+        <rect x="184" y="24" width="24" height="24" rx="6" fill="${a}" fill-opacity="0.24" stroke="${a}" stroke-width="1"/>
+      </svg>`;
+
+    default:
+      return `<svg viewBox="0 0 260 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="30" y="10" width="200" height="60" rx="8" fill="${a30}" stroke="${a60}" stroke-width="1"/>
+        <text x="130" y="45" text-anchor="middle" font-size="12" fill="${a}" font-family="var(--font-sans)">${esc(categoryTitle)}</text>
+      </svg>`;
+  }
+}
+
+function buildMetadata(col, ex, ci, ei) {
+  const kind = ex.kind || "unovis";
+  const isPattern = kind === "pattern";
+  const pathLabel = ex.pathLabel || ex.pathname;
+  const implementationLanguages = ex.languages || (isPattern ? DEFAULT_PATTERN_LANGS : DEFAULT_UNOVIS_LANGS);
+  const links = isPattern
+    ? patternLinks(ex)
+    : [
+        { label: "Gallery", url: galleryUrl(col.title, ex.title) },
+        { label: "Source", url: sourceUrl(ex.pathname) }
+      ];
+  return {
+    kind,
+    collection: col.title,
+    title: ex.title,
+    pathname: ex.pathname,
+    path_label: pathLabel,
+    description: ex.desc,
+    ordinal_in_collection: ei + 1,
+    collection_size: col.examples.length,
+    collection_index: ci + 1,
+    source: isPattern
+      ? {
+          pattern_library_page: PATTERN_LIBRARY_PAGE,
+          pattern_library_source: PATTERN_LIBRARY_SOURCE,
+          source_file: ex.sourceFile || PATTERN_LIBRARY_SOURCE,
+          reference_url: ex.referenceUrl || PATTERN_LIBRARY_PAGE
+        }
+      : {
+          gallery_root_url: GALLERY_URL,
+          gallery_view_url: galleryUrl(col.title, ex.title),
+          repo_url: GITHUB_REPO_URL,
+          canonical_examples_list: EXAMPLES_LIST_URL,
+          example_directory: sourceUrl(ex.pathname),
+          example_index_file: sourceUrl(ex.pathname) + "/index.tsx"
+        },
+    likely_source_files: isPattern
+      ? [ex.sourceFile || PATTERN_LIBRARY_SOURCE]
+      : [
+          ex.pathname + ".tsx", ex.pathname + ".ts", ex.pathname + "-solid.tsx",
+          ex.pathname + ".svelte", ex.pathname + ".vue",
+          ex.pathname + ".component.ts", ex.pathname + ".component.html", "data"
+        ],
+    links,
+    implementation_languages: implementationLanguages,
+    note: isPattern
+      ? "Metadata derived from flipcard-pattern-library.html."
+      : "Metadata derived from f5/unovis packages/shared/examples/examples-list.tsx."
+  };
+}
+
+function buildFlipCardSurfaceSchema(meta, accent, views, ex) {
+  return {
+    component: "FlipCard",
+    trigger: "click",
+    flipHint: FLIP_HINT,
+    accent: accent.solid,
+    front: {
+      title: meta.title,
+      subtitle: meta.collection,
+      path: meta.path_label,
+      description: meta.description,
+      links: meta.links
+    },
+    back: {
+      default_view: "Metadata",
+      available_views: views,
+      copy_supported: true
+    },
+    schema_origin: ex.kind === "pattern" ? "pattern-library" : "unovis-gallery",
+    minHeight: 380
+  };
+}
+
+function buildAdaptiveTileSchema(meta) {
+  const primaryLink = meta.links[0] || { label: "Open", url: GALLERY_URL };
+  return {
+    $schema: AC_SCHEMA_URL,
+    type: "AdaptiveCard",
+    version: AC_VERSION,
+    metadata: {
+      schema_variant: "adaptive-tile",
+      source_kind: meta.kind,
+      collection: meta.collection,
+      pathname: meta.pathname
+    },
+    body: [
+      { type: "TextBlock", text: meta.collection.toUpperCase(), size: "Small", weight: "Bolder", color: "Accent" },
+      { type: "TextBlock", text: meta.title, size: "Large", weight: "Bolder", wrap: true, spacing: "Small" },
+      { type: "TextBlock", text: meta.description, wrap: true, spacing: "Small" },
+      {
+        type: "FactSet",
+        spacing: "Medium",
+        facts: [
+          { title: "Path", value: meta.path_label },
+          { title: "Position", value: meta.ordinal_in_collection + " / " + meta.collection_size },
+          { title: "Languages", value: meta.implementation_languages.join(", ") }
+        ]
+      }
+    ],
+    actions: [
+      { type: "Action.OpenUrl", title: primaryLink.label, url: primaryLink.url }
+    ]
+  };
+}
+
+function buildAdaptiveLiveTileSchema(meta, ci, ei) {
+  return {
+    id: slugify(meta.collection + "-" + meta.title),
+    type: "adaptive-livetile",
+    version: "1.0",
+    grid: liveTileGrid(ci, ei),
+    content: {
+      title: meta.title,
+      subtitle: meta.collection,
+      description: meta.description,
+      metric: meta.ordinal_in_collection,
+      total: meta.collection_size
+    },
+    bindings: {
+      title: "${Topic.Title}",
+      collection: "${Topic.Collection}",
+      description: "${Topic.Description}",
+      metric: "${Topic.Ordinal}",
+      total: "${Topic.CollectionSize}",
+      primaryUrl: "${Topic.PrimaryUrl}"
+    },
+    links: meta.links,
+    note: "Every adaptive live tile now exposes the same additional schema views: metadata, source schema where available, FlipCard surface, adaptive tile, and adaptive live tile."
+  };
+}
+
+function buildSourceSchemaOption(ex, meta) {
+  if (typeof ex.sourceSchemaFactory === "function") return ex.sourceSchemaFactory(meta);
+  if (ex.sourceSchema) {
+    return optionShape(
+      "source",
+      ex.sourceSchemaLabel || "Source schema",
+      ex.title + " -- source schema",
+      ex.sourceSchemaSummary || "Source schema carried over from the pattern library.",
+      ex.sourceSchema
+    );
+  }
+  return null;
+}
+
+function buildSchemaOptions(col, ex, meta, accent, ci, ei) {
+  const options = [
+    optionShape("metadata", "Metadata", ex.title + " -- metadata", "Catalog metadata, source links, framework coverage, and path mapping for this card.", meta)
+  ];
+  const sourceOption = buildSourceSchemaOption(ex, meta);
+  if (sourceOption) options.push(sourceOption);
+  const viewLabels = options.map(o => o.label).concat(["FlipCard Surface", "Adaptive Tile", "Adaptive LiveTile"]);
+  options.push(
+    optionShape("flipcard", "FlipCard Surface", ex.title + " -- FlipCard surface", "Reusable flip surface contract with front/back content slots and explicit interaction state.", buildFlipCardSurfaceSchema(meta, accent, viewLabels, ex)),
+    optionShape("adaptive-tile", "Adaptive Tile", ex.title + " -- adaptive tile", "Adaptive Card-backed tile option mirroring the richer tile surfaces shown in the pattern library.", buildAdaptiveTileSchema(meta)),
+    optionShape("adaptive-livetile", "Adaptive LiveTile", ex.title + " -- adaptive livetile", "Dashboard-ready live tile option with shared additional schema views on every tile.", buildAdaptiveLiveTileSchema(meta, ci, ei))
+  );
+  return options;
+}
+
+function registerSchemaOptions(cardId, options) {
+  CARD_SCHEMAS.set(cardId, options);
+}
+
+function getSchemaOption(cardId, key) {
+  const options = CARD_SCHEMAS.get(cardId) || [];
+  return options.find(o => o.key === key) || options[0] || null;
+}
+
+/* ── Render helpers ── */
+
+function renderFilterChips() {
+  const allChip = `<button type="button" class="filter-chip" data-collection-filter="All" aria-pressed="true"
+    style="--chip-solid:#0284c7;--chip-soft:rgba(2,132,199,0.14)">All collections (${totalExamples()})</button>`;
+  return allChip + COLLECTIONS.map((c, i) => {
+    const a = PALETTE[i % PALETTE.length];
+    return `<button type="button" class="filter-chip" data-collection-filter="${esc(c.title)}" aria-pressed="false"
+      style="--chip-solid:${a.solid};--chip-soft:${a.soft}">${esc(c.title)} (${c.examples.length})</button>`;
+  }).join("");
+}
+
+function positionPips(current, total) {
+  let html = "";
+  for (let i = 0; i < total; i++) {
+    html += `<span class="position-pip${i === current ? " active" : ""}"></span>`;
+  }
+  return html;
+}
+
+function renderCard(col, ex, ci, ei) {
+  const accent = PALETTE[ci % PALETTE.length];
+  const meta = buildMetadata(col, ex, ci, ei);
+  const cardId = "card-" + slugify(col.title) + "-" + slugify(ex.title) + "-" + ci + "-" + ei;
+  const schemaOptions = buildSchemaOptions(col, ex, meta, accent, ci, ei);
+  const initialOption = schemaOptions[0];
+  const optionMarkup = schemaOptions.map(opt => `<option value="${esc(opt.key)}">${esc(opt.label)}</option>`).join("");
+  const linksMarkup = meta.links.map(link => `<a class="card-link" href="${esc(link.url)}" target="_blank" rel="noreferrer">${esc(link.label)}</a>`).join("");
+  const backLinksMarkup = meta.links.map(link => `<a class="back-link" href="${esc(link.url)}" target="_blank" rel="noreferrer">${esc(link.label)}</a>`).join("");
+  registerSchemaOptions(cardId, schemaOptions);
+
+  return `
+  <div class="flip-card" tabindex="0" role="button" aria-pressed="false"
+    aria-label="${esc(ex.title)} -- ${FLIP_HINT}"
+    data-card-id="${esc(cardId)}" data-collection="${esc(col.title)}" data-title="${esc(ex.title)}" data-pathname="${esc(ex.pathname)}"
+    style="--accent:${accent.solid};--accent-soft:${accent.soft}">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div class="card-header">
+          <div class="card-badge"><span>${ci+1}.${ei+1}</span><span>${esc(col.title)}</span></div>
+          <span class="flip-hint">${esc(FLIP_HINT)}</span>
+        </div>
+        <div class="card-hero">${heroSvg(col.title, accent.solid)}</div>
+        <div class="front-body">
+          <h3 class="example-title">${esc(ex.title)}</h3>
+          <span class="example-path">${esc(meta.path_label)}</span>
+          <p style="margin:0;font-size:13px;color:var(--text-dim);line-height:1.5">${esc(ex.desc)}</p>
+          <div class="meta-grid">
+            <div class="meta-cell">
+              <span class="meta-cell-label">Position</span>
+              <div class="position-bar">${positionPips(ei, col.examples.length)}</div>
+            </div>
+            <div class="meta-cell">
+              <span class="meta-cell-label">Source</span>
+              <span class="meta-cell-value" style="font-size:11px;font-family:var(--font-mono)">${esc(meta.likely_source_files[0] || meta.path_label)}</span>
+            </div>
+          </div>
+          <div class="lang-row">${meta.implementation_languages.map(l => `<span class="lang-badge">${esc(l)}</span>`).join("")}</div>
+          <div class="link-row">${linksMarkup}</div>
+        </div>
+      </div>
+      <div class="flip-back">
+        <div class="card-header">
+          <span class="back-title" data-schema-title>${esc(initialOption.title)}</span>
+          <span class="flip-hint">Back face</span>
+        </div>
+        <div class="back-body">
+          <div class="back-actions">${backLinksMarkup}</div>
+          <div class="back-copy-row">
+            <div class="schema-controls">
+              <div class="schema-picker">
+                <span class="schema-label">Schema view</span>
+                <select class="schema-select" data-schema-select="${esc(cardId)}" aria-label="Schema view for ${esc(ex.title)}">${optionMarkup}</select>
+              </div>
+              <div class="schema-summary" data-schema-summary>${esc(initialOption.summary)}</div>
+            </div>
+            <button type="button" class="copy-btn" data-state="idle">Copy JSON</button>
+          </div>
+          <pre class="json-block" data-schema-json>${esc(prettyJson(initialOption.json))}</pre>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCollection(col, index) {
+  const accent = PALETTE[index % PALETTE.length];
+  const cards = col.examples.map((ex, ei) => renderCard(col, ex, index, ei)).join("");
+  const desc = col.description ? `<p class="collection-desc">${col.description}</p>` : "";
+  return `
+  <section class="collection" data-collection="${esc(col.title)}" style="--accent:${accent.solid};--accent-soft:${accent.soft}">
+    <div class="collection-header">
+      <div class="collection-title-wrap">
+        <div class="collection-title"><span class="collection-marker"></span><h2>${esc(col.title)}</h2></div>
+        ${desc}
+      </div>
+      <div class="collection-count">${col.examples.length} cards</div>
+    </div>
+    <div class="flip-grid">${cards}</div>
+  </section>`;
+}
+
+function renderApp() {
+  const tc = COLLECTIONS.length;
+  const te = totalExamples();
+  document.getElementById("app").innerHTML = `
+  <div class="page">
+    <header class="page-header">
+      <div class="title-block">
+        <h1>Unovis Gallery Flipcards and Pattern Library</h1>
+        <p class="subtitle">
+          One adaptive flipcard for every example in the <a href="${esc(GALLERY_URL)}" target="_blank" rel="noreferrer">Unovis visualization gallery</a>,
+          plus every flipcard surface cataloged in <a href="${esc(PATTERN_LIBRARY_PAGE)}" target="_blank" rel="noreferrer">flipcard-pattern-library.html</a>.
+          Back faces now expose switchable schema views, including the same additional schema options on every adaptive live tile.
+        </p>
+        <div class="source-line">
+          Canonical sources:
+          <a href="${esc(EXAMPLES_LIST_URL)}" target="_blank" rel="noreferrer">packages/shared/examples/examples-list.tsx</a>
+          and
+          <a href="${esc(PATTERN_LIBRARY_PAGE)}" target="_blank" rel="noreferrer">flipcard-pattern-library.html</a>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="stat-value" id="stat-visible-collections">${tc}</span><span class="stat-label">Visible collections</span></div>
+        <div class="stat"><span class="stat-value">${tc}</span><span class="stat-label">Total collections</span></div>
+        <div class="stat"><span class="stat-value" id="stat-visible-cards">${te}</span><span class="stat-label">Visible cards</span></div>
+        <div class="stat"><span class="stat-value">${te}</span><span class="stat-label">Total cards</span></div>
+      </div>
+      <section class="controls" aria-label="Filters">
+        <div class="controls-row">
+          <input class="search" id="searchInput" type="search" spellcheck="false"
+            placeholder="Search by title, collection, or pathname" value="${esc(STATE.query)}" aria-label="Search cards">
+          <div class="search-help">Filter ${te} cards instantly.</div>
+        </div>
+        <div class="chip-bar" id="filterBar">${renderFilterChips()}</div>
+      </section>
+    </header>
+    <main class="collections">${COLLECTIONS.map((c, i) => renderCollection(c, i)).join("")}</main>
+    <section class="empty-state hidden" id="emptyState">No cards match the current search and collection filter.</section>
+    <footer class="page-footer">
+      Self-contained adaptive flipcards with switchable schema views. All illustrations are inline SVG -- zero external image dependencies.
+      Data is sourced from the <code>f5/unovis</code> canonical examples list and the local flipcard pattern library.
+    </footer>
+  </div>`;
+}
+
+/* ── Interaction ── */
+
+function applyFilters() {
+  const q = STATE.query.trim().toLowerCase();
+  let vc = 0, vk = 0;
+  document.querySelectorAll(".collection").forEach(sec => {
+    const sc = sec.dataset.collection || "";
+    const cm = STATE.collection === "All" || STATE.collection === sc;
+    let sv = 0;
+    sec.querySelectorAll(".flip-card").forEach(card => {
+      const hay = [card.dataset.collection||"", card.dataset.title||"", card.dataset.pathname||""].join(" ").toLowerCase();
+      const vis = cm && (q === "" || hay.includes(q));
+      card.classList.toggle("hidden", !vis);
+      if (vis) { sv++; vk++; }
+    });
+    sec.classList.toggle("hidden", sv === 0);
+    if (sv > 0) vc++;
+  });
+  document.getElementById("stat-visible-collections").textContent = String(vc);
+  document.getElementById("stat-visible-cards").textContent = String(vk);
+  document.getElementById("emptyState").classList.toggle("hidden", vk !== 0);
+}
+
+function syncFilterChips() {
+  document.querySelectorAll("[data-collection-filter]").forEach(c => {
+    c.setAttribute("aria-pressed", c.dataset.collectionFilter === STATE.collection ? "true" : "false");
+  });
+}
+
+function toggleCard(card) {
+  card.setAttribute("aria-pressed", String(card.getAttribute("aria-pressed") !== "true"));
+}
+
+function updateSchemaView(card, key) {
+  const cardId = card.dataset.cardId;
+  const option = getSchemaOption(cardId, key);
+  if (!option) return;
+  const title = card.querySelector("[data-schema-title]");
+  const summary = card.querySelector("[data-schema-summary]");
+  const json = card.querySelector("[data-schema-json]");
+  if (title) title.textContent = option.title;
+  if (summary) summary.textContent = option.summary;
+  if (json) json.textContent = prettyJson(option.json);
+}
+
+async function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); return; }
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.setAttribute("readonly",""); ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+  document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+}
+
+function bindEvents() {
+  document.addEventListener("input", e => { if (e.target.id === "searchInput") { STATE.query = e.target.value || ""; applyFilters(); } });
+  document.addEventListener("change", e => {
+    const select = e.target.closest("[data-schema-select]");
+    if (!select) return;
+    const card = select.closest(".flip-card");
+    if (!card) return;
+    updateSchemaView(card, select.value);
+  });
+  document.addEventListener("click", async e => {
+    const fc = e.target.closest("[data-collection-filter]");
+    if (fc) { STATE.collection = fc.dataset.collectionFilter; syncFilterChips(); applyFilters(); return; }
+    if (e.target.closest("a")) { e.stopPropagation(); return; }
+    if (e.target.closest("select")) { e.stopPropagation(); return; }
+    const cb = e.target.closest(".copy-btn");
+    if (cb) {
+      e.stopPropagation();
+      const pre = cb.closest(".flip-back").querySelector("[data-schema-json]");
+      if (!pre) return;
+      try { await copyText(pre.textContent); cb.dataset.state="copied"; cb.textContent="Copied"; setTimeout(()=>{cb.dataset.state="idle";cb.textContent="Copy JSON";},1200); }
+      catch(_) { cb.textContent="Failed"; setTimeout(()=>{cb.textContent="Copy JSON";},1200); }
+      return;
+    }
+    const card = e.target.closest(".flip-card");
+    if (card) toggleCard(card);
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const card = e.target.closest(".flip-card");
+    if (!card || e.target !== card) return;
+    e.preventDefault(); toggleCard(card);
+  });
+}
+
+(function init() {
+  renderApp();
+  syncFilterChips();
+  bindEvents();
+  applyFilters();
+})();
+</script>
+</body>
+</html>

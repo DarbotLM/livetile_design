@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Agent Studio FlipCard Pattern Library</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'Fira Code', 'SF Mono', Consolas, monospace;
+  --bg: #fafbfc;
+  --surface: #ffffff;
+  --surface-alt: #f4f5f7;
+  --border: rgba(0,0,0,0.08);
+  --border-bright: rgba(0,0,0,0.14);
+  --text: #1a1a2e;
+  --text-dim: #6b7280;
+  --text-subtle: #9ca3af;
+  --teal: #0891b2;  --teal-dim: rgba(8,145,178,0.10);
+  --navy: #1e3a5f;  --navy-dim: rgba(30,58,95,0.08);
+  --gold: #b45309;  --gold-dim: rgba(180,83,9,0.08);
+  --green: #059669; --green-dim: rgba(5,150,105,0.08);
+  --red: #be123c;   --red-dim: rgba(190,18,60,0.06);
+  --plum: #7e22ce;  --plum-dim: rgba(126,34,206,0.06);
+  --slate: #475569; --slate-dim: rgba(71,85,105,0.06);
+  --back-bg: #111827;
+  --back-border: #374151;
+  --back-text: #d1d5db;
+  --back-green: #86efac;
+  --back-header: #1f2937;
+}
+@media(prefers-color-scheme:dark){
+  :root {
+    --bg: #0c0f14;
+    --surface: #161b22;
+    --surface-alt: #1c2128;
+    --border: rgba(255,255,255,0.06);
+    --border-bright: rgba(255,255,255,0.12);
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-subtle: #6e7681;
+    --teal: #22d3ee;  --teal-dim: rgba(34,211,238,0.12);
+    --navy: #60a5fa;  --navy-dim: rgba(96,165,250,0.10);
+    --gold: #fbbf24;  --gold-dim: rgba(251,191,36,0.10);
+    --green: #34d399; --green-dim: rgba(52,211,153,0.10);
+    --red: #fb7185;   --red-dim: rgba(251,113,133,0.08);
+    --plum: #c084fc;  --plum-dim: rgba(192,132,252,0.08);
+    --slate: #94a3b8; --slate-dim: rgba(148,163,184,0.08);
+    --back-bg: #000000;
+    --back-border: #1f2937;
+    --back-text: #9ca3af;
+    --back-header: #0a0a0a;
+    --back-green: #4ade80;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;
+  background-image:radial-gradient(ellipse at 30% 0%,var(--teal-dim) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,var(--gold-dim) 0%,transparent 50%)}
+.page{max-width:1200px;margin:0 auto;padding:40px 24px 80px}
+
+/* -- Header -- */
+.page-header{margin-bottom:48px}
+.page-header h1{font-size:32px;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:4px}
+.page-header .subtitle{font-size:14px;color:var(--text-dim);line-height:1.5}
+.page-header .stats{display:flex;gap:16px;margin-top:16px;flex-wrap:wrap}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;display:flex;flex-direction:column;min-width:120px}
+.stat .val{font-size:22px;font-weight:700;color:var(--teal);font-family:var(--font-mono)}
+.stat .lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-top:2px}
+.stat .val.loading{opacity:0.4;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.4}50%{opacity:0.8}}
+
+/* -- Section -- */
+.section{margin-bottom:48px}
+.section-header{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.section-num{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--surface);background:var(--teal);width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-size:18px;font-weight:700;color:var(--text)}
+.section-desc{font-size:13px;color:var(--text-dim);margin-bottom:20px;max-width:700px}
+.section-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.badge{font-family:var(--font-mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:0.04em}
+.badge-teal{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal)}
+.badge-gold{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold)}
+.badge-navy{background:var(--navy-dim);color:var(--navy);border:1px solid var(--navy)}
+.badge-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.badge-red{background:var(--red-dim);color:var(--red);border:1px solid var(--red)}
+.badge-plum{background:var(--plum-dim);color:var(--plum);border:1px solid var(--plum)}
+.badge-slate{background:var(--slate-dim);color:var(--slate);border:1px solid var(--slate)}
+
+/* -- Flip Card -- */
+.flip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.flip-card{perspective:1000px;cursor:pointer;position:relative;outline:none}
+.flip-card:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:12px}
+.flip-inner{position:relative;width:100%;transition:transform 0.5s ease;transform-style:preserve-3d}
+.flip-card[aria-pressed="true"] .flip-inner{transform:rotateY(180deg)}
+.flip-front,.flip-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;overflow:hidden}
+.flip-front{background:var(--surface);border:1px solid var(--border)}
+.flip-front:hover{border-color:var(--border-bright);box-shadow:0 4px 16px rgba(0,0,0,0.06)}
+.flip-back{transform:rotateY(180deg);background:var(--back-bg);border:1px solid var(--back-border)}
+.flip-front .header,.flip-back .header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.flip-back .header{border-bottom-color:var(--back-border)}
+.flip-front .header .name{font-size:13px;font-weight:600;color:var(--text)}
+.flip-front .header .hint{font-size:10px;color:var(--text-subtle);opacity:0;transition:opacity 0.15s}
+.flip-card:hover .flip-front .header .hint,.flip-card:focus-visible .flip-front .header .hint{opacity:1}
+.flip-back .header .name{font-size:13px;font-weight:600;color:var(--back-text)}
+.flip-back .header .copy-btn{font-family:var(--font-mono);font-size:10px;padding:3px 10px;border-radius:5px;border:1px solid var(--back-border);background:var(--back-header);color:var(--back-text);cursor:pointer;transition:background 0.15s}
+.flip-back .header .copy-btn:hover,.flip-back .header .copy-btn:focus-visible{background:#374151;color:#fff}
+.flip-front .body{padding:14px}
+.flip-back .body{padding:10px 14px;overflow:auto}
+.flip-back .body pre{margin:0;font-family:var(--font-mono);font-size:11px;line-height:1.55;color:var(--back-green);white-space:pre-wrap;word-break:break-all}
+
+/* front content patterns */
+.kpi{display:flex;flex-direction:column;gap:4px}
+.kpi .label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
+.kpi .value{font-size:28px;font-weight:700;color:var(--text)}
+.kpi .delta{font-size:12px;font-weight:600}
+.kpi .delta.up{color:var(--green)}
+.kpi .delta.down{color:var(--red)}
+
+.preview-bars{display:flex;flex-direction:column;gap:6px}
+.preview-bars .bar-row{display:flex;align-items:center;gap:8px}
+.preview-bars .bar-label{font-size:10px;color:var(--text-dim);width:60px;flex-shrink:0;text-align:right}
+.preview-bars .bar-track{flex:1;height:6px;background:var(--surface-alt);border-radius:3px;overflow:hidden}
+.preview-bars .bar-fill{height:100%;border-radius:3px;transition:width 0.4s ease}
+
+.card-desc{font-size:12px;color:var(--text-dim);margin-top:8px;line-height:1.5}
+
+.tag-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.tag{font-family:var(--font-mono);font-size:9px;padding:2px 8px;border-radius:4px;background:var(--surface-alt);color:var(--text-dim);border:1px solid var(--border)}
+
+/* category colors on front header */
+.cat-teal{border-left:3px solid var(--teal)}
+.cat-navy{border-left:3px solid var(--navy)}
+.cat-gold{border-left:3px solid var(--gold)}
+.cat-green{border-left:3px solid var(--green)}
+.cat-red{border-left:3px solid var(--red)}
+.cat-plum{border-left:3px solid var(--plum)}
+.cat-slate{border-left:3px solid var(--slate)}
+
+/* -- Architecture table -- */
+.arch-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+.arch-table th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);padding:8px 12px;border-bottom:2px solid var(--border-bright);background:var(--surface-alt)}
+.arch-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.arch-table tr:last-child td{border-bottom:none}
+.arch-table code{font-family:var(--font-mono);font-size:11px;background:var(--surface-alt);padding:1px 5px;border-radius:4px;color:var(--teal)}
+
+/* -- Status banner -- */
+.api-status{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.api-pill{font-family:var(--font-mono);font-size:9px;padding:3px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:6px}
+.api-pill .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.api-pill .dot.ok{background:var(--green)}
+.api-pill .dot.err{background:var(--red)}
+.api-pill .dot.pending{background:var(--gold);animation:pulse 1s ease-in-out infinite}
+
+/* -- Subsection headers (within a section) -- */
+.subsection{margin-top:28px}
+.subsection:first-child{margin-top:0}
+.subsection-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.subsection-label{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-subtle);padding:3px 10px;border-radius:6px;border:1px solid var(--border)}
+.subsection-title{font-size:15px;font-weight:700;color:var(--text)}
+.subsection-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;max-width:640px}
+
+/* -- Layer card (portfolio scope) -- */
+.layer-front{display:flex;flex-direction:column;gap:8px}
+.layer-stats{display:flex;gap:14px}
+.layer-stat{display:flex;flex-direction:column;gap:1px}
+.layer-stat .ls-val{font-size:20px;font-weight:700;color:var(--text)}
+.layer-stat .ls-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-subtle)}
+.layer-role{font-size:11px;color:var(--text-dim);line-height:1.45}
+.layer-signals{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
+.layer-signals .tag{font-size:8px;padding:1px 6px}
+
+/* -- Setting card (security settings) -- */
+.setting-front{display:flex;flex-direction:column;gap:6px}
+.setting-state{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:6px}
+.setting-state.ok{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.setting-state.warn{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold)}
+.setting-state.critical{background:var(--red-dim);color:var(--red);border:1px solid var(--red)}
+.setting-state .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.setting-state.ok .dot{background:var(--green)}
+.setting-state.warn .dot{background:var(--gold)}
+.setting-state.critical .dot{background:var(--red)}
+.setting-field{font-family:var(--font-mono);font-size:10px;color:var(--teal);background:var(--surface-alt);padding:2px 8px;border-radius:4px;display:inline-block}
+
+/* -- Adaptive Card SDK renderer -- */
+.ac-host{border:1px solid var(--border);border-radius:10px;overflow:hidden;min-height:80px;position:relative}
+.ac-host.light{background:#ffffff;color:#111827}
+.ac-host.dark{background:#0f172a;color:#f8fafc}
+.ac-host .ac-container{padding:12px}
+.ac-host .ac-textBlock{font-family:'Segoe UI',system-ui,sans-serif!important;word-break:break-word}
+.ac-host .ac-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-subtle);background:var(--surface-alt)}
+.ac-host .ac-error{font-size:11px;color:var(--red);padding:10px}
+.ac-host img{max-width:100%;border-radius:6px}
+
+/* -- Animations -- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.section{animation:fadeUp 0.4s ease both}
+.section:nth-child(2){animation-delay:0.05s}
+.section:nth-child(3){animation-delay:0.10s}
+.section:nth-child(4){animation-delay:0.15s}
+.section:nth-child(5){animation-delay:0.20s}
+.section:nth-child(6){animation-delay:0.25s}
+.section:nth-child(7){animation-delay:0.30s}
+.section:nth-child(8){animation-delay:0.35s}
+.section:nth-child(9){animation-delay:0.40s}
+.section:nth-child(10){animation-delay:0.45s}
+@media(prefers-reduced-motion:reduce){.section,.stat .val.loading{animation:none!important;opacity:1!important}}
+</style>
+</head>
+<body>
+<div class="page" id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// ENVIRONMENT CONFIGURATION
+// All text, URLs, and default values are defined here. Edit this block to
+// customize the pattern library without touching rendering logic below.
+// ═══════════════════════════════════════════════════════════════════════════════
+const ENV = {
+  // ── App chrome ──────────────────────────────────────────────────────────────
+  APP_TITLE:    "Agent Studio -- FlipCard Pattern Library",
+  APP_SUBTITLE: "Interactive catalog of every click-to-flip surface in the Agent Studio codebase. Each card is a working demo -- click to flip and view the JSON schema on the back. Copy JSON with the button on the back face.",
+  FLIP_HINT:    "Click to flip",
+  COPY_LABEL:   "Copy JSON",
+  COPIED_LABEL: "Copied",
+
+  // ── Source file paths (displayed in badges / back-face JSON) ────────────────
+  PATHS: {
+    FLIPCARD_COMPONENT: "src/components/ui/FlipCard.tsx",
+    FLIPCARD_EXPORT:    "index.ts",
+    AC_GALLERY_PAGE:    "AdaptiveCardsGalleryPage.tsx",
+    TILES_LIBRARY_PAGE: "AdaptiveTilesLibraryPage.tsx",
+    LIVETILE_LIBRARY:   "LiveTileLibrary.tsx",
+    COMPONENT_SHOWCASE: "ComponentShowcaseWeb.tsx",
+    DISCOVER_PAGE:      "DiscoverPage.tsx",
+    EVAL_PAGE:          "EnvironmentEvaluationsPage.tsx",
+    SECURITY_PAGE:      "SecurityAdminPage.tsx",
+  },
+
+  // ── Open-source API endpoints (no keys required) ───────────────────────────
+  APIS: {
+    // GitHub REST v3 -- public, 60 req/hr unauthenticated
+    GITHUB_REPO:          "https://api.github.com/repos/microsoft/AdaptiveCards",
+    // Raw GitHub content -- fetch real AC sample JSON
+    GITHUB_RAW_BASE:      "https://raw.githubusercontent.com/microsoft/AdaptiveCards/main/samples",
+    // Adaptive Cards schema URL (canonical, used in all AC JSON $schema fields)
+    AC_SCHEMA_URL:        "http://adaptivecards.io/schemas/adaptive-card.json",
+    // Open-Meteo -- free weather API, no API key
+    OPEN_METEO:           "https://api.open-meteo.com/v1/forecast",
+  },
+
+  // ── Weather card configuration (Open-Meteo parameters) ─────────────────────
+  WEATHER: {
+    LATITUDE:       47.6062,   // Seattle (Microsoft HQ)
+    LONGITUDE:    -122.3321,
+    LOCATION_NAME: "Seattle, WA",
+    TEMP_UNIT:     "fahrenheit", // "celsius" or "fahrenheit"
+    UNIT_LABEL:    "F",
+  },
+
+  // ── Adaptive Cards samples to fetch from GitHub raw content ─────────────────
+  AC_SAMPLES: {
+    FLIGHT_ITINERARY: "v1.5/Scenarios/FlightItinerary.json",
+    WEATHER_COMPACT:  "v1.5/Scenarios/WeatherCompact.json",
+    EXPENSE_REPORT:   "v1.5/Scenarios/ExpenseReport.json",
+    STOCK_UPDATE:     "v1.5/Scenarios/StockUpdate.json",
+    FOOD_ORDER:       "v1.5/Scenarios/FoodOrder.json",
+    ACTIVITY_UPDATE:  "v1.5/Scenarios/ActivityUpdate.json",
+    INPUT_FORM:       "v1.5/Scenarios/InputForm.json",
+    RESTAURANT:       "v1.5/Scenarios/Restaurant.json",
+  },
+  // Version tag shown on AC gallery cards
+  AC_VERSION: "1.5",
+
+  // ── KPI / metric defaults (used when APIs are unavailable) ──────────────────
+  DEFAULTS: {
+    EVAL_CONFIGS:    12,
+    EVAL_DELTA:      "+2 since last run",
+    PASS_RATE:       87,
+    PASS_RATE_DELTA: "+3% week over week",
+    TOTAL_RUNS:      48,
+    PASSED:          42,
+    FAILED:          6,
+    TOTAL_AGENTS:    24,
+    NO_AUTH_AGENTS:  3,
+    MS_AUTH_AGENTS:  19,
+    WEB_SEC_OFF:     2,
+    TILE_COUNT:      44,
+    AC_SAMPLE_COUNT: 25,
+    BIC_SCORES: {
+      Relevance:      91,
+      Completeness:   84,
+      Coherence:      78,
+      "Tool Accuracy": 72,
+    },
+  },
+
+  // ── Discover page template metadata ─────────────────────────────────────────
+  TEMPLATES: {
+    FAQ_CHATBOT: {
+      id: "faq-chatbot",
+      name: "FAQ Chatbot",
+      type: "agent",
+      category: "Customer Service",
+      audience: "customers",
+      capabilities: ["knowledge-grounding", "conversational-ai", "multi-turn"],
+      purpose: "Automated FAQ responses powered by knowledge base grounding",
+      guidelines: ["Stay on-topic", "Cite sources", "Escalate when unsure"],
+      skills: ["search-knowledge", "summarize", "escalate"],
+      platforms: ["copilot-studio", "teams"],
+    },
+  },
+
+  // ── Dashboard template metadata ─────────────────────────────────────────────
+  DASHBOARD: {
+    name:    "Evaluation Review",
+    theme:   "midnight-sapphire",
+    tiles:   7,
+    columns: 12,
+    rows:    7,
+  },
+
+  // ── Dataverse entity references (eval tile back-face JSON) ──────────────────
+  DATAVERSE: {
+    EVAL_CONFIG_ENTITY: "msdyn_aievaluationconfiguration",
+    EVAL_CONFIG_STREAM: "msdyn_aievaluationconfigurations",
+    EVAL_RUNS_STREAM:   "agent_studio_eval_runs",
+  },
+
+  // ── Security recommendations ────────────────────────────────────────────────
+  SECURITY: {
+    NO_AUTH_RECOMMENDATION:  "Enable Integrated (Entra ID) authentication",
+    NO_AUTH_SEVERITY:        "critical",
+    WEB_SEC_FIELD:           "iswebchannelsecurityenabled",
+    WEB_SEC_RECOMMENDATION:  "Enable secured access on web channel",
+    AUTH_MODE_LABEL:         "Integrated (Entra ID SSO)",
+  },
+
+  // ── Portfolio Scope -- 3DKG agent layers in security review ─────────────────
+  // Derived from .agent/diagrams/adaptive-cards/3dkg-*-layer-card.json
+  PORTFOLIO_SCOPE: {
+    LAYERS: [
+      {
+        id: "security",
+        name: "Security Layer",
+        role: "Identity, access policy, and agent-connectivity gates",
+        degree: 12,
+        signals: 4,
+        schema: "Security Schema",
+        cluster: "Security",
+        signal_names: [
+          "Authentication Mode: Authenticate with Microsoft",
+          "Authentication Trigger: Always",
+          "Access Control: Selected users",
+          "Agent Connectable: True",
+        ],
+        connections: [
+          { rel: "has_layer", target: "Studio Steve" },
+          { rel: "maps_layer", target: "Composition" },
+          { rel: "structures", target: "Security Schema" },
+          { rel: "authenticates_users_for", target: "Microsoft Teams" },
+        ],
+        color: "red",
+        card_file: "3dkg-security-layer-card.json",
+      },
+      {
+        id: "identity",
+        name: "Identity Layer",
+        role: "Inner core identity surface",
+        degree: 8,
+        signals: 4,
+        schema: "Identity Schema",
+        cluster: "Identity",
+        signal_names: [
+          "Display Name: Studio Steve",
+          "Schema Name: dayour_copilotStudioExper...",
+          "Description: expert Copilot Studio gui...",
+          "Published State: Published",
+        ],
+        connections: [
+          { rel: "has_layer", target: "Studio Steve" },
+          { rel: "maps_layer", target: "Composition" },
+          { rel: "structures", target: "Identity Schema" },
+          { rel: "stored_in", target: "Dataverse Environment" },
+        ],
+        color: "navy",
+        card_file: "3dkg-identity-layer-card.json",
+      },
+      {
+        id: "channel",
+        name: "Channel Layer",
+        role: "Where the agent surfaces to users and platforms",
+        degree: 12,
+        signals: 3,
+        schema: "Channel Schema",
+        cluster: "Channel",
+        signal_names: [
+          "Channel: MsTeams",
+          "Channel: Microsoft365Copilot",
+          "Direct Line: Available",
+        ],
+        connections: [
+          { rel: "has_layer", target: "Studio Steve" },
+          { rel: "maps_layer", target: "Composition" },
+          { rel: "structures", target: "Channel Schema" },
+          { rel: "publishes_to", target: "Microsoft Teams" },
+          { rel: "publishes_to", target: "Microsoft 365 Copilot" },
+        ],
+        color: "teal",
+        card_file: "3dkg-channel-layer-card.json",
+      },
+      {
+        id: "ai-settings",
+        name: "AI Settings Layer",
+        role: "Model, planner, grounding, and file-analysis controls",
+        degree: 11,
+        signals: 5,
+        schema: "AI Settings Schema",
+        cluster: "AI Settings",
+        signal_names: [
+          "Model: GPT51ChatThinky",
+          "Use Model Knowledge: True",
+          "Semantic Search: True",
+          "File Analysis: True",
+          "Generative Actions: True",
+        ],
+        connections: [
+          { rel: "has_layer", target: "Studio Steve" },
+          { rel: "maps_layer", target: "Composition" },
+          { rel: "structures", target: "AI Settings Schema" },
+        ],
+        color: "plum",
+        card_file: "3dkg-ai-settings-layer-card.json",
+      },
+    ],
+    // 3DKG Viewer URL template (node name appended)
+    VIEWER_URL_BASE: "http://127.0.0.1:8123/copilot-studio-agent-3dkg.html#node=",
+    // Adaptive Card schema used in all layer cards
+    AC_SCHEMA: "http://adaptivecards.io/schemas/adaptive-card.json",
+    AC_VERSION: "1.5",
+  },
+
+  // ── Security Settings to Apply -- actionable recommendations ────────────────
+  SECURITY_SETTINGS: [
+    {
+      id: "auth-mode",
+      name: "Authentication Mode",
+      field: "authenticationconfiguration.mode",
+      current_value: "Authenticate with Microsoft",
+      target_value: "Authenticate with Microsoft",
+      state: "ok",     // ok | warn | critical
+      description: "Require Entra ID (Azure AD) authentication before any user can interact with the agent.",
+      recommendation: "Keep authentication mode set to 'Authenticate with Microsoft' to enforce Entra ID SSO for all sessions.",
+      impact: "All users must sign in via Entra ID before the agent responds.",
+      schema_ref: "BotAuthenticationConfiguration",
+      layer: "Security",
+    },
+    {
+      id: "auth-trigger",
+      name: "Authentication Trigger",
+      field: "authenticationconfiguration.trigger",
+      current_value: "Always",
+      target_value: "Always",
+      state: "ok",
+      description: "Controls when the authentication prompt appears. 'Always' means every new session requires sign-in.",
+      recommendation: "Set trigger to 'Always' for compliance-sensitive agents. Use 'As needed' only for low-risk public FAQ bots.",
+      impact: "Prevents anonymous sessions; every conversation starts authenticated.",
+      schema_ref: "AuthenticationTrigger",
+      layer: "Security",
+    },
+    {
+      id: "access-control",
+      name: "Access Control",
+      field: "accesscontrol.audience",
+      current_value: "Selected users",
+      target_value: "Selected users",
+      state: "ok",
+      description: "Restricts which users or groups can interact with the agent. 'Selected users' limits to named Entra ID groups.",
+      recommendation: "Use 'Selected users' for internal-facing agents. Only use 'Everyone' for public customer-facing bots.",
+      impact: "Prevents unauthorized users from discovering or chatting with the agent.",
+      schema_ref: "AccessControl",
+      layer: "Security",
+    },
+    {
+      id: "web-channel-sec",
+      name: "Web Channel Security",
+      field: "iswebchannelsecurityenabled",
+      current_value: false,
+      target_value: true,
+      state: "critical",
+      description: "When disabled, the Direct Line token endpoint is open. Anyone with the bot ID can embed or call the agent.",
+      recommendation: "Enable secured access on web channel. Require token exchange validation for all non-Teams channels.",
+      impact: "Blocks unauthorized embedding of the agent in external websites.",
+      schema_ref: "ChannelDefinition.webSecurity",
+      layer: "Channel",
+    },
+    {
+      id: "agent-connectable",
+      name: "Agent Connectivity",
+      field: "isagentconnectable",
+      current_value: true,
+      target_value: true,
+      state: "warn",
+      description: "Allows other Copilot Studio agents to call this agent as a sub-agent in multi-agent orchestration.",
+      recommendation: "Review which agents can call this one. In multi-agent mode, ensure only trusted orchestrators have invoke permissions.",
+      impact: "Other agents can pass prompts and receive responses from this agent.",
+      schema_ref: "ConnectedAgent",
+      layer: "Security",
+    },
+    {
+      id: "generative-actions",
+      name: "Generative Actions",
+      field: "aisettings.generativeActionsEnabled",
+      current_value: true,
+      target_value: "Review",
+      state: "warn",
+      description: "Enables the LLM to autonomously select and invoke plugin actions without explicit topic routing.",
+      recommendation: "Audit all connected plugins and connectors. Disable for agents handling PII or financial data unless each action is allow-listed.",
+      impact: "The model can call any enabled plugin action on behalf of the user.",
+      schema_ref: "AISettings.generativeActions",
+      layer: "AI Settings",
+    },
+    {
+      id: "file-analysis",
+      name: "File Upload Analysis",
+      field: "aisettings.fileAnalysisEnabled",
+      current_value: true,
+      target_value: "Review",
+      state: "warn",
+      description: "Allows users to upload files which the LLM will parse and analyze within the conversation context.",
+      recommendation: "Evaluate DLP exposure. Uploaded file content flows through the LLM context window. Disable if the agent handles sensitive environments.",
+      impact: "User-uploaded documents become part of the LLM prompt context.",
+      schema_ref: "AISettings.fileAnalysis",
+      layer: "AI Settings",
+    },
+  ],
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// API LAYER -- Fetch live data from open-source endpoints
+// Each function returns a promise; failures fall back to ENV.DEFAULTS silently.
+// ═══════════════════════════════════════════════════════════════════════════════
+const API = {
+  _cache: {},
+  _status: {},
+
+  /** Mark an API endpoint as pending / ok / err and update the status bar */
+  _setStatus(name, state) {
+    this._status[name] = state;
+    renderApiStatus();
+  },
+
+  /** GitHub repo stats (stars, open issues, forks) */
+  async fetchGitHubStats() {
+    const key = "github";
+    this._setStatus(key, "pending");
+    try {
+      const res = await fetch(ENV.APIS.GITHUB_REPO, {
+        headers: { Accept: "application/vnd.github.v3+json" },
+      });
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      this._cache.github = {
+        stars:      data.stargazers_count,
+        forks:      data.forks_count,
+        issues:     data.open_issues_count,
+        updated_at: data.updated_at,
+      };
+      this._setStatus(key, "ok");
+      return this._cache.github;
+    } catch (e) {
+      this._setStatus(key, "err");
+      return null;
+    }
+  },
+
+  /** Fetch a real Adaptive Card sample JSON from GitHub raw content */
+  async fetchACSample(samplePath) {
+    const key = "ac:" + samplePath;
+    if (this._cache[key]) return this._cache[key];
+    this._setStatus("ac-samples", "pending");
+    try {
+      const url = ENV.APIS.GITHUB_RAW_BASE + "/" + samplePath;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      this._cache[key] = data;
+      this._setStatus("ac-samples", "ok");
+      return data;
+    } catch (e) {
+      this._setStatus("ac-samples", "err");
+      return null;
+    }
+  },
+
+  /** Open-Meteo: current weather + 4-day daily forecast */
+  async fetchWeather() {
+    const key = "weather";
+    if (this._cache[key]) return this._cache[key];
+    this._setStatus(key, "pending");
+    try {
+      const u = ENV.APIS.OPEN_METEO
+        + "?latitude=" + ENV.WEATHER.LATITUDE
+        + "&longitude=" + ENV.WEATHER.LONGITUDE
+        + "&current_weather=true"
+        + "&daily=temperature_2m_max,weathercode"
+        + "&temperature_unit=" + ENV.WEATHER.TEMP_UNIT
+        + "&timezone=America%2FLos_Angeles"
+        + "&forecast_days=5";
+      const res = await fetch(u);
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      this._cache[key] = data;
+      this._setStatus(key, "ok");
+      return data;
+    } catch (e) {
+      this._setStatus(key, "err");
+      return null;
+    }
+  },
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════════════════════
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
+function formatNum(n) {
+  return n == null ? "--" : n.toLocaleString();
+}
+
+function dayName(dateStr) {
+  return new Date(dateStr).toLocaleDateString("en-US", { weekday: "short" });
+}
+
+/** WMO weather code -> short description */
+function wmoDesc(code) {
+  const map = {0:"Clear",1:"Mostly Clear",2:"Partly Cloudy",3:"Overcast",
+    45:"Fog",48:"Rime Fog",51:"Light Drizzle",53:"Drizzle",55:"Heavy Drizzle",
+    61:"Light Rain",63:"Rain",65:"Heavy Rain",71:"Light Snow",73:"Snow",
+    75:"Heavy Snow",77:"Snow Grains",80:"Light Showers",81:"Showers",
+    82:"Heavy Showers",85:"Snow Showers",86:"Heavy Snow Showers",
+    95:"Thunderstorm",96:"Thunderstorm + Hail",99:"Heavy Thunderstorm + Hail"};
+  return map[code] || "Unknown";
+}
+
+// ── Adaptive Cards SDK loader (same CDN as agent-studio) ─────────────────────
+const AC_SDK_URL = "https://unpkg.com/adaptivecards@3.0.4/dist/adaptivecards.min.js";
+let _acSdkPromise = null;
+
+function ensureACLoaded() {
+  if (window.AdaptiveCards) return Promise.resolve(true);
+  if (_acSdkPromise) return _acSdkPromise;
+  _acSdkPromise = new Promise(resolve => {
+    const existing = document.querySelector('script[data-ac-sdk]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true), { once: true });
+      existing.addEventListener("error", () => resolve(false), { once: true });
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = AC_SDK_URL;
+    s.async = true;
+    s.dataset.acSdk = "true";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.head.appendChild(s);
+  });
+  return _acSdkPromise;
+}
+
+/**
+ * Render an Adaptive Card JSON into a DOM container using the AC SDK.
+ * @param {HTMLElement} container - Target element (will be replaced inner)
+ * @param {object} schema - AC JSON payload
+ * @param {"light"|"dark"} appearance
+ */
+function renderACInto(container, schema, appearance) {
+  if (!window.AdaptiveCards || !schema) return false;
+  const AC = window.AdaptiveCards;
+  try {
+    const card = new AC.AdaptiveCard();
+    card.hostConfig = new AC.HostConfig({
+      fontFamily: "'Segoe UI', system-ui, sans-serif",
+      fontSizes: { small: 11, default: 13, medium: 15, large: 18, extraLarge: 22 },
+      fontWeights: { lighter: 300, default: 400, bolder: 600 },
+      spacing: { small: 6, default: 10, medium: 14, large: 20, extraLarge: 28, padding: 12 },
+      separator: { lineThickness: 1, lineColor: appearance === "dark" ? "#374151" : "#e5e7eb" },
+      imageSizes: { small: 40, medium: 80, large: 160 },
+      containerStyles: {
+        default: {
+          backgroundColor: appearance === "dark" ? "#0f172a" : "#ffffff",
+          foregroundColors: {
+            default:   { default: appearance === "dark" ? "#f8fafc" : "#111827", subtle: appearance === "dark" ? "#94a3b8" : "#6b7280" },
+            accent:    { default: "#464FEB", subtle: "#818cf8" },
+            good:      { default: "#059669", subtle: "#34d399" },
+            warning:   { default: "#d97706", subtle: "#fbbf24" },
+            attention: { default: "#dc2626", subtle: "#f87171" },
+          },
+        },
+        emphasis: {
+          backgroundColor: appearance === "dark" ? "#111827" : "#f8fafc",
+          foregroundColors: {
+            default:   { default: appearance === "dark" ? "#e2e8f0" : "#1f2937", subtle: appearance === "dark" ? "#94a3b8" : "#6b7280" },
+            accent:    { default: "#464FEB", subtle: "#818cf8" },
+            good:      { default: "#059669", subtle: "#34d399" },
+            warning:   { default: "#d97706", subtle: "#fbbf24" },
+            attention: { default: "#dc2626", subtle: "#f87171" },
+          },
+        },
+        accent:    { backgroundColor: appearance === "dark" ? "#1e1b4b" : "#eef0ff" },
+        good:      { backgroundColor: appearance === "dark" ? "#052e16" : "#ecfdf5" },
+        warning:   { backgroundColor: appearance === "dark" ? "#451a03" : "#fffbeb" },
+        attention: { backgroundColor: appearance === "dark" ? "#450a0a" : "#fef2f2" },
+      },
+      actions: {
+        actionAlignment: "Left",
+        actionsOrientation: "Horizontal",
+        buttonSpacing: 8,
+        maxActions: 6,
+        showCard: { actionMode: "Inline", inlineTopMargin: 12 },
+      },
+      factSet: { title: { weight: "Bolder", size: "Small", color: "Accent" }, value: { size: "Small" }, spacing: 8 },
+    });
+    card.parse(schema);
+    const rendered = card.render();
+    if (rendered) {
+      container.innerHTML = "";
+      container.appendChild(rendered);
+      return true;
+    }
+  } catch (e) {
+    container.innerHTML = `<div class="ac-error">Render error: ${esc(e.message)}</div>`;
+  }
+  return false;
+}
+
+/** Copy text to clipboard with execCommand fallback */
+function copyToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.cssText = "position:fixed;left:-9999px";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); } catch (_) {}
+  document.body.removeChild(ta);
+  return Promise.resolve();
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════════════════════════
+const app = document.getElementById("app");
+
+function renderApiStatus() {
+  const el = document.getElementById("api-status");
+  if (!el) return;
+  const pills = Object.entries(API._status).map(([name, state]) => {
+    const dotCls = state === "ok" ? "ok" : state === "err" ? "err" : "pending";
+    const label = state === "pending" ? "loading..." : state === "ok" ? "live" : "offline";
+    return `<span class="api-pill"><span class="dot ${dotCls}"></span>${esc(name)} ${label}</span>`;
+  }).join("");
+  el.innerHTML = pills;
+}
+
+function renderHeader() {
+  return `
+  <div class="page-header">
+    <h1>${esc(ENV.APP_TITLE)}</h1>
+    <p class="subtitle">${esc(ENV.APP_SUBTITLE)}</p>
+    <div class="stats">
+      <div class="stat"><span class="val" id="stat-surfaces">10</span><span class="lbl">Surfaces</span></div>
+      <div class="stat"><span class="val loading" id="stat-stars">--</span><span class="lbl">AC Repo Stars</span></div>
+      <div class="stat"><span class="val loading" id="stat-issues">--</span><span class="lbl">Open Issues</span></div>
+      <div class="stat"><span class="val" id="stat-samples">${ENV.DEFAULTS.AC_SAMPLE_COUNT}</span><span class="lbl">AC Samples</span></div>
+    </div>
+    <div class="api-status" id="api-status"></div>
+  </div>`;
+}
+
+function flipCard(id, minH, catClass, frontName, frontHtml, backTitle, backJson, opts) {
+  opts = opts || {};
+  const extraFrontStyle = opts.frontStyle || "";
+  const extraHeaderStyle = opts.headerStyle || "";
+  const nameStyle = opts.nameStyle || "";
+  const hintStyle = opts.hintStyle || "";
+  const gridStyle = opts.gridMinWidth ? `grid-template-columns:repeat(auto-fill,minmax(${opts.gridMinWidth},1fr))` : "";
+  const headerBadge = opts.headerBadge || "";
+  const jsonStr = typeof backJson === "string" ? backJson : JSON.stringify(backJson, null, 2);
+  return `
+  <div class="flip-card" id="${id}" tabindex="0" role="button" aria-pressed="false"
+       aria-label="${frontName.replace(/<[^>]*>/g, '')} -- ${ENV.FLIP_HINT}">
+    <div class="flip-inner" style="min-height:${minH}">
+      <div class="flip-front ${catClass}" ${extraFrontStyle ? `style="${extraFrontStyle}"` : ""}>
+        <div class="header" ${extraHeaderStyle ? `style="${extraHeaderStyle}"` : ""}>
+          <span class="name" ${nameStyle ? `style="${nameStyle}"` : ""}>${headerBadge}${frontName}</span>
+          <span class="hint" ${hintStyle ? `style="${hintStyle}"` : ""}>${esc(ENV.FLIP_HINT)}</span>
+        </div>
+        <div class="body">${frontHtml}</div>
+      </div>
+      <div class="flip-back">
+        <div class="header">
+          <span class="name">${esc(backTitle)}</span>
+          <button class="copy-btn" aria-label="${esc(ENV.COPY_LABEL)}">${esc(ENV.COPY_LABEL)}</button>
+        </div>
+        <div class="body"><pre>${esc(jsonStr)}</pre></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function sectionShell(num, title, desc, badges, innerHtml, opts) {
+  opts = opts || {};
+  const numStyle = opts.numStyle || "";
+  const badgesHtml = badges.map(b => `<span class="badge badge-${b[0]}">${esc(b[1])}</span>`).join("");
+  return `
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num" ${numStyle ? `style="${numStyle}"` : ""}>${esc(String(num))}</span>
+      <span class="section-title">${esc(title)}</span>
+    </div>
+    <p class="section-desc">${desc}</p>
+    <div class="section-meta">${badgesHtml}</div>
+    ${innerHtml}
+  </div>`;
+}
+
+function barRow(label, pct, color, labelStyle) {
+  const trackStyle = labelStyle ? `background:rgba(255,255,255,0.06)` : "";
+  return `<div class="bar-row"><span class="bar-label" ${labelStyle ? `style="${labelStyle}"` : ""}>${esc(label)}</span><div class="bar-track" ${trackStyle ? `style="${trackStyle}"` : ""}><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div></div>`;
+}
+
+function barsHtml(scores, color, labelStyle) {
+  return `<div class="preview-bars">${Object.entries(scores).map(([k,v]) => barRow(k, v, color, labelStyle)).join("")}</div>`;
+}
+
+// ── Section 1: Reusable FlipCard Component ───────────────────────────────────
+function renderS1() {
+  const props = {
+    component: "FlipCard",
+    file: ENV.PATHS.FLIPCARD_COMPONENT,
+    props: {
+      front: "ReactNode (required)",
+      back: "ReactNode (custom back face)",
+      backJson: "unknown (auto-rendered JSON)",
+      backTitle: "string (default: 'JSON')",
+      minHeight: "string | number (default: '260px')",
+      flipped: "boolean (controlled)",
+      onFlip: "(flipped: boolean) => void",
+      flipHint: "string (default: '" + ENV.FLIP_HINT + "')",
+      showFlipHint: "boolean (default: true)",
+      defaultFlipped: "boolean (default: false)",
+      className: "string",
+    },
+    css: { perspective: "1000px", transform: "rotateY(180deg)", transition: "500ms ease", backfaceVisibility: "hidden" },
+  };
+  const propKeys = Object.keys(props.props);
+  const bars = {};
+  propKeys.forEach((k, i) => { bars[k] = Math.round(100 - (i / propKeys.length) * 75); });
+  const colors = ["var(--teal)","var(--green)","var(--gold)","var(--navy)","var(--plum)",
+    "var(--teal)","var(--green)","var(--gold)","var(--navy)","var(--plum)","var(--slate)"];
+  const barsInner = propKeys.map((k, i) =>
+    barRow(k, bars[k], colors[i % colors.length])
+  ).join("");
+  const front = `<div class="preview-bars">${barsInner}</div>
+    <p class="card-desc">Props: ${propKeys.join(", ")}</p>`;
+  const card = flipCard("s1-props", "240px", "cat-teal", "FlipCard Props", front, "FlipCardProps -- Interface", props);
+  return sectionShell(1, "FlipCard -- Reusable Component",
+    `The shared component at <code>${esc(ENV.PATHS.FLIPCARD_COMPONENT)}</code>. Accepts front/back slots, optional backJson for auto-rendered JSON, Copy JSON button, and controlled/uncontrolled flip state.`,
+    [["teal", ENV.PATHS.FLIPCARD_COMPONENT], ["navy", "Exported from " + ENV.PATHS.FLIPCARD_EXPORT], ["green", "Click anywhere"]],
+    `<div class="flip-grid">${card}</div>`);
+}
+
+// ── Section 2: Adaptive Cards Gallery (live-fetched samples) ─────────────────
+function renderS2() {
+  // Render placeholder cards; actual JSON populated via API fetch
+  const sampleKeys = Object.keys(ENV.AC_SAMPLES);
+  const names = { FLIGHT_ITINERARY: "Flight Itinerary", WEATHER_COMPACT: "Weather Forecast",
+    EXPENSE_REPORT: "Expense Report", STOCK_UPDATE: "Stock Update",
+    FOOD_ORDER: "Food Order", ACTIVITY_UPDATE: "Activity Update",
+    INPUT_FORM: "Input Form", RESTAURANT: "Restaurant" };
+  const cards = sampleKeys.map(key => {
+    const name = names[key] || key;
+    const front = `<div class="ac-host light" id="s2-ac-${key}"><div class="ac-loading">Loading from GitHub...</div></div>
+      <div class="tag-row"><span class="tag">Scenarios</span><span class="tag">v${ENV.AC_VERSION}</span></div>`;
+    return flipCard("s2-" + key, "260px", "cat-gold", name + ` <span class="tag" style="margin-left:6px">v${ENV.AC_VERSION}</span>`,
+      front, name + " -- JSON", { _loading: true },
+      { headerBadge: "" });
+  }).join("");
+  return sectionShell(2, "Adaptive Cards Gallery",
+    `${ENV.DEFAULTS.AC_SAMPLE_COUNT} official AdaptiveCards samples rendered from <a href="${esc(ENV.APIS.GITHUB_RAW_BASE)}" style="color:var(--teal)">${esc(ENV.APIS.GITHUB_RAW_BASE)}</a> on front, raw JSON source on back. Fetched live from the microsoft/AdaptiveCards repo.`,
+    [["gold", ENV.PATHS.AC_GALLERY_PAGE], ["teal", "CardTile component"], ["green", "Click anywhere"]],
+    `<div class="flip-grid">${cards}</div>`);
+}
+
+// ── Section 3: Adaptive Tiles Library ────────────────────────────────────────
+function renderS3() {
+  const scores = ENV.DEFAULTS.BIC_SCORES;
+  // Pie/Donut chart schema using ColumnSet wedge widths + Power Fx expressions
+  const pieBack = {
+    type: "AdaptiveCard", version: ENV.AC_VERSION,
+    $schema: ENV.APIS.AC_SCHEMA_URL,
+    _note: "Donut chart simulated via ColumnSet proportional widths. In Copilot Studio, values are bound via Power Fx: Topic.PassRate, Topic.FailRate, Topic.SkipRate",
+    body: [
+      { type: "TextBlock", text: "EVALUATION BREAKDOWN", size: "Small", weight: "Bolder", color: "Accent" },
+      { type: "TextBlock", text: "${Topic.EvalTitle}", size: "Medium", weight: "Bolder", spacing: "Small" },
+      { type: "ColumnSet", spacing: "Medium", columns: [
+        { type: "Column", width: "stretch", items: [
+          { type: "TextBlock", text: "${Topic.TotalRuns}", size: "ExtraLarge", weight: "Bolder" },
+          { type: "TextBlock", text: "Total Runs", size: "Small", isSubtle: true, spacing: "None" },
+        ]},
+        { type: "Column", width: "stretch", items: [
+          { type: "TextBlock", text: "${Text(Topic.PassRate, \"#%\")}", size: "ExtraLarge", weight: "Bolder", color: "Good" },
+          { type: "TextBlock", text: "Pass Rate", size: "Small", isSubtle: true, spacing: "None" },
+        ]},
+      ]},
+      { type: "TextBlock", text: "BREAKDOWN BY RESULT", size: "Small", weight: "Bolder", color: "Accent", spacing: "Medium" },
+      { type: "ColumnSet", columns: [
+        { type: "Column", width: "${Topic.Passed}", style: "good", minHeight: "24px", items: [
+          { type: "TextBlock", text: "${Topic.Passed} passed", size: "Small", weight: "Bolder" },
+        ]},
+        { type: "Column", width: "${Topic.Failed}", style: "attention", minHeight: "24px", items: [
+          { type: "TextBlock", text: "${Topic.Failed} failed", size: "Small", weight: "Bolder" },
+        ]},
+        { type: "Column", width: "${Topic.Skipped}", style: "warning", minHeight: "24px", items: [
+          { type: "TextBlock", text: "${Topic.Skipped} skipped", size: "Small" },
+        ]},
+      ]},
+      { type: "FactSet", spacing: "Medium", facts: [
+        { title: "Pass Rate", value: "${Text(Topic.PassRate, \"#%\")}" },
+        { title: "Fail Rate", value: "${Text(Topic.FailRate, \"#%\")}" },
+        { title: "Last Run", value: "{{DATE(${Topic.LastRunDate}, SHORT)}}" },
+      ]},
+    ],
+  };
+  const pieFront = `<div class="ac-host light" id="s3-ac-kpi"><div class="ac-loading">Rendering...</div></div>
+    <div class="tag-row"><span class="tag">donut</span><span class="tag">Power Fx</span><span class="tag">Topic.PassRate</span></div>`;
+  // Horizontal bar chart using ColumnSet width proportions + Power Fx
+  const barBack = {
+    type: "AdaptiveCard", version: ENV.AC_VERSION,
+    _note: "Horizontal bar chart via ColumnSet proportional widths. Power Fx: Topic.BICScores collection with .dim and .score fields",
+    body: [
+      { type: "TextBlock", text: "BIC Scores by Dimension", size: "Medium", weight: "Bolder" },
+      { type: "TextBlock", text: "${Topic.EvalConfigName}", size: "Small", isSubtle: true, spacing: "None" },
+      ...Object.entries(scores).map(([dim, pct]) => ({
+        type: "ColumnSet", spacing: "Small", columns: [
+          { type: "Column", width: "80px", items: [
+            { type: "TextBlock", text: dim, size: "Small", weight: "Bolder" },
+          ]},
+          { type: "Column", width: String(pct), style: "accent", minHeight: "20px", items: [
+            { type: "TextBlock", text: pct + "%", size: "Small", weight: "Bolder", color: "Light" },
+          ]},
+          { type: "Column", width: String(100 - pct), items: [] },
+        ],
+      })),
+      { type: "TextBlock", text: "Source: ${Topic.EvalConfigName} · ${Topic.EvalRunDate}", size: "Small", isSubtle: true, spacing: "Medium" },
+    ],
+  };
+  const barFront = `<div class="ac-host light" id="s3-ac-bar"><div class="ac-loading">Rendering...</div></div>
+    <div class="tag-row"><span class="tag">bar-chart</span><span class="tag">Power Fx</span><span class="tag">Topic.BICScores</span></div>`;
+  const card1 = flipCard("s3-kpi", "320px", "cat-plum",
+    `Donut Chart <span class="badge badge-plum" style="margin-left:6px;font-size:9px;padding:2px 6px">Analytics</span>`,
+    pieFront, "Donut Chart -- Power Fx Schema", pieBack);
+  const card2 = flipCard("s3-bar", "320px", "cat-plum",
+    `Horizontal Bar Chart <span class="badge badge-plum" style="margin-left:6px;font-size:9px;padding:2px 6px">Analytics</span>`,
+    barFront, "Bar Chart -- Power Fx Schema", barBack);
+  return sectionShell(3, "Adaptive Tiles Library",
+    `${ENV.DEFAULTS.TILE_COUNT} tile schemas with preview rendering. Uses <code>\${Topic.*}</code> Power Fx expressions for data binding at runtime; values shown here are design-time defaults.`,
+    [["plum", ENV.PATHS.TILES_LIBRARY_PAGE], ["teal", "TileCard component"], ["green", "Click anywhere"]],
+    `<div class="flip-grid">${card1}${card2}</div>`);
+}
+
+// ── Section 4: LiveTile Studio Canvas (weather tile uses Open-Meteo) ─────────
+function renderS4() {
+  const kpiFront = `<div style="text-align:center;padding-top:20px">
+    <div style="font-size:36px;font-weight:700;color:#e2e8f0" id="s4-kpi-val">${ENV.DEFAULTS.EVAL_CONFIGS}</div>
+    <div style="font-size:11px;color:#64748b;margin-top:2px">Eval Configs</div>
+    <div style="font-size:11px;color:#22d3ee;margin-top:4px">${esc(ENV.DEFAULTS.EVAL_DELTA)}</div>
+  </div>`;
+  const kpiBack = {
+    id: "m1", type: "kpi",
+    grid: { col: 1, row: 2, colSpan: 3, rowSpan: 2 },
+    content: { label: "Eval Configs", value: String(ENV.DEFAULTS.EVAL_CONFIGS), delta: ENV.DEFAULTS.EVAL_DELTA.split(" ")[0], up: true },
+  };
+  const weatherFront = `<div style="text-align:center;padding-top:12px">
+    <div style="font-size:32px;font-weight:700;color:#e2e8f0" id="s4-weather-temp">--${ENV.WEATHER.UNIT_LABEL}</div>
+    <div style="font-size:11px;color:#64748b;margin-top:2px" id="s4-weather-desc">Loading from Open-Meteo...</div>
+    <div style="font-size:10px;color:#94a3b8;margin-top:2px">${esc(ENV.WEATHER.LOCATION_NAME)}</div>
+    <div style="display:flex;justify-content:space-around;margin-top:10px;font-size:10px;color:#64748b" id="s4-weather-forecast">...</div>
+  </div>`;
+  const weatherBack = {
+    _note: "Populated from Open-Meteo API",
+    api: ENV.APIS.OPEN_METEO,
+    params: { latitude: ENV.WEATHER.LATITUDE, longitude: ENV.WEATHER.LONGITUDE, temperature_unit: ENV.WEATHER.TEMP_UNIT },
+    current_weather: null,
+  };
+  const barFront = barsHtml(ENV.DEFAULTS.BIC_SCORES, "#3b82f6", "color:#64748b");
+  const barBack = {
+    id: "bar", type: "bar-chart",
+    grid: { col: 1, row: 4, colSpan: 7, rowSpan: 4 },
+    content: { dataKey: "score", xKey: "dim", data: "BIC_DATA", title: "BIC Scores by Dimension" },
+  };
+  const darkOpts = {
+    frontStyle: "background:linear-gradient(135deg,#08090f,#0f1120)",
+    headerStyle: "border-color:rgba(255,255,255,0.08)",
+    nameStyle: "color:#94a3b8",
+    hintStyle: "color:#4b5563",
+  };
+  const card1 = flipCard("s4-kpi", "200px", "cat-navy",
+    "Eval Configs", kpiFront, "KPI Tile -- Schema", kpiBack,
+    { ...darkOpts, headerBadge: '<span class="badge badge-navy" style="font-size:8px;padding:1px 6px;margin-right:6px">KPI</span>' });
+  const card2 = flipCard("s4-weather", "200px", "cat-navy",
+    "Live Weather", weatherFront, "Weather Tile -- Open-Meteo API", weatherBack,
+    { ...darkOpts, headerBadge: '<span class="badge badge-navy" style="font-size:8px;padding:1px 6px;margin-right:6px">LIVE API</span>' });
+  const card3 = flipCard("s4-bar", "200px", "cat-navy",
+    "BIC Scores", barFront, "Bar Chart -- Schema", barBack,
+    { ...darkOpts, headerBadge: '<span class="badge badge-navy" style="font-size:8px;padding:1px 6px;margin-right:6px">BAR-CHART</span>' });
+  return sectionShell(4, "LiveTile Studio Canvas",
+    `Individual tiles within the slide builder canvas. Each tile renders its content on the front and its adaptive-slide schema on the back. The weather tile fetches live data from <a href="${esc(ENV.APIS.OPEN_METEO)}" style="color:var(--teal)">Open-Meteo</a> (no API key).`,
+    [["navy", ENV.PATHS.LIVETILE_LIBRARY], ["teal", "LiveTile component"], ["gold", "JSON badge trigger"]],
+    `<div class="flip-grid">${card1}${card2}${card3}</div>`);
+}
+
+// ── Section 5: Component Showcase ────────────────────────────────────────────
+function renderS5() {
+  const helloFront = `<div class="ac-host light" id="s5-ac-hello"><div class="ac-loading">Rendering...</div></div>
+    <p class="card-desc">A simple Adaptive Card with a text block.</p>`;
+  const helloBack = { type: "AdaptiveCard", version: ENV.AC_VERSION, body: [{ type: "TextBlock", text: "Hello World" }] };
+  const dashFront = `<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#60a5fa;margin-bottom:4px">Dashboard Template</div>
+    <div style="font-size:13px;font-weight:700;color:#e2e8f0">${esc(ENV.DASHBOARD.name)}</div>
+    <div style="font-size:11px;color:#64748b;margin-top:4px">${ENV.DASHBOARD.columns}x${ENV.DASHBOARD.rows} grid, ${ENV.DASHBOARD.tiles} tiles, ${esc(ENV.DASHBOARD.theme)}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px">
+      ${'<div style="height:20px;background:rgba(59,130,246,0.25);border-radius:4px"></div>'.repeat(4)}
+    </div>`;
+  const dashBack = { template: "dashboard", theme: ENV.DASHBOARD.theme, tiles: ENV.DASHBOARD.tiles, grid: { columns: ENV.DASHBOARD.columns, rows: ENV.DASHBOARD.rows } };
+  const card1 = flipCard("s5-hello", "200px", "cat-green", "Hello World Card", helloFront, "Card Schema", helloBack);
+  const card2 = flipCard("s5-dash", "200px", "cat-green", "Dashboard Template", dashFront, "Dashboard Template", dashBack,
+    { frontStyle: "background:linear-gradient(135deg,#0f172a,#1e293b);border-color:rgba(255,255,255,0.08)", headerStyle: "border-color:rgba(255,255,255,0.08)", nameStyle: "color:#94a3b8", hintStyle: "color:#475569" });
+  return sectionShell(5, "Component Showcase",
+    `Five demo variations in ${ENV.PATHS.COMPONENT_SHOWCASE} demonstrating FlipCard with backJson, custom back, dark theme cards, and controlled state.`,
+    [["green", ENV.PATHS.COMPONENT_SHOWCASE], ["teal", "5 demo variants"], ["green", "Click anywhere"]],
+    `<div class="flip-grid">${card1}${card2}</div>`);
+}
+
+// ── Section 6: Discover Templates ────────────────────────────────────────────
+function renderS6() {
+  const t = ENV.TEMPLATES.FAQ_CHATBOT;
+  // Proper FAQ Adaptive Card with ShowCard Q&A expandable answers + Power Fx
+  const faqAC = {
+    type: "AdaptiveCard", version: ENV.AC_VERSION,
+    $schema: ENV.APIS.AC_SCHEMA_URL,
+    _note: "FAQ agent card template. Questions bound via Power Fx: Topic.FAQItems collection. ShowCard reveals each answer inline.",
+    body: [
+      { type: "Container", style: "emphasis", bleed: true, items: [
+        { type: "TextBlock", text: "FAQ ASSISTANT", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+        { type: "TextBlock", text: "${Topic.AgentName}", size: "Large", weight: "Bolder", spacing: "Small" },
+        { type: "TextBlock", text: "${Topic.AgentDescription}", wrap: true, isSubtle: true, spacing: "Small" },
+      ]},
+      { type: "TextBlock", text: "Frequently Asked Questions", size: "Medium", weight: "Bolder", spacing: "Medium" },
+      { type: "TextBlock", text: "Select a question to see the answer. Can't find what you need? Type your question below.", size: "Small", isSubtle: true, wrap: true },
+    ],
+    actions: [
+      { type: "Action.ShowCard", title: "What is Copilot Studio?", card: {
+        type: "AdaptiveCard", body: [
+          { type: "TextBlock", text: "Microsoft Copilot Studio is a low-code platform for building AI-powered conversational agents. It integrates with Power Platform, Dataverse, and Microsoft 365 to create agents that can answer questions, automate tasks, and connect to enterprise data.", wrap: true },
+          { type: "TextBlock", text: "Source: ${Topic.KBSource}", size: "Small", isSubtle: true, spacing: "Small" },
+        ],
+      }},
+      { type: "Action.ShowCard", title: "How do I connect a knowledge source?", card: {
+        type: "AdaptiveCard", body: [
+          { type: "TextBlock", text: "Navigate to Knowledge in the left panel, click 'Add knowledge', then choose from SharePoint sites, Dataverse tables, uploaded files, or public websites. The agent will use generative answers grounded in your selected sources.", wrap: true },
+          { type: "TextBlock", text: "Source: ${Topic.KBSource}", size: "Small", isSubtle: true, spacing: "Small" },
+        ],
+      }},
+      { type: "Action.ShowCard", title: "What authentication modes are supported?", card: {
+        type: "AdaptiveCard", body: [
+          { type: "TextBlock", text: "Copilot Studio supports three authentication modes: No authentication (public), Authenticate with Microsoft (Entra ID SSO), and Manual authentication (OAuth 2.0 with any identity provider). For enterprise agents, 'Authenticate with Microsoft' is recommended.", wrap: true },
+          { type: "FactSet", facts: [
+            { title: "Recommended", value: "Authenticate with Microsoft" },
+            { title: "Schema ref", value: "BotAuthenticationConfiguration" },
+          ]},
+        ],
+      }},
+      { type: "Action.ShowCard", title: "Ask a different question...", card: {
+        type: "AdaptiveCard", body: [
+          { type: "Input.Text", id: "userQuestion", label: "Type your question", isMultiline: true, placeholder: "e.g., How do I publish to Teams?" },
+        ], actions: [
+          { type: "Action.Submit", title: "Send", data: { action: "faq_freeform", source: "${Topic.AgentName}" } },
+        ],
+      }},
+    ],
+  };
+  const front = `<div class="ac-host light" id="s6-ac-faq"><div class="ac-loading">Rendering FAQ card...</div></div>
+    <div class="tag-row">${t.capabilities.map(c => `<span class="tag">${esc(c)}</span>`).join("")}</div>`;
+  const card = flipCard("s6-faq", "380px", "cat-red",
+    `${esc(t.name)} <span class="badge badge-slate" style="margin-left:6px;font-size:9px;padding:2px 6px">${esc(t.type)}</span>`,
+    front, t.name + " -- Power Fx Template", faqAC);
+  return sectionShell(6, "Discover Templates",
+    `Gallery cards on the Discover page wrapped with FlipCard. Front face renders a live FAQ Adaptive Card with <code>Action.ShowCard</code> Q&A pattern and <code>\${Topic.*}</code> Power Fx bindings.`,
+    [["red", ENV.PATHS.DISCOVER_PAGE], ["teal", "FlipCard wrapping CopilotCard"], ["gold", "Front click-through"]],
+    `<div class="flip-grid">${card}</div>`);
+}
+
+// ── Section 7: Evaluation Tiles ──────────────────────────────────────────────
+function renderS7() {
+  const evalFront = `<div class="kpi">
+      <span class="value" style="color:var(--plum)">${ENV.DEFAULTS.EVAL_CONFIGS}</span>
+      <span class="delta up">${esc(ENV.DEFAULTS.EVAL_DELTA)}</span>
+    </div>
+    <p class="card-desc">Native Copilot Studio evaluation configurations in this environment.</p>`;
+  const evalBack = {
+    id: "eval-configs", label: "Eval Configs", scopeLabel: "Environment",
+    dataStream: ENV.DATAVERSE.EVAL_CONFIG_STREAM, value: ENV.DEFAULTS.EVAL_CONFIGS,
+    description: "Native Copilot Studio evaluation configurations",
+    preview: { entity: ENV.DATAVERSE.EVAL_CONFIG_ENTITY, count: ENV.DEFAULTS.EVAL_CONFIGS, latestRun: new Date().toISOString() },
+  };
+  const passFront = `<div class="kpi">
+      <span class="value" style="color:var(--green)">${ENV.DEFAULTS.PASS_RATE}<span style="font-size:16px;color:var(--text-dim)">%</span></span>
+      <span class="delta up">${esc(ENV.DEFAULTS.PASS_RATE_DELTA)}</span>
+    </div>
+    <p class="card-desc">Aggregate pass rate across all evaluation runs and models.</p>`;
+  const passBack = {
+    id: "pass-rate", label: "Pass Rate", scopeLabel: "Combined",
+    dataStream: ENV.DATAVERSE.EVAL_RUNS_STREAM, value: ENV.DEFAULTS.PASS_RATE, suffix: "%",
+    description: "Aggregate pass rate across all evaluation runs",
+    preview: { totalRuns: ENV.DEFAULTS.TOTAL_RUNS, passed: ENV.DEFAULTS.PASSED, failed: ENV.DEFAULTS.FAILED, weekOverWeekDelta: ENV.DEFAULTS.PASS_RATE_DELTA },
+  };
+  const card1 = flipCard("s7-eval", "180px", "cat-plum",
+    `Eval Configs <span class="badge badge-slate" style="margin-left:6px;font-size:9px;padding:2px 6px">Environment</span>`,
+    evalFront, "Eval Configs -- Schema", evalBack);
+  const card2 = flipCard("s7-pass", "180px", "cat-plum",
+    `Pass Rate <span class="badge badge-slate" style="margin-left:6px;font-size:9px;padding:2px 6px">Combined</span>`,
+    passFront, "Pass Rate -- Schema", passBack);
+  return sectionShell(7, "Evaluation Tiles",
+    `Evaluation KPI tiles on ${ENV.PATHS.EVAL_PAGE}. Previously showed JSON in hover tooltips -- now uses FlipCard for a persistent, copyable schema view. Front click selects the tile for detail expansion.`,
+    [["plum", ENV.PATHS.EVAL_PAGE], ["teal", "FlipCard wrapping eval button"], ["gold", "Front click-through"]],
+    `<div class="flip-grid">${card1}${card2}</div>`);
+}
+
+// ── Section 8: Security -- Summary + Portfolio Scope + Settings to Apply ──────
+function renderS8() {
+  // ── 8A: Summary Cards (existing) ───────────────────────────────────────────
+  const metrics = [
+    { id: "total", label: "Total Agents", val: ENV.DEFAULTS.TOTAL_AGENTS, color: "var(--text)", cat: "cat-slate",
+      json: { metric: "total_agents", value: ENV.DEFAULTS.TOTAL_AGENTS, scope: "environment" } },
+    { id: "noauth", label: "No Authentication", val: ENV.DEFAULTS.NO_AUTH_AGENTS, color: "var(--red)", cat: "",
+      catStyle: "border-left:3px solid var(--red)",
+      json: { metric: "no_auth", value: ENV.DEFAULTS.NO_AUTH_AGENTS, severity: ENV.SECURITY.NO_AUTH_SEVERITY, recommendation: ENV.SECURITY.NO_AUTH_RECOMMENDATION } },
+    { id: "msauth", label: "Microsoft Auth", val: ENV.DEFAULTS.MS_AUTH_AGENTS, color: "var(--text)", cat: "cat-green",
+      json: { metric: "microsoft_auth", value: ENV.DEFAULTS.MS_AUTH_AGENTS, authMode: ENV.SECURITY.AUTH_MODE_LABEL } },
+    { id: "websec", label: "Web Security Off", val: ENV.DEFAULTS.WEB_SEC_OFF, color: "var(--red)", cat: "",
+      catStyle: "border-left:3px solid var(--red)",
+      json: { metric: "web_security_disabled", value: ENV.DEFAULTS.WEB_SEC_OFF, field: ENV.SECURITY.WEB_SEC_FIELD, recommendation: ENV.SECURITY.WEB_SEC_RECOMMENDATION } },
+  ];
+  const summaryCards = metrics.map(m => {
+    const front = `<div style="font-size:28px;font-weight:700;color:${m.color}">${m.val}</div>`;
+    const catClass = m.cat || "";
+    const extraStyle = m.catStyle || "";
+    return `
+    <div class="flip-card" id="s8-${m.id}" tabindex="0" role="button" aria-pressed="false" aria-label="${esc(m.label)} -- ${esc(ENV.FLIP_HINT)}">
+      <div class="flip-inner" style="min-height:120px">
+        <div class="flip-front ${catClass}" ${extraStyle ? `style="${extraStyle}"` : ""}>
+          <div class="header"><span class="name" style="font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)">${esc(m.label)}</span><span class="hint">Flip</span></div>
+          <div class="body">${front}</div>
+        </div>
+        <div class="flip-back">
+          <div class="header"><span class="name">${esc(m.label)}</span><button class="copy-btn" aria-label="${esc(ENV.COPY_LABEL)}">${esc(ENV.COPY_LABEL)}</button></div>
+          <div class="body"><pre>${esc(JSON.stringify(m.json, null, 2))}</pre></div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // ── 8B: Portfolio Scope (3DKG agent layers) ────────────────────────────────
+  const ps = ENV.PORTFOLIO_SCOPE;
+  const layerCards = ps.LAYERS.map(layer => {
+    // Build the full 3DKG-style Adaptive Card JSON for the back face
+    const acJson = {
+      $schema: ps.AC_SCHEMA,
+      type: "AdaptiveCard",
+      version: ps.AC_VERSION,
+      body: [
+        { type: "Container", style: "emphasis", bleed: true, items: [
+          { type: "TextBlock", text: "AGENT LAYER", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+          { type: "TextBlock", text: layer.name, size: "ExtraLarge", weight: "Bolder", wrap: true, spacing: "Small" },
+          { type: "TextBlock", text: layer.role, size: "Medium", wrap: true, isSubtle: true, spacing: "Small" },
+        ]},
+        { type: "ColumnSet", spacing: "Medium", columns: [
+          { type: "Column", width: "stretch", items: [
+            { type: "TextBlock", text: "Degree", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+            { type: "TextBlock", text: String(layer.degree), size: "Large", weight: "Bolder", spacing: "None" },
+          ]},
+          { type: "Column", width: "stretch", items: [
+            { type: "TextBlock", text: "Schema", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+            { type: "TextBlock", text: layer.schema, size: "Large", weight: "Bolder", spacing: "None" },
+          ]},
+          { type: "Column", width: "stretch", items: [
+            { type: "TextBlock", text: "Signals", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+            { type: "TextBlock", text: String(layer.signals), size: "Large", weight: "Bolder", spacing: "None" },
+          ]},
+        ]},
+        { type: "Container", id: "connectedSection", items: [
+          { type: "TextBlock", text: "CONNECTED NODES", size: "Small", weight: "Bolder", color: "Accent" },
+          { type: "FactSet", facts:
+            layer.connections.map(c => ({ title: c.rel, value: c.target }))
+            .concat(layer.signal_names.map(s => ({ title: "exposes_signal", value: s })))
+          },
+        ]},
+        { type: "Container", id: "metaSection", items: [
+          { type: "TextBlock", text: "METADATA", size: "Small", weight: "Bolder", color: "Accent" },
+          { type: "FactSet", facts: [
+            { title: "Schema cluster", value: layer.schema },
+            { title: "Live signals", value: String(layer.signals) },
+            { title: "Cluster", value: layer.cluster },
+            { title: "Degree", value: String(layer.degree) },
+            { title: "Source file", value: layer.card_file },
+          ]},
+        ]},
+      ],
+      actions: [
+        { type: "Action.OpenUrl", title: "Open in 3DKG Viewer", url: ps.VIEWER_URL_BASE + encodeURIComponent(layer.name) },
+      ],
+    };
+    const front = `<div class="ac-host light" id="s8p-ac-${layer.id}"><div class="ac-loading">Rendering ${esc(layer.name)}...</div></div>`;
+    return flipCard("s8p-" + layer.id, "320px", "cat-" + layer.color,
+      layer.name, front, layer.name + " -- 3DKG Adaptive Card", acJson);
+  }).join("");
+
+  // ── 8C: Security Settings to Apply ─────────────────────────────────────────
+  const settingsCards = ENV.SECURITY_SETTINGS.map(s => {
+    const stateLabel = s.state === "ok" ? "Compliant" : s.state === "warn" ? "Review" : "Action Required";
+    const currentStr = typeof s.current_value === "boolean" ? (s.current_value ? "Enabled" : "Disabled") : String(s.current_value);
+    const targetStr = typeof s.target_value === "boolean" ? (s.target_value ? "Enabled" : "Disabled") : String(s.target_value);
+    const front = `<div class="setting-front">
+        <span class="setting-state ${s.state}"><span class="dot"></span>${stateLabel}</span>
+        <p class="card-desc" style="margin-top:2px">${esc(s.description)}</p>
+        <span class="setting-field">${esc(s.field)}</span>
+        <div class="tag-row" style="margin-top:2px">
+          <span class="tag">${esc(s.layer)}</span>
+          <span class="tag">${esc(s.schema_ref)}</span>
+        </div>
+      </div>`;
+    const backJson = {
+      setting: s.id,
+      name: s.name,
+      field: s.field,
+      current_value: s.current_value,
+      target_value: s.target_value,
+      state: s.state,
+      layer: s.layer,
+      schema_ref: s.schema_ref,
+      recommendation: s.recommendation,
+      impact: s.impact,
+      assessed_at: new Date().toISOString(),
+    };
+    const catColor = s.state === "ok" ? "cat-green" : s.state === "warn" ? "cat-gold" : "";
+    const catStyle = s.state === "critical" ? "border-left:3px solid var(--red)" : "";
+    return `
+    <div class="flip-card" id="s8s-${s.id}" tabindex="0" role="button" aria-pressed="false" aria-label="${esc(s.name)} -- ${esc(ENV.FLIP_HINT)}">
+      <div class="flip-inner" style="min-height:220px">
+        <div class="flip-front ${catColor}" ${catStyle ? `style="${catStyle}"` : ""}>
+          <div class="header">
+            <span class="name">${esc(s.name)}</span>
+            <span class="hint">${esc(ENV.FLIP_HINT)}</span>
+          </div>
+          <div class="body">${front}</div>
+        </div>
+        <div class="flip-back">
+          <div class="header"><span class="name">${esc(s.name)} -- Config</span><button class="copy-btn" aria-label="${esc(ENV.COPY_LABEL)}">${esc(ENV.COPY_LABEL)}</button></div>
+          <div class="body"><pre>${esc(JSON.stringify(backJson, null, 2))}</pre></div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // ── Compose the full section ───────────────────────────────────────────────
+  const okCount = ENV.SECURITY_SETTINGS.filter(s => s.state === "ok").length;
+  const warnCount = ENV.SECURITY_SETTINGS.filter(s => s.state === "warn").length;
+  const critCount = ENV.SECURITY_SETTINGS.filter(s => s.state === "critical").length;
+
+  const inner = `
+    <div class="subsection">
+      <div class="subsection-header">
+        <span class="subsection-label">8A</span>
+        <span class="subsection-title">Summary</span>
+      </div>
+      <div class="flip-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${summaryCards}</div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-header">
+        <span class="subsection-label">8B</span>
+        <span class="subsection-title">Portfolio Scope</span>
+        <span class="badge badge-navy">${ps.LAYERS.length} layers</span>
+        <span class="badge badge-teal">${ps.LAYERS.reduce((a, l) => a + l.signals, 0)} signals</span>
+      </div>
+      <p class="subsection-desc">Agent layers in scope for security review. Each card shows live 3DKG layer metrics on front; the full Adaptive Card JSON (v${ps.AC_VERSION}) on back -- identical to the cards served by the 3DKG viewer.</p>
+      <div class="flip-grid">${layerCards}</div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-header">
+        <span class="subsection-label">8C</span>
+        <span class="subsection-title">Security Settings to Apply</span>
+        <span class="badge badge-green">${okCount} ok</span>
+        ${warnCount ? `<span class="badge badge-gold">${warnCount} review</span>` : ""}
+        ${critCount ? `<span class="badge badge-red">${critCount} critical</span>` : ""}
+      </div>
+      <p class="subsection-desc">Actionable security configuration for each agent. Front face shows current state and field path; back face shows the recommended configuration JSON with impact assessment.</p>
+      <div class="flip-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${settingsCards}</div>
+    </div>`;
+
+  return sectionShell(8, "Security Admin",
+    `Comprehensive security view for ${ENV.PATHS.SECURITY_PAGE}. Summary metrics, portfolio scope across 3DKG agent layers, and actionable security settings with compliance state assessment.`,
+    [["red", ENV.PATHS.SECURITY_PAGE], ["teal", "SummaryCard + FlipCard"], ["navy", "3DKG Layer Cards"], ["green", "Settings Config"]],
+    inner);
+}
+
+// ── Architecture Index ───────────────────────────────────────────────────────
+function renderArchTable() {
+  const surfaces = [
+    { name: "Reusable FlipCard", file: ENV.PATHS.FLIPCARD_COMPONENT, comp: "FlipCard", front: "Any ReactNode", back: "JSON or custom ReactNode", trigger: "Click anywhere", color: "teal" },
+    { name: "Adaptive Cards Gallery", file: ENV.PATHS.AC_GALLERY_PAGE, comp: "CardTile", front: "Rendered AC (SDK)", back: "Full card JSON source", trigger: "Click anywhere", color: "gold" },
+    { name: "Adaptive Tiles Library", file: ENV.PATHS.TILES_LIBRARY_PAGE, comp: "TileCard", front: "Tile preview + badge", back: "Full tile schema JSON", trigger: "Click anywhere", color: "plum" },
+    { name: "LiveTile Studio Canvas", file: ENV.PATHS.LIVETILE_LIBRARY, comp: "LiveTile", front: "Rendered tile in grid", back: "Individual tile schema", trigger: "JSON badge on hover", color: "navy" },
+    { name: "Component Showcase", file: ENV.PATHS.COMPONENT_SHOWCASE, comp: "FlipCard demos", front: "5 demo variants", back: "JSON + custom back", trigger: "Click anywhere", color: "green" },
+    { name: "Discover Templates", file: ENV.PATHS.DISCOVER_PAGE, comp: "FlipCard + CopilotCard", front: "FAQ card (AC SDK)", back: "Power Fx template", trigger: "Front click-through", color: "red" },
+    { name: "Evaluation Tiles", file: ENV.PATHS.EVAL_PAGE, comp: "FlipCard + eval btn", front: "KPI tile (value, scope)", back: "EvaluationTile schema", trigger: "Front click-through", color: "plum" },
+    { name: "Security Summary", file: ENV.PATHS.SECURITY_PAGE, comp: "SummaryCard + FlipCard", front: "Stat card (severity)", back: "Audit metric + recs", trigger: "Click to flip", color: "red" },
+    { name: "Portfolio Scope", file: ENV.PATHS.SECURITY_PAGE, comp: "LayerCard + FlipCard", front: "3DKG layer AC (SDK)", back: "Full AC JSON", trigger: "Click to flip", color: "navy" },
+    { name: "Security Settings", file: ENV.PATHS.SECURITY_PAGE, comp: "SettingCard + FlipCard", front: "State + field + desc", back: "Config JSON + impact", trigger: "Click to flip", color: "slate" },
+  ];
+  const archCards = surfaces.map((s, i) => {
+    const front = `<div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--teal)">${esc(s.file)}</div>
+        <div style="font-size:12px;color:var(--text-dim)"><strong style="color:var(--text)">${esc(s.comp)}</strong></div>
+        <div style="display:flex;gap:8px;font-size:11px;color:var(--text-dim)">
+          <span><strong>Front:</strong> ${esc(s.front)}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim)">
+          <span><strong>Back:</strong> ${esc(s.back)}</span>
+        </div>
+        <div class="tag-row"><span class="tag">${esc(s.trigger)}</span></div>
+      </div>`;
+    const backJson = {
+      surface: s.name,
+      file: s.file,
+      component: s.comp,
+      frontContent: s.front,
+      backContent: s.back,
+      trigger: s.trigger,
+      sectionIndex: i + 1,
+      totalSurfaces: surfaces.length,
+    };
+    return flipCard("arch-" + i, "180px", "cat-" + s.color,
+      s.name, front, s.name + " -- Surface", backJson);
+  }).join("");
+  return sectionShell("A", "Architecture Index",
+    `Complete mapping of all ${surfaces.length} flip card surfaces across the Agent Studio codebase. Each tile flips to show its surface metadata JSON.`,
+    [["navy", surfaces.length + " surfaces"], ["teal", "Click to inspect"]],
+    `<div class="flip-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">${archCards}</div>`,
+    { numStyle: "background:var(--navy)" });
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BOOT -- Render page, bind events, fire API calls
+// ═══════════════════════════════════════════════════════════════════════════════
+(function boot() {
+  // 1. Initial render from ENV defaults
+  app.innerHTML = renderHeader() + renderS1() + renderS2() + renderS3() + renderS4()
+    + renderS5() + renderS6() + renderS7() + renderS8() + renderArchTable();
+
+  // 2. Bind flip + copy events via delegation
+  app.addEventListener("click", (e) => {
+    // Copy button
+    const copyBtn = e.target.closest(".copy-btn");
+    if (copyBtn) {
+      e.stopPropagation();
+      const pre = copyBtn.closest(".flip-back").querySelector("pre");
+      if (!pre) return;
+      copyToClipboard(pre.textContent).then(() => {
+        const orig = copyBtn.textContent;
+        copyBtn.textContent = ENV.COPIED_LABEL;
+        setTimeout(() => copyBtn.textContent = orig, 1500);
+      });
+      return;
+    }
+    // Flip card toggle
+    const card = e.target.closest(".flip-card");
+    if (card) {
+      const pressed = card.getAttribute("aria-pressed") === "true";
+      card.setAttribute("aria-pressed", String(!pressed));
+    }
+  });
+
+  // Keyboard accessibility: Enter / Space to flip
+  app.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const card = e.target.closest(".flip-card");
+    if (card && e.target === card) {
+      e.preventDefault();
+      const pressed = card.getAttribute("aria-pressed") === "true";
+      card.setAttribute("aria-pressed", String(!pressed));
+    }
+  });
+
+  // 3. Fire API calls in parallel, hydrate when ready
+  hydrateGitHub();
+  hydrateWeather();
+  hydrateACSamples();
+  hydrateACRenderers();
+})();
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HYDRATION -- Update DOM with live API data
+// ═══════════════════════════════════════════════════════════════════════════════
+async function hydrateGitHub() {
+  const data = await API.fetchGitHubStats();
+  const starsEl = document.getElementById("stat-stars");
+  const issuesEl = document.getElementById("stat-issues");
+  if (starsEl) { starsEl.textContent = data ? formatNum(data.stars) : "N/A"; starsEl.classList.remove("loading"); }
+  if (issuesEl) { issuesEl.textContent = data ? formatNum(data.issues) : "N/A"; issuesEl.classList.remove("loading"); }
+}
+
+async function hydrateWeather() {
+  const data = await API.fetchWeather();
+  if (!data || !data.current_weather) return;
+  const cw = data.current_weather;
+  const tempEl = document.getElementById("s4-weather-temp");
+  const descEl = document.getElementById("s4-weather-desc");
+  const foreEl = document.getElementById("s4-weather-forecast");
+  if (tempEl) tempEl.textContent = Math.round(cw.temperature) + ENV.WEATHER.UNIT_LABEL;
+  if (descEl) descEl.textContent = wmoDesc(cw.weathercode);
+  if (foreEl && data.daily) {
+    const days = data.daily.time.slice(1, 5);
+    const temps = data.daily.temperature_2m_max.slice(1, 5);
+    foreEl.innerHTML = days.map((d, i) =>
+      `<span>${dayName(d)} ${Math.round(temps[i])}</span>`
+    ).join("");
+  }
+  // Update the back-face JSON with real data
+  const card = document.getElementById("s4-weather");
+  if (card) {
+    const pre = card.querySelector(".flip-back pre");
+    if (pre) {
+      const backData = {
+        api: ENV.APIS.OPEN_METEO,
+        location: ENV.WEATHER.LOCATION_NAME,
+        coordinates: { lat: ENV.WEATHER.LATITUDE, lon: ENV.WEATHER.LONGITUDE },
+        current_weather: cw,
+        daily_forecast: data.daily ? data.daily.time.slice(0, 5).map((d, i) => ({
+          date: d,
+          max_temp: data.daily.temperature_2m_max[i],
+          weathercode: data.daily.weathercode[i],
+        })) : null,
+        fetched_at: new Date().toISOString(),
+      };
+      pre.textContent = JSON.stringify(backData, null, 2);
+    }
+  }
+}
+
+async function hydrateACSamples() {
+  // Wait for SDK before fetching samples (they'll be rendered via SDK)
+  const sdkOk = await ensureACLoaded();
+  const entries = Object.entries(ENV.AC_SAMPLES);
+  const results = await Promise.allSettled(
+    entries.map(([key, path]) => API.fetchACSample(path).then(data => [key, data]))
+  );
+  for (const result of results) {
+    if (result.status !== "fulfilled" || !result.value) continue;
+    const [key, data] = result.value;
+    if (!data) continue;
+    // Render front face via AC SDK
+    const hostEl = document.getElementById("s2-ac-" + key);
+    if (hostEl && sdkOk) {
+      renderACInto(hostEl, data, "light");
+    } else if (hostEl) {
+      // Fallback: show element summary
+      const body = data.body || [];
+      hostEl.innerHTML = body.slice(0, 3).map(el =>
+        `<div style="font-size:12px;color:var(--text-dim);padding:2px 12px">[${esc(el.type || "?")}]</div>`
+      ).join("");
+    }
+    // Update back face JSON
+    const card = document.getElementById("s2-" + key);
+    if (card) {
+      const pre = card.querySelector(".flip-back pre");
+      if (pre) pre.textContent = JSON.stringify(data, null, 2);
+    }
+  }
+}
+
+/**
+ * Render static AC schemas into all ac-host containers (S3, S5, S8B).
+ * These schemas are known at render time, unlike S2 which fetches from GitHub.
+ */
+async function hydrateACRenderers() {
+  const sdkOk = await ensureACLoaded();
+  if (!sdkOk) return;
+
+  const D = ENV.DEFAULTS;
+  const scores = D.BIC_SCORES;
+
+  // S3: Donut/Pie chart tile -- proportional ColumnSet widths simulate chart segments
+  const s3kpi = document.getElementById("s3-ac-kpi");
+  if (s3kpi) {
+    renderACInto(s3kpi, {
+      type: "AdaptiveCard", version: ENV.AC_VERSION,
+      $schema: ENV.APIS.AC_SCHEMA_URL,
+      body: [
+        { type: "TextBlock", text: "EVALUATION BREAKDOWN", size: "Small", weight: "Bolder", color: "Accent" },
+        { type: "TextBlock", text: "All Configurations", size: "Medium", weight: "Bolder", spacing: "Small" },
+        { type: "ColumnSet", spacing: "Medium", columns: [
+          { type: "Column", width: "stretch", items: [
+            { type: "TextBlock", text: String(D.TOTAL_RUNS), size: "ExtraLarge", weight: "Bolder" },
+            { type: "TextBlock", text: "Total Runs", size: "Small", isSubtle: true, spacing: "None" },
+          ]},
+          { type: "Column", width: "stretch", items: [
+            { type: "TextBlock", text: D.PASS_RATE + "%", size: "ExtraLarge", weight: "Bolder", color: "Good" },
+            { type: "TextBlock", text: "Pass Rate", size: "Small", isSubtle: true, spacing: "None" },
+          ]},
+        ]},
+        { type: "TextBlock", text: "BREAKDOWN BY RESULT", size: "Small", weight: "Bolder", color: "Accent", spacing: "Medium" },
+        { type: "ColumnSet", columns: [
+          { type: "Column", width: String(D.PASSED), style: "good", minHeight: "24px", items: [
+            { type: "TextBlock", text: D.PASSED + " passed", size: "Small", weight: "Bolder" },
+          ]},
+          { type: "Column", width: String(D.FAILED), style: "attention", minHeight: "24px", items: [
+            { type: "TextBlock", text: D.FAILED + " failed", size: "Small", weight: "Bolder" },
+          ]},
+          { type: "Column", width: String(D.TOTAL_RUNS - D.PASSED - D.FAILED), style: "warning", minHeight: "24px", items: [] },
+        ]},
+        { type: "FactSet", spacing: "Medium", facts: [
+          { title: "Pass Rate", value: D.PASS_RATE + "%" },
+          { title: "Fail Rate", value: Math.round(D.FAILED / D.TOTAL_RUNS * 100) + "%" },
+          { title: "Delta", value: D.PASS_RATE_DELTA },
+        ]},
+      ],
+    }, "light");
+  }
+
+  // S3: Horizontal bar chart -- each row is a ColumnSet with proportional accent bar
+  const s3bar = document.getElementById("s3-ac-bar");
+  if (s3bar) {
+    renderACInto(s3bar, {
+      type: "AdaptiveCard", version: ENV.AC_VERSION,
+      body: [
+        { type: "TextBlock", text: "BIC Scores by Dimension", size: "Medium", weight: "Bolder" },
+        { type: "TextBlock", text: "Eval Config: Default", size: "Small", isSubtle: true, spacing: "None" },
+        ...Object.entries(scores).map(([dim, pct]) => ({
+          type: "ColumnSet", spacing: "Small", columns: [
+            { type: "Column", width: "80px", items: [
+              { type: "TextBlock", text: dim, size: "Small", weight: "Bolder" },
+            ]},
+            { type: "Column", width: String(pct), style: "accent", minHeight: "20px", items: [
+              { type: "TextBlock", text: pct + "%", size: "Small", weight: "Bolder" },
+            ]},
+            { type: "Column", width: String(100 - pct), items: [] },
+          ],
+        })),
+      ],
+    }, "light");
+  }
+
+  // S5: Hello World card
+  const s5hello = document.getElementById("s5-ac-hello");
+  if (s5hello) {
+    renderACInto(s5hello, {
+      type: "AdaptiveCard", version: ENV.AC_VERSION,
+      body: [{ type: "TextBlock", text: "Hello World", size: "Large" }],
+    }, "light");
+  }
+
+  // S6: FAQ Chatbot card (rendered via SDK with ShowCard actions)
+  const s6faq = document.getElementById("s6-ac-faq");
+  if (s6faq) {
+    const t = ENV.TEMPLATES.FAQ_CHATBOT;
+    renderACInto(s6faq, {
+      type: "AdaptiveCard", version: ENV.AC_VERSION, $schema: ENV.APIS.AC_SCHEMA_URL,
+      body: [
+        { type: "Container", style: "emphasis", bleed: true, items: [
+          { type: "TextBlock", text: "FAQ ASSISTANT", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+          { type: "TextBlock", text: t.name, size: "Large", weight: "Bolder", spacing: "Small" },
+          { type: "TextBlock", text: t.purpose, wrap: true, isSubtle: true, spacing: "Small" },
+        ]},
+        { type: "TextBlock", text: "Frequently Asked Questions", size: "Medium", weight: "Bolder", spacing: "Medium" },
+        { type: "TextBlock", text: "Select a question to see the answer.", size: "Small", isSubtle: true, wrap: true },
+      ],
+      actions: [
+        { type: "Action.ShowCard", title: "What is Copilot Studio?", card: {
+          type: "AdaptiveCard", body: [
+            { type: "TextBlock", text: "Microsoft Copilot Studio is a low-code platform for building AI-powered conversational agents. It integrates with Power Platform, Dataverse, and Microsoft 365.", wrap: true },
+          ],
+        }},
+        { type: "Action.ShowCard", title: "How do I connect a knowledge source?", card: {
+          type: "AdaptiveCard", body: [
+            { type: "TextBlock", text: "Navigate to Knowledge in the left panel, click 'Add knowledge', then choose SharePoint sites, Dataverse tables, uploaded files, or public websites.", wrap: true },
+          ],
+        }},
+        { type: "Action.ShowCard", title: "What authentication modes are supported?", card: {
+          type: "AdaptiveCard", body: [
+            { type: "TextBlock", text: "Three modes: No authentication (public), Authenticate with Microsoft (Entra ID SSO), and Manual OAuth 2.0. Enterprise agents should use 'Authenticate with Microsoft'.", wrap: true },
+            { type: "FactSet", facts: [
+              { title: "Recommended", value: "Authenticate with Microsoft" },
+              { title: "Schema", value: "BotAuthenticationConfiguration" },
+            ]},
+          ],
+        }},
+        { type: "Action.ShowCard", title: "Ask a different question...", card: {
+          type: "AdaptiveCard", body: [
+            { type: "Input.Text", id: "userQuestion", label: "Type your question", isMultiline: true, placeholder: "e.g., How do I publish to Teams?" },
+          ], actions: [
+            { type: "Action.Submit", title: "Send" },
+          ],
+        }},
+      ],
+    }, "light");
+  }
+
+  // S8B: Portfolio scope layer cards (full 3DKG Adaptive Cards)
+  const ps = ENV.PORTFOLIO_SCOPE;
+  for (const layer of ps.LAYERS) {
+    const el = document.getElementById("s8p-ac-" + layer.id);
+    if (!el) continue;
+    // Build the same AC JSON as renderS8 does
+    const acJson = {
+      $schema: ps.AC_SCHEMA, type: "AdaptiveCard", version: ps.AC_VERSION,
+      body: [
+        { type: "Container", style: "emphasis", bleed: true, items: [
+          { type: "TextBlock", text: "AGENT LAYER", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+          { type: "TextBlock", text: layer.name, size: "ExtraLarge", weight: "Bolder", wrap: true, spacing: "Small" },
+          { type: "TextBlock", text: layer.role, size: "Medium", wrap: true, isSubtle: true, spacing: "Small" },
+        ]},
+        { type: "ColumnSet", spacing: "Medium", columns: [
+          { type: "Column", width: "stretch", items: [
+            { type: "TextBlock", text: "Degree", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+            { type: "TextBlock", text: String(layer.degree), size: "Large", weight: "Bolder", spacing: "None" },
+          ]},
+          { type: "Column", width: "stretch", items: [
+            { type: "TextBlock", text: "Schema", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+            { type: "TextBlock", text: layer.schema, size: "Default", weight: "Bolder", spacing: "None", wrap: true },
+          ]},
+          { type: "Column", width: "stretch", items: [
+            { type: "TextBlock", text: "Signals", size: "Small", weight: "Bolder", color: "Accent", spacing: "None" },
+            { type: "TextBlock", text: String(layer.signals), size: "Large", weight: "Bolder", spacing: "None" },
+          ]},
+        ]},
+        { type: "FactSet", spacing: "Medium", facts:
+          layer.signal_names.map(s => ({ title: "Signal", value: s }))
+        },
+      ],
+    };
+    renderACInto(el, acJson, "light");
+  }
+}
+</script>
+</body>
+</html>
