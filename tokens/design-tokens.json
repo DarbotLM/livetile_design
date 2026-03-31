@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://darbotlabs.com/adaptive-design/tokens/design-tokens.json",
+  "name": "Adaptive Design System Tokens",
+  "version": "1.0.0",
+  "description": "Design tokens for the viewport-grid BD coordinate system",
+
+  "grid": {
+    "sizes": {
+      "15": {
+        "value": 15,
+        "unit": "px",
+        "dpi": 72,
+        "theme": "cyan",
+        "description": "Low-DPI grid for legacy displays"
+      },
+      "20": {
+        "value": 20,
+        "unit": "px",
+        "dpi": 96,
+        "theme": "gold",
+        "description": "Standard grid for common displays"
+      },
+      "30": {
+        "value": 30,
+        "unit": "px",
+        "dpi": 144,
+        "theme": "green",
+        "description": "High-DPI grid for Retina displays"
+      }
+    },
+    "wordWidth": {
+      "value": 4,
+      "unit": "characters",
+      "description": "One W (word) equals 4 character widths"
+    }
+  },
+
+  "tileSlots": {
+    "nano": {
+      "width": 1,
+      "height": 2,
+      "label": "1W x 2R",
+      "description": "Minimal indicator tile"
+    },
+    "small": {
+      "width": 2,
+      "height": 4,
+      "label": "2W x 4R",
+      "description": "KPI badge tile"
+    },
+    "medium": {
+      "width": 4,
+      "height": 8,
+      "label": "4W x 8R",
+      "description": "Standard content tile"
+    },
+    "large": {
+      "width": 8,
+      "height": 16,
+      "label": "8W x 16R",
+      "description": "Detail panel tile"
+    },
+    "xl": {
+      "width": 16,
+      "height": 32,
+      "label": "16W x 32R",
+      "description": "Full dashboard tile"
+    }
+  },
+
+  "colors": {
+    "background": {
+      "app": {
+        "value": "#0a0a14",
+        "description": "Main application background"
+      },
+      "page1": {
+        "value": "#1a1a2e",
+        "description": "Page 1 background"
+      },
+      "page2": {
+        "value": "#120b1d",
+        "description": "Page 2 background"
+      },
+      "page3": {
+        "value": "#0a0a14",
+        "description": "Page 3 background"
+      },
+      "page4": {
+        "value": "#030312",
+        "description": "Page 4 background"
+      }
+    },
+    "surface": {
+      "0": {
+        "value": "rgba(6, 8, 22, 0.52)",
+        "description": "Transparent overlay surface"
+      },
+      "1": {
+        "value": "rgba(8, 10, 28, 0.90)",
+        "description": "Primary surface"
+      },
+      "2": {
+        "value": "rgba(10, 14, 34, 0.95)",
+        "description": "Elevated surface"
+      },
+      "3": {
+        "value": "rgba(13, 18, 40, 0.98)",
+        "description": "Modal/dialog surface"
+      },
+      "chip": {
+        "value": "rgba(255, 255, 255, 0.06)",
+        "description": "Chip/tag background"
+      }
+    },
+    "border": {
+      "subtle": {
+        "value": "rgba(255, 255, 255, 0.08)",
+        "description": "Subtle borders"
+      },
+      "strong": {
+        "value": "rgba(255, 255, 255, 0.15)",
+        "description": "Prominent borders"
+      }
+    },
+    "text": {
+      "hi": {
+        "value": "#f4f7ff",
+        "description": "High emphasis text"
+      },
+      "strong": {
+        "value": "#d9e1f2",
+        "description": "Strong text (default)"
+      },
+      "med": {
+        "value": "#97a4be",
+        "description": "Medium emphasis text"
+      },
+      "dim": {
+        "value": "#76819a",
+        "description": "Dimmed text"
+      },
+      "faint": {
+        "value": "#5f6880",
+        "description": "Faint/tertiary text"
+      },
+      "ghost": {
+        "value": "#394257",
+        "description": "Ghost/placeholder text"
+      }
+    },
+    "accent": {
+      "cyan": {
+        "value": "#00d4ff",
+        "description": "Primary accent (72 DPI theme)"
+      },
+      "cyanSoft": {
+        "value": "rgba(0, 212, 255, 0.14)",
+        "description": "Soft cyan for backgrounds"
+      },
+      "gold": {
+        "value": "#f59e0b",
+        "description": "Warning accent (96 DPI theme)"
+      },
+      "green": {
+        "value": "#22c55e",
+        "description": "Success accent (144 DPI theme)"
+      },
+      "violet": {
+        "value": "#a855f7",
+        "description": "Secondary accent"
+      },
+      "red": {
+        "value": "#ef4444",
+        "description": "Error/critical accent"
+      }
+    }
+  },
+
+  "typography": {
+    "fontFamily": {
+      "sans": "'Segoe UI', system-ui, sans-serif",
+      "mono": "'Cascadia Code', 'Consolas', monospace"
+    },
+    "fontSize": {
+      "xs": "9px",
+      "sm": "10px",
+      "base": "12px",
+      "md": "13px",
+      "lg": "14px",
+      "xl": "15px",
+      "2xl": "24px"
+    },
+    "letterSpacing": {
+      "tight": "0.2px",
+      "normal": "0.3px",
+      "wide": "0.7px",
+      "wider": "1.4px",
+      "widest": "2.5px"
+    }
+  },
+
+  "effects": {
+    "shadow": {
+      "lg": {
+        "value": "0 12px 48px rgba(0, 0, 0, 0.42)",
+        "description": "Large elevation shadow"
+      },
+      "panel": {
+        "value": "0 8px 24px rgba(0, 0, 0, 0.28)",
+        "description": "Panel shadow"
+      }
+    },
+    "blur": {
+      "panel": {
+        "value": "blur(18px) saturate(1.4)",
+        "description": "Panel backdrop blur"
+      },
+      "header": {
+        "value": "blur(20px) saturate(1.4)",
+        "description": "Header backdrop blur"
+      }
+    },
+    "transition": {
+      "fast": "0.15s ease",
+      "normal": "0.18s ease",
+      "slow": "0.25s ease"
+    }
+  },
+
+  "spacing": {
+    "headerHeight": "34px",
+    "panelPadding": "14px 16px",
+    "tilePadding": "8px 10px",
+    "gap": {
+      "xs": "4px",
+      "sm": "6px",
+      "md": "10px",
+      "lg": "14px"
+    },
+    "borderRadius": {
+      "sm": "2px",
+      "md": "4px",
+      "lg": "6px",
+      "xl": "8px"
+    }
+  },
+
+  "viewports": {
+    "vp4": {
+      "blocks": 4,
+      "role": "introduction",
+      "description": "Quick overview"
+    },
+    "vp8": {
+      "blocks": 8,
+      "role": "standard",
+      "description": "Standard detail"
+    },
+    "vp16": {
+      "blocks": 16,
+      "role": "extended",
+      "description": "Extended content"
+    },
+    "vp32": {
+      "blocks": 32,
+      "role": "deepDive",
+      "description": "Complete deep-dive"
+    }
+  },
+
+  "runbookRoles": {
+    "introduces": {
+      "description": "First presentation of a concept"
+    },
+    "reinforces": {
+      "description": "Repeated exposure for retention"
+    },
+    "recaps": {
+      "description": "Summary/review context"
+    },
+    "deepDive": {
+      "description": "Detailed exploration"
+    }
+  }
+}

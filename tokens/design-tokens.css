@@ -1,0 +1,206 @@
+/**
+ * Adaptive Design System - CSS Custom Properties
+ * Generated from design-tokens.json
+ *
+ * Usage: @import 'design-tokens.css';
+ */
+
+:root {
+  /* ========================================
+   * Grid Sizes (BD Coordinate System)
+   * ======================================== */
+  --grid-15: 15px;  /* 72 DPI - Low-DPI displays */
+  --grid-20: 20px;  /* 96 DPI - Standard displays */
+  --grid-30: 30px;  /* 144 DPI - High-DPI/Retina */
+  --grid-default: var(--grid-20);
+  --word-width: 4;  /* 1 W = 4 characters */
+
+  /* ========================================
+   * Background Colors
+   * ======================================== */
+  --bg-app: #0a0a14;
+  --bg-page-1: #1a1a2e;
+  --bg-page-2: #120b1d;
+  --bg-page-3: #0a0a14;
+  --bg-page-4: #030312;
+
+  /* ========================================
+   * Surface Colors (with alpha)
+   * ======================================== */
+  --surface-0: rgba(6, 8, 22, 0.52);
+  --surface-1: rgba(8, 10, 28, 0.90);
+  --surface-2: rgba(10, 14, 34, 0.95);
+  --surface-3: rgba(13, 18, 40, 0.98);
+  --surface-chip: rgba(255, 255, 255, 0.06);
+
+  /* ========================================
+   * Border Colors
+   * ======================================== */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+
+  /* ========================================
+   * Text Colors (high to low emphasis)
+   * ======================================== */
+  --text-hi: #f4f7ff;
+  --text-strong: #d9e1f2;
+  --text-med: #97a4be;
+  --text-dim: #76819a;
+  --text-faint: #5f6880;
+  --text-ghost: #394257;
+
+  /* ========================================
+   * Accent Colors
+   * ======================================== */
+  --accent-cyan: #00d4ff;
+  --accent-cyan-soft: rgba(0, 212, 255, 0.14);
+  --accent-gold: #f59e0b;
+  --accent-gold-soft: rgba(245, 158, 11, 0.14);
+  --accent-green: #22c55e;
+  --accent-green-soft: rgba(34, 197, 94, 0.14);
+  --accent-violet: #a855f7;
+  --accent-violet-soft: rgba(168, 85, 247, 0.14);
+  --accent-red: #ef4444;
+  --accent-red-soft: rgba(239, 68, 68, 0.14);
+
+  /* ========================================
+   * Typography
+   * ======================================== */
+  --font-sans: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', monospace;
+
+  --text-xs: 9px;
+  --text-sm: 10px;
+  --text-base: 12px;
+  --text-md: 13px;
+  --text-lg: 14px;
+  --text-xl: 15px;
+  --text-2xl: 24px;
+
+  --tracking-tight: 0.2px;
+  --tracking-normal: 0.3px;
+  --tracking-wide: 0.7px;
+  --tracking-wider: 1.4px;
+  --tracking-widest: 2.5px;
+
+  /* ========================================
+   * Effects
+   * ======================================== */
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.42);
+  --shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.24);
+
+  --blur-panel: blur(18px) saturate(1.4);
+  --blur-header: blur(20px) saturate(1.4);
+  --blur-light: blur(8px);
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.18s ease;
+  --transition-slow: 0.25s ease;
+
+  /* ========================================
+   * Spacing
+   * ======================================== */
+  --header-h: 34px;
+  --padding-panel: 14px 16px;
+  --padding-tile: 8px 10px;
+
+  --gap-xs: 4px;
+  --gap-sm: 6px;
+  --gap-md: 10px;
+  --gap-lg: 14px;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+
+  /* ========================================
+   * Z-Index Layers
+   * ======================================== */
+  --z-grid: 10;
+  --z-frame: 50;
+  --z-tile: 100;
+  --z-panel: 200;
+  --z-fixed: 300;
+  --z-modal: 400;
+  --z-header: 500;
+}
+
+/* ========================================
+ * Tile Slot Classes
+ * Usage: class="tile tile--nano"
+ * ======================================== */
+
+.tile--nano {
+  --tile-w: 1;
+  --tile-r: 2;
+}
+
+.tile--small {
+  --tile-w: 2;
+  --tile-r: 4;
+}
+
+.tile--medium {
+  --tile-w: 4;
+  --tile-r: 8;
+}
+
+.tile--large {
+  --tile-w: 8;
+  --tile-r: 16;
+}
+
+.tile--xl {
+  --tile-w: 16;
+  --tile-r: 32;
+}
+
+/* Calculate pixel dimensions based on grid size */
+.tile {
+  width: calc(var(--tile-w) * var(--word-width) * var(--grid-default));
+  height: calc(var(--tile-r) * var(--grid-default));
+}
+
+/* ========================================
+ * Grid Theme Classes
+ * Usage: class="grid-theme-72" for 72 DPI
+ * ======================================== */
+
+.grid-theme-72 {
+  --grid-default: var(--grid-15);
+  --accent-primary: var(--accent-cyan);
+}
+
+.grid-theme-96 {
+  --grid-default: var(--grid-20);
+  --accent-primary: var(--accent-gold);
+}
+
+.grid-theme-144 {
+  --grid-default: var(--grid-30);
+  --accent-primary: var(--accent-green);
+}
+
+/* ========================================
+ * Status Classes
+ * ======================================== */
+
+.status-online {
+  color: var(--accent-green);
+  border-color: var(--accent-green-soft);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.status-degraded {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold-soft);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.status-offline {
+  color: var(--accent-red);
+  border-color: var(--accent-red-soft);
+  background: rgba(239, 68, 68, 0.08);
+}
