@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tile Spec Viewer</title>
+<style>
+:root {
+  --bg: #0a0a14;
+  --surface: rgba(6, 6, 18, 0.97);
+  --border: rgba(255, 255, 255, 0.08);
+  --accent: #00d4ff;
+  --accent-soft: rgba(0, 212, 255, 0.14);
+  --text: #b8d0e0;
+  --text-dim: #556;
+  --font-mono: 'Cascadia Code', 'Consolas', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 14px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Tile selector */
+.tile-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.tile-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tile-btn:hover {
+  border-color: var(--accent);
+}
+
+.tile-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tile-btn .slot {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  margin-left: 6px;
+}
+
+/* Spec viewer */
+.spec-viewer {
+  background: var(--surface);
+  border: 1px solid rgba(0, 212, 255, 0.22);
+  border-radius: 8px;
+  overflow: hidden;
+  backdrop-filter: blur(22px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+.spec-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.spec-title {
+  flex: 1;
+  font-size: 12px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+.spec-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* Tabs */
+.spec-tabs {
+  display: flex;
+  padding: 8px 14px 0;
+  gap: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.spec-tab {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 16px;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: all 0.15s;
+}
+
+.spec-tab.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(0, 212, 255, 0.28);
+}
+
+.spec-tab:hover:not(.active) {
+  color: var(--text);
+}
+
+/* Content */
+.spec-content {
+  padding: 14px;
+  max-height: 500px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 212, 255, 0.2) transparent;
+}
+
+.spec-content pre {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+/* Footer */
+.spec-footer {
+  padding: 8px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.copy-btn {
+  background: var(--accent-soft);
+  border: 1px solid rgba(0, 212, 255, 0.22);
+  border-radius: 4px;
+  color: var(--accent);
+  padding: 4px 14px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: background 0.15s;
+}
+
+.copy-btn:hover {
+  background: rgba(0, 212, 255, 0.25);
+}
+
+.copy-btn.copied {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+}
+
+.empty-state p {
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Tile Spec Viewer</h1>
+
+  <div class="tile-selector" id="tileSelector">
+    <!-- Populated by JS -->
+  </div>
+
+  <div class="spec-viewer">
+    <div class="spec-header">
+      <span class="spec-title" id="specTitle">Select a tile</span>
+      <span class="spec-meta" id="specMeta"></span>
+    </div>
+
+    <div class="spec-tabs" id="specTabs">
+      <button class="spec-tab active" data-tab="tsx">TSX</button>
+      <button class="spec-tab" data-tab="json">JSON</button>
+      <button class="spec-tab" data-tab="yaml">YAML</button>
+      <button class="spec-tab" data-tab="md">Markdown</button>
+    </div>
+
+    <div class="spec-content">
+      <pre id="specPre"><div class="empty-state"><p>Select a tile above to view its specification</p></div></pre>
+    </div>
+
+    <div class="spec-footer">
+      <span class="file-label" id="fileLabel"></span>
+      <button class="copy-btn" id="copyBtn">Copy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========================================
+// Tile Manifest (extracted from viewport-grid.html)
+// ========================================
+const TILE_MANIFEST = {
+  'tile-a': {
+    id: 'tile-a',
+    label: 'Accuracy',
+    color: '#00d4ff',
+    bdW: 2,
+    bdR: 4,
+    tsx: `import React from "react";
+import type { TileProps } from "./types";
+
+export interface AccuracyTileData {
+  value: number;        // 0-100
+  unit: "%";
+  threshold: { warn: number; critical: number };
+  trend: "up" | "down" | "stable";
+}
+
+export function AccuracyTile({ data, locked }: TileProps<AccuracyTileData>) {
+  const color = data.value >= data.threshold.warn ? "#00d4ff"
+              : data.value >= data.threshold.critical ? "#f59e0b" : "#ef4444";
+  return (
+    <div className="livetile livetile--2w4r">
+      <div className="livetile-header">
+        <span className="livetile-title">Accuracy</span>
+        <span className="livetile-bd">2W x 4R</span>
+      </div>
+      <div className="livetile-body">
+        <div className="livetile-val" style={{ color }}>
+          {data.value.toFixed(1)}{data.unit}
+        </div>
+        <div className="livetile-sub">Model accuracy</div>
+        <div className="livetile-trend" data-dir={data.trend}>{data.trend}</div>
+      </div>
+    </div>
+  );
+}`,
+    json: JSON.stringify({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "tile-a.schema.json",
+      "title": "AccuracyTile",
+      "type": "object",
+      "required": ["value", "unit", "threshold"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0, "maximum": 100 },
+        "unit": { "const": "%" },
+        "threshold": {
+          "type": "object",
+          "properties": {
+            "warn": { "type": "number", "default": 90 },
+            "critical": { "type": "number", "default": 80 }
+          },
+          "required": ["warn", "critical"]
+        },
+        "trend": { "enum": ["up", "down", "stable"], "default": "stable" }
+      }
+    }, null, 2),
+    yaml: `tile:
+  id: tile-a
+  label: Accuracy
+  slot:
+    width: 2   # bitblock words (4ch each)
+    height: 4  # bitblock rows
+  color: "#00d4ff"
+  vp: bd-grid-schema.vp4
+  runbook:
+    thread: accuracy
+    schedule:
+      - vp: 4
+        role: introduces
+      - vp: 8
+        role: reinforces
+      - vp: 16
+        role: recaps
+  defaults:
+    value: 94.2
+    unit: "%"
+    threshold:
+      warn: 90
+      critical: 80
+    trend: stable`,
+    md: `# AccuracyTile (tile-a)
+
+**Slot**: 2W x 4R  |  **VP**: bd-grid-schema.vp4  |  **Thread**: accuracy
+
+## Purpose
+Displays current model accuracy as a percentage KPI with threshold-based
+color coding (cyan/amber/red) and a trend direction indicator.
+
+## Data Contract
+| Field | Type | Req | Description |
+|---|---|---|---|
+| value | number | yes | Accuracy 0-100 |
+| unit | "%" | yes | Always percent |
+| threshold.warn | number | yes | Amber below this |
+| threshold.critical | number | yes | Red below this |
+| trend | up|down|stable | no | Direction indicator |
+
+## Visual States
+- **Nominal** (>= warn): \`#00d4ff\` cyan
+- **Warning** (< warn, >= critical): \`#f59e0b\` amber
+- **Critical** (< critical): \`#ef4444\` red
+
+## Runbook Schedule
+| VP | Role |
+|---|---|
+| vp4 bd-grid-schema | introduces |
+| vp8 (future) | reinforces |
+| vp16 (future) | recaps |`
+  },
+  'tile-b': {
+    id: 'tile-b',
+    label: 'Events/sec',
+    color: '#f59e0b',
+    bdW: 4,
+    bdR: 8,
+    tsx: `import React from "react";
+import type { TileProps } from "./types";
+
+export interface EventsSecTileData {
+  value: number;       // events per second
+  peak: number;        // peak observed
+  baseline: number;    // expected baseline
+  window: "1m" | "5m" | "15m";
+  history: number[];   // last N samples for sparkline
+}
+
+export function EventsSecTile({ data, locked }: TileProps<EventsSecTileData>) {
+  const pct = Math.min(100, (data.value / data.peak) * 100);
+  const color = pct > 85 ? "#ef4444" : pct > 65 ? "#f59e0b" : "#22c55e";
+  return (
+    <div className="livetile livetile--4w8r">
+      <div className="livetile-header">
+        <span className="livetile-title">Events/sec</span>
+        <span className="livetile-bd">4W x 8R</span>
+        <span className="livetile-window">{data.window}</span>
+      </div>
+      <div className="livetile-body">
+        <div className="livetile-val" style={{ color }}>
+          {data.value.toLocaleString()}
+        </div>
+        <div className="livetile-sub">Throughput</div>
+        <div className="livetile-bar">
+          <div style={{ width: pct + "%", background: color }}/>
+        </div>
+        <div className="livetile-meta">
+          Peak: {data.peak.toLocaleString()} | Base: {data.baseline.toLocaleString()}
+        </div>
+      </div>
+    </div>
+  );
+}`,
+    json: JSON.stringify({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "tile-b.schema.json",
+      "title": "EventsSecTile",
+      "type": "object",
+      "required": ["value", "peak", "baseline", "window"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "peak": { "type": "number", "minimum": 0 },
+        "baseline": { "type": "number", "minimum": 0 },
+        "window": { "enum": ["1m", "5m", "15m"], "default": "1m" },
+        "history": { "type": "array", "items": { "type": "number" }, "maxItems": 60 }
+      }
+    }, null, 2),
+    yaml: `tile:
+  id: tile-b
+  label: Events/sec
+  slot:
+    width: 4
+    height: 8
+  color: "#f59e0b"
+  vp: bd-grid-schema.vp4
+  runbook:
+    thread: events-sec
+    schedule:
+      - vp: 4
+        role: introduces
+      - vp: 8
+        role: reinforces
+  defaults:
+    value: 1247
+    peak: 2000
+    baseline: 1000
+    window: "1m"`,
+    md: `# EventsSecTile (tile-b)
+
+**Slot**: 4W x 8R  |  **VP**: bd-grid-schema.vp4  |  **Thread**: events-sec
+
+## Purpose
+Real-time throughput monitor. Displays current events/second with a
+utilization bar against peak capacity. Includes configurable time window.
+
+## Data Contract
+| Field | Type | Req | Description |
+|---|---|---|---|
+| value | number | yes | Current events/sec |
+| peak | number | yes | Peak observed value |
+| baseline | number | yes | Expected normal value |
+| window | 1m|5m|15m | yes | Aggregation window |
+| history | number[] | no | Sparkline samples (max 60) |
+
+## Color Thresholds
+- **Green** (< 65% of peak): nominal
+- **Amber** (65-85% of peak): elevated
+- **Red** (> 85% of peak): high load
+
+## Runbook Schedule
+| VP | Role |
+|---|---|
+| vp4 bd-grid-schema | introduces |
+| vp8 (future) | reinforces |`
+  },
+  'tile-c': {
+    id: 'tile-c',
+    label: 'Status',
+    color: '#a855f7',
+    bdW: 8,
+    bdR: 8,
+    tsx: `import React from "react";
+import type { TileProps } from "./types";
+
+export type SystemStatus = "nominal" | "degraded" | "outage" | "maintenance";
+
+export interface StatusSystem {
+  name: string;
+  status: SystemStatus;
+  latencyMs?: number;
+}
+
+export interface StatusTileData {
+  overall: SystemStatus;
+  systems: StatusSystem[];
+  updatedAt: string;  // ISO 8601
+}
+
+const STATUS_COLORS: Record<SystemStatus, string> = {
+  nominal:     "#22c55e",
+  degraded:    "#f59e0b",
+  outage:      "#ef4444",
+  maintenance: "#a855f7",
+};
+
+export function StatusTile({ data }: TileProps<StatusTileData>) {
+  return (
+    <div className="livetile livetile--8w8r">
+      <div className="livetile-header">
+        <span className="livetile-title">Status</span>
+        <span className="livetile-bd">8W x 8R</span>
+      </div>
+      <div className="livetile-body">
+        <div className="livetile-val"
+          style={{ color: STATUS_COLORS[data.overall] }}>
+          {data.overall.toUpperCase()}
+        </div>
+        <div className="status-systems">
+          {data.systems.map(s => (
+            <div key={s.name} className="status-row">
+              <span className="status-dot"
+                style={{ background: STATUS_COLORS[s.status] }}/>
+              <span className="status-name">{s.name}</span>
+              {s.latencyMs && <span className="status-latency">{s.latencyMs}ms</span>}
+            </div>
+          ))}
+        </div>
+        <div className="livetile-meta">
+          Updated: {new Date(data.updatedAt).toLocaleTimeString()}
+        </div>
+      </div>
+    </div>
+  );
+}`,
+    json: JSON.stringify({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "tile-c.schema.json",
+      "title": "StatusTile",
+      "type": "object",
+      "required": ["overall", "systems", "updatedAt"],
+      "properties": {
+        "overall": { "enum": ["nominal", "degraded", "outage", "maintenance"] },
+        "systems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "status"],
+            "properties": {
+              "name": { "type": "string" },
+              "status": { "enum": ["nominal", "degraded", "outage", "maintenance"] },
+              "latencyMs": { "type": "number" }
+            }
+          }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }, null, 2),
+    yaml: `tile:
+  id: tile-c
+  label: Status
+  slot:
+    width: 8
+    height: 8
+  color: "#a855f7"
+  vp: bd-grid-schema.vp4
+  runbook:
+    thread: status
+    schedule:
+      - vp: 4
+        role: introduces
+  defaults:
+    overall: nominal
+    systems:
+      - name: API
+        status: nominal
+        latencyMs: 45
+      - name: Database
+        status: nominal
+        latencyMs: 12
+      - name: Cache
+        status: nominal
+        latencyMs: 3`,
+    md: `# StatusTile (tile-c)
+
+**Slot**: 8W x 8R  |  **VP**: bd-grid-schema.vp4  |  **Thread**: status
+
+## Purpose
+Multi-system status dashboard. Shows overall health and per-system
+breakdown with optional latency metrics.
+
+## Data Contract
+| Field | Type | Req | Description |
+|---|---|---|---|
+| overall | SystemStatus | yes | Overall status |
+| systems | StatusSystem[] | yes | Per-system status |
+| updatedAt | string | yes | ISO 8601 timestamp |
+
+## Status Colors
+| Status | Color | Description |
+|--------|-------|-------------|
+| nominal | #22c55e | All operational |
+| degraded | #f59e0b | Partial functionality |
+| outage | #ef4444 | Service unavailable |
+| maintenance | #a855f7 | Planned downtime |
+
+## Runbook Schedule
+| VP | Role |
+|---|---|
+| vp4 bd-grid-schema | introduces |`
+  }
+};
+
+// ========================================
+// State
+// ========================================
+let currentTile = null;
+let currentTab = 'tsx';
+
+// ========================================
+// DOM
+// ========================================
+const tileSelector = document.getElementById('tileSelector');
+const specTitle = document.getElementById('specTitle');
+const specMeta = document.getElementById('specMeta');
+const specTabs = document.getElementById('specTabs');
+const specPre = document.getElementById('specPre');
+const fileLabel = document.getElementById('fileLabel');
+const copyBtn = document.getElementById('copyBtn');
+
+// ========================================
+// Init
+// ========================================
+function init() {
+  // Create tile buttons
+  Object.values(TILE_MANIFEST).forEach(tile => {
+    const btn = document.createElement('button');
+    btn.className = 'tile-btn';
+    btn.dataset.tileId = tile.id;
+    btn.innerHTML = `${tile.label}<span class="slot">${tile.bdW}W×${tile.bdR}R</span>`;
+    btn.style.borderLeftColor = tile.color;
+    btn.style.borderLeftWidth = '3px';
+    btn.addEventListener('click', () => selectTile(tile.id));
+    tileSelector.appendChild(btn);
+  });
+
+  // Tab clicks
+  specTabs.addEventListener('click', e => {
+    if (e.target.classList.contains('spec-tab')) {
+      switchTab(e.target.dataset.tab);
+    }
+  });
+
+  // Copy button
+  copyBtn.addEventListener('click', copyToClipboard);
+}
+
+function selectTile(tileId) {
+  currentTile = TILE_MANIFEST[tileId];
+  if (!currentTile) return;
+
+  // Update buttons
+  document.querySelectorAll('.tile-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tileId === tileId);
+  });
+
+  // Update header
+  specTitle.textContent = `${currentTile.label} (${currentTile.id})`;
+  specMeta.textContent = `${currentTile.bdW}W × ${currentTile.bdR}R`;
+
+  // Render content
+  renderContent();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+
+  // Update tabs
+  document.querySelectorAll('.spec-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+
+  // Render content
+  renderContent();
+}
+
+function renderContent() {
+  if (!currentTile) {
+    specPre.innerHTML = '<div class="empty-state"><p>Select a tile above to view its specification</p></div>';
+    fileLabel.textContent = '';
+    return;
+  }
+
+  const content = currentTile[currentTab] || '(no content)';
+  specPre.textContent = content;
+
+  const extMap = { tsx: '.tsx', json: '.json', yaml: '.yaml', md: '.md' };
+  fileLabel.textContent = currentTile.id + extMap[currentTab];
+}
+
+async function copyToClipboard() {
+  if (!currentTile) return;
+
+  const content = currentTile[currentTab] || '';
+  try {
+    await navigator.clipboard.writeText(content);
+    copyBtn.textContent = 'Copied!';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy';
+      copyBtn.classList.remove('copied');
+    }, 2000);
+  } catch (err) {
+    console.error('Copy failed:', err);
+  }
+}
+
+// Start
+init();
+</script>
+
+</body>
+</html>
