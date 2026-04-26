@@ -6,6 +6,42 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function rewriteInlinedAssetUrls(code: string, bundle: Record<string, unknown>, chunkFileName: string): string {
+  const chunkDirectory = chunkFileName.includes('/')
+    ? chunkFileName.slice(0, chunkFileName.lastIndexOf('/') + 1)
+    : '';
+
+  if (!chunkDirectory) {
+    return code;
+  }
+
+  let rewrittenCode = code;
+
+  for (const [fileName, output] of Object.entries(bundle)) {
+    if (
+      typeof output === 'object' &&
+      output !== null &&
+      'type' in output &&
+      output.type === 'asset' &&
+      fileName.startsWith(chunkDirectory)
+    ) {
+      const relativeAssetName = fileName.slice(chunkDirectory.length);
+      const inlinedAssetPath = `./${fileName}`;
+      const assetUrlPattern = new RegExp(
+        `new URL\\((["'])${escapeRegExp(relativeAssetName)}\\1,\\s*import\\.meta\\.url\\)`,
+        'g',
+      );
+
+      rewrittenCode = rewrittenCode.replace(
+        assetUrlPattern,
+        (_match, quote: string) => `new URL(${quote}${inlinedAssetPath}${quote},import.meta.url)`,
+      );
+    }
+  }
+
+  return rewrittenCode;
+}
+
 function singleFileHtml(): Plugin {
   return {
     name: 'single-file-html',
@@ -35,7 +71,10 @@ function singleFileHtml(): Plugin {
             `<script([^>]*)src=["']${assetPathPattern}["']([^>]*)></script>`,
             'g',
           );
-          const code = output.code.replaceAll('</script', '<\\/script');
+          const code = rewriteInlinedAssetUrls(output.code, bundle, fileName).replaceAll(
+            '</script',
+            '<\\/script',
+          );
           const nextHtml = html.replace(
             scriptTag,
             (_match, beforeSrc: string, afterSrc: string) =>
