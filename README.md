@@ -39,7 +39,7 @@ npm run preview
 
 ## GitHub Pages
 
-The repository includes a GitHub Actions workflow at `.github\workflows\pages.yml`. On every push to `master`, the workflow installs dependencies, runs `npm run build`, uploads `dist\`, and deploys the site to GitHub Pages.
+The repository includes a GitHub Actions workflow at `.github\workflows\pages.yml`. On every push to `master`, the workflow installs dependencies, runs `npm run build`, uploads `dist\`, and deploys the site to GitHub Pages at https://darbotlm.github.io/livetile_design/.
 
 The deployed app includes a `Gallery` tab that loads the curated bakeoff screenshots from `lib\img\`. Keep source images in that folder so they remain available for future gallery and documentation work.
 
