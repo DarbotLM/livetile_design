@@ -28,7 +28,7 @@ function singleFileHtml(): Plugin {
       let html = String(htmlAsset.source);
 
       for (const [fileName, output] of Object.entries(bundle)) {
-        const assetPathPattern = `/?${escapeRegExp(fileName)}`;
+        const assetPathPattern = `(?:\\.?/)?${escapeRegExp(fileName)}`;
 
         if (output.type === 'chunk') {
           const scriptTag = new RegExp(
