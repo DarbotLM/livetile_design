@@ -2,7 +2,7 @@
 // Formal catalog of every tile type: schema definition, category, description,
 // required fields, and content shape. Decouples data from rendering for reuse.
 
-import type { TileType, TileContentMap } from './types';
+import type { TileType } from './types';
 
 /** Tile category for grouping in the schema catalog */
 export type TileCategory = 'layout' | 'chart' | 'data' | 'comparison' | 'status' | 'input';

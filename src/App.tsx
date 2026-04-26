@@ -13,6 +13,26 @@ import { SettingsPanel } from '@/canvas/SettingsPanel';
 
 import type { TileTemplate } from '@/shared/types';
 
+type InspectorMode = 'slide' | 'tile' | 'gallery';
+
+const galleryImageModules = import.meta.glob('../lib/img/*.png', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>;
+
+const galleryImages = Object.entries(galleryImageModules)
+  .map(([path, src]) => {
+    const fileName = path.split('/').pop() ?? path;
+    const title = fileName
+      .replace(/\.png$/i, '')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    return { fileName, title, src };
+  })
+  .sort((a, b) => a.fileName.localeCompare(b.fileName));
+
 /**
  * LiveTile Design Studio -- main application shell.
  * Wires canvas, template browser, theme switcher, settings panel,
@@ -22,7 +42,7 @@ export function App() {
   const [themeId, setThemeId] = useState<string>(DEFAULT_THEME_ID);
   const [templateId, setTemplateId] = useState(TEMPLATES[0]?.id ?? 'title-overview');
   const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
-  const [jsonMode, setJsonMode] = useState<'slide' | 'tile'>('slide');
+  const [inspectorMode, setInspectorMode] = useState<InspectorMode>('slide');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Settings state
@@ -67,14 +87,14 @@ export function App() {
   // Auto-switch JSON mode when selecting/deselecting tiles
   const handleSelectTile = (id: string | null) => {
     setSelectedTileId(id);
-    if (id) setJsonMode('tile');
+    if (id) setInspectorMode('tile');
   };
 
-  const inspectorData = jsonMode === 'tile' && selectedTileProfile
+  const inspectorData = inspectorMode === 'tile' && selectedTileProfile
     ? selectedTileProfile
     : slideProfile;
 
-  const inspectorTitle = jsonMode === 'tile' && selectedTileProfile
+  const inspectorTitle = inspectorMode === 'tile' && selectedTileProfile
     ? `Tile Profile -- ${selectedTileProfile.type}`
     : 'Slide Profile';
 
@@ -130,7 +150,7 @@ export function App() {
               boxShadow: `0 0 12px ${theme.accentGlow}`,
             }}
           >
-            {settingsOpen ? 'S' : '\u25C6'}
+            {settingsOpen ? 'S' : 'LT'}
           </div>
           <div>
             <div
@@ -283,13 +303,13 @@ export function App() {
               flexShrink: 0,
             }}
           >
-            {(['slide', 'tile'] as const).map((mode) => {
-              const isActive = jsonMode === mode;
+            {(['slide', 'tile', 'gallery'] as const).map((mode) => {
+              const isActive = inspectorMode === mode;
               const disabled = mode === 'tile' && !selectedTileProfile;
               return (
                 <button
                   key={mode}
-                  onClick={() => !disabled && setJsonMode(mode)}
+                  onClick={() => !disabled && setInspectorMode(mode)}
                   disabled={disabled}
                   style={{
                     flex: 1,
@@ -312,7 +332,11 @@ export function App() {
                     borderColor: isActive ? theme.emphasisBorder : 'transparent',
                   }}
                 >
-                  {mode === 'slide' ? 'SLIDE PROFILE' : 'TILE PROFILE'}
+                  {mode === 'slide'
+                    ? 'SLIDE PROFILE'
+                    : mode === 'tile'
+                      ? 'TILE PROFILE'
+                      : 'GALLERY'}
                 </button>
               );
             })}
@@ -320,11 +344,98 @@ export function App() {
 
           {/* Inspector */}
           <div style={{ flex: 1, minHeight: 0 }}>
-            <JsonInspector
-              data={inspectorData}
-              title={inspectorTitle}
-              accentColor={theme.accentLight}
-            />
+            {inspectorMode === 'gallery' ? (
+              <div
+                style={{
+                  height: '100%',
+                  overflowY: 'auto',
+                  paddingRight: 4,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 10,
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        color: theme.accentLight,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Bakeoff Gallery
+                    </div>
+                    <div style={{ fontSize: '8px', color: theme.textSubtle, marginTop: 2 }}>
+                      Visual evidence from the first parallel agent platform bakeoff.
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '8px', color: theme.textSubtle }}>
+                    {galleryImages.length} images
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                    gap: 10,
+                  }}
+                >
+                  {galleryImages.map((image) => (
+                    <a
+                      key={image.fileName}
+                      href={image.src}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: 'block',
+                        textDecoration: 'none',
+                        color: theme.text,
+                        background: theme.card,
+                        border: `1px solid ${theme.border}`,
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <img
+                        src={image.src}
+                        alt={image.title}
+                        loading="lazy"
+                        style={{
+                          width: '100%',
+                          aspectRatio: '16 / 10',
+                          objectFit: 'cover',
+                          display: 'block',
+                          background: theme.bg,
+                        }}
+                      />
+                      <div
+                        style={{
+                          padding: '7px 8px 8px',
+                          fontSize: '8px',
+                          lineHeight: 1.35,
+                          color: theme.textSubtle,
+                        }}
+                      >
+                        {image.title}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <JsonInspector
+                data={inspectorData}
+                title={inspectorTitle}
+                accentColor={theme.accentLight}
+              />
+            )}
           </div>
 
           {/* Stats footer */}

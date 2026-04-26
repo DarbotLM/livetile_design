@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { LiveTileTheme, TileType } from '../shared/types';
+import type { LiveTileTheme } from '../shared/types';
 import { TILE_SCHEMA_INDEX, getSchemasByCategory } from '../shared/schema-index';
 import type { TileCategory } from '../shared/schema-index';
 
