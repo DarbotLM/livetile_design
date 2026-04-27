@@ -630,6 +630,20 @@ function esc(s) {
   return d.innerHTML;
 }
 
+function escAttr(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function textOnly(html) {
+  const d = document.createElement("div");
+  d.innerHTML = String(html);
+  return d.textContent || "";
+}
+
 function formatNum(n) {
   return n == null ? "--" : n.toLocaleString();
 }
@@ -796,9 +810,10 @@ function flipCard(id, minH, catClass, frontName, frontHtml, backTitle, backJson,
   const gridStyle = opts.gridMinWidth ? `grid-template-columns:repeat(auto-fill,minmax(${opts.gridMinWidth},1fr))` : "";
   const headerBadge = opts.headerBadge || "";
   const jsonStr = typeof backJson === "string" ? backJson : JSON.stringify(backJson, null, 2);
+  const ariaLabel = escAttr(`${textOnly(frontName)} -- ${ENV.FLIP_HINT}`);
   return `
-  <div class="flip-card" id="${id}" tabindex="0" role="button" aria-pressed="false"
-       aria-label="${frontName.replace(/<[^>]*>/g, '')} -- ${ENV.FLIP_HINT}">
+  <div class="flip-card" id="${escAttr(id)}" tabindex="0" role="button" aria-pressed="false"
+       aria-label="${ariaLabel}">
     <div class="flip-inner" style="min-height:${minH}">
       <div class="flip-front ${catClass}" ${extraFrontStyle ? `style="${extraFrontStyle}"` : ""}>
         <div class="header" ${extraHeaderStyle ? `style="${extraHeaderStyle}"` : ""}>
