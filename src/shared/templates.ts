@@ -1,7 +1,7 @@
 import type { TileTemplate } from './types';
 
 /**
- * All 8 slide templates in the LiveTile Design System.
+ * Slide templates in the LiveTile Design System.
  * Grid: 12 cols × 7 rows.  Each tile uses { col, row, cs (colSpan), rs (rowSpan) }.
  * Pixel-perfect copy of the canonical LiveTileLibrary template definitions.
  */
@@ -9,10 +9,10 @@ export const TEMPLATES: TileTemplate[] = [
   {
     id: 'title-overview',
     name: 'Title Overview',
-    icon: '⬛',
-    description: 'Hero header + 8 audit steps + metadata',
-    slideTitle: 'Copilot Studio Evaluation Audit',
-    slideSubtitle: 'Open workspace · Review metrics · Review results · Review responses',
+    icon: 'OVR',
+    description: 'Hero header, capability cards, and metadata',
+    slideTitle: 'Healthcare Access Program',
+    slideSubtitle: 'Patient intake, care navigation, service quality, and outcomes',
     tiles: [
       { id: 'hero',  type: 'hero',           col: 1,  row: 1, cs: 12, rs: 2 },
       { id: 'cards', type: 'overview-cards',  col: 1,  row: 3, cs: 8,  rs: 5 },
@@ -22,10 +22,10 @@ export const TEMPLATES: TileTemplate[] = [
   {
     id: 'dashboard',
     name: 'Dashboard',
-    icon: '▦',
-    description: 'Header + KPIs + chart regions for evaluation review',
-    slideTitle: 'Evaluation Review Dashboard',
-    slideSubtitle: 'Native metrics · Results archive · Response evidence',
+    icon: 'DASH',
+    description: 'Header, KPIs, and chart regions for an operating review',
+    slideTitle: 'Financial Services Portfolio Dashboard',
+    slideSubtitle: 'Risk posture, service levels, client impact, and operations',
     tiles: [
       { id: 'hdr', type: 'accent-header', col: 1,  row: 1, cs: 12, rs: 1 },
       { id: 'm1',  type: 'kpi',           col: 1,  row: 2, cs: 3,  rs: 2 },
@@ -39,10 +39,10 @@ export const TEMPLATES: TileTemplate[] = [
   {
     id: 'analytics',
     name: 'Analytics',
-    icon: 'CHART',
-    description: 'Line trend + radar + stacked bar',
-    slideTitle: 'Evaluation Metrics and Response Signals',
-    slideSubtitle: 'Quality trend · Pass rate · Trace coverage',
+    icon: 'ANLY',
+    description: 'Line trend, radar chart, stacked bar, and movement summary',
+    slideTitle: 'Retail Demand and Experience Analytics',
+    slideSubtitle: 'Demand trend, channel mix, loyalty signals, and conversion',
     tiles: [
       { id: 'hdr',     type: 'accent-header', col: 1, row: 1, cs: 12, rs: 1 },
       { id: 'line',    type: 'line-chart',    col: 1, row: 2, cs: 7,  rs: 3 },
@@ -54,10 +54,10 @@ export const TEMPLATES: TileTemplate[] = [
   {
     id: 'comparison',
     name: 'Comparison',
-    icon: '⊞',
+    icon: 'COMP',
     description: 'Side-by-side two-column comparison',
-    slideTitle: 'Offline vs Online Evaluation',
-    slideSubtitle: 'BIC Methodology · Pre/Post Deploy',
+    slideTitle: 'Manufacturing Quality Strategy',
+    slideSubtitle: 'Preventive controls, inspection flow, throughput, and defects',
     tiles: [
       { id: 'hdr',   type: 'accent-header', col: 1, row: 1, cs: 12, rs: 1 },
       { id: 'left',  type: 'compare-left',  col: 1, row: 2, cs: 6,  rs: 6 },
@@ -67,10 +67,10 @@ export const TEMPLATES: TileTemplate[] = [
   {
     id: 'pipeline',
     name: 'Pipeline Flow',
-    icon: '⟶',
-    description: 'Workflow steps + review checklist + chart region',
-    slideTitle: 'Evaluation Review Workflow',
-    slideSubtitle: 'Open Studio → Metrics → Results → Responses → Evidence',
+    icon: 'FLOW',
+    description: 'Workflow steps, status checklist, and chart region',
+    slideTitle: 'Supply Chain Recovery Workflow',
+    slideSubtitle: 'Plan, source, make, deliver, resolve, and improve',
     tiles: [
       { id: 'hdr',    type: 'accent-header', col: 1, row: 1, cs: 12, rs: 1 },
       { id: 'flow',   type: 'pipeline',      col: 1, row: 2, cs: 12, rs: 2 },
@@ -82,9 +82,9 @@ export const TEMPLATES: TileTemplate[] = [
     id: 'executive',
     name: 'Executive Brief',
     icon: 'BRIEF',
-    description: 'Audit brief + KPIs + callout blocks',
-    slideTitle: 'Evaluation Audit Brief',
-    slideSubtitle: 'Copilot Studio review checklist · Current run',
+    description: 'Executive brief, KPIs, callout blocks, and action table',
+    slideTitle: 'Cybersecurity Executive Brief',
+    slideSubtitle: 'Risk reduction, response readiness, exposure, and controls',
     tiles: [
       { id: 'hdr',    type: 'accent-header', col: 1, row: 1, cs: 12, rs: 1 },
       { id: 'facts',  type: 'fact-sheet',    col: 1, row: 2, cs: 5,  rs: 6 },
@@ -98,9 +98,9 @@ export const TEMPLATES: TileTemplate[] = [
     id: 'data-report',
     name: 'Data Report',
     icon: 'DOC',
-    description: 'Step table + trend line + pie donut',
-    slideTitle: 'Evaluation Audit Evidence',
-    slideSubtitle: 'Steps, metrics, and response review',
+    description: 'Data table, trend line, pie chart, callout, and KPI',
+    slideTitle: 'Education Program Evidence',
+    slideSubtitle: 'Learner engagement, intervention quality, and completion',
     tiles: [
       { id: 'hdr',   type: 'accent-header', col: 1, row: 1, cs: 12, rs: 1 },
       { id: 'tbl',   type: 'table',         col: 1, row: 2, cs: 6,  rs: 4 },
@@ -114,9 +114,9 @@ export const TEMPLATES: TileTemplate[] = [
     id: 'kpi-board',
     name: 'KPI Board',
     icon: 'KPI',
-    description: 'All metrics — radar, pie, trend, KPIs',
-    slideTitle: 'Evaluation Surface KPI Board',
-    slideSubtitle: 'Metrics · Results · Responses · Evidence',
+    description: 'Dense metric board with KPIs, radar, pie, and trend',
+    slideTitle: 'Energy Operations KPI Board',
+    slideSubtitle: 'Reliability, safety, field response, and sustainability',
     tiles: [
       { id: 'hdr',    type: 'accent-header', col: 1,  row: 1, cs: 12, rs: 1 },
       { id: 'k1',     type: 'kpi',           col: 1,  row: 2, cs: 2,  rs: 2 },
@@ -131,15 +131,15 @@ export const TEMPLATES: TileTemplate[] = [
     ],
   },
 
-  // ── Agent & Bot Analytics Templates ──────────────────────────────────────
+  // Industry and specialty templates.
 
   {
     id: 'agent-analytics',
-    name: 'Agent Analytics',
-    icon: 'AGENT',
-    description: 'Agent response quality + session KPIs + message distribution',
-    slideTitle: 'Agent Performance Analytics',
-    slideSubtitle: 'Response quality · Session metrics · Message routing · CSAT',
+    name: 'Customer Success',
+    icon: 'CS',
+    description: 'Success score, adoption KPIs, engagement mix, and segment quality',
+    slideTitle: 'Customer Success Analytics',
+    slideSubtitle: 'Adoption, retention, support quality, and expansion signals',
     tiles: [
       { id: 'hdr',   type: 'accent-header', col: 1,  row: 1, cs: 12, rs: 1 },
       { id: 'k1',    type: 'kpi',           col: 1,  row: 2, cs: 3,  rs: 2 },
@@ -152,11 +152,11 @@ export const TEMPLATES: TileTemplate[] = [
   },
   {
     id: 'bot-dashboard',
-    name: 'Bot Dashboard',
-    icon: 'BOT',
-    description: 'Bot operations — status grid + trend + KPIs + resolution',
-    slideTitle: 'Bot Operations Dashboard',
-    slideSubtitle: 'Agent health · Resolution rates · Escalation tracking · Trends',
+    name: 'Public Sector',
+    icon: 'GOV',
+    description: 'Service status grid, trend, KPIs, and resolution outcomes',
+    slideTitle: 'Public Sector Service Dashboard',
+    slideSubtitle: 'Case volume, response timeliness, channel demand, and outcomes',
     tiles: [
       { id: 'hdr',     type: 'accent-header', col: 1, row: 1, cs: 12, rs: 1 },
       { id: 'k1',      type: 'kpi',           col: 1, row: 2, cs: 2,  rs: 2 },
@@ -169,11 +169,11 @@ export const TEMPLATES: TileTemplate[] = [
   },
   {
     id: 'conversation-flow',
-    name: 'Conversation Flow',
-    icon: 'CONV',
-    description: 'Intent routing + conversation metrics + flow pipeline',
-    slideTitle: 'Conversation Flow Analytics',
-    slideSubtitle: 'Intent distribution · Message routing · Resolution pipeline · Coverage',
+    name: 'Legal Ops Flow',
+    icon: 'LAW',
+    description: 'Matter routing, review metrics, and flow pipeline',
+    slideTitle: 'Legal Operations Matter Flow',
+    slideSubtitle: 'Matter intake, review routing, evidence readiness, and closeout',
     tiles: [
       { id: 'hdr',     type: 'accent-header', col: 1, row: 1, cs: 12, rs: 1 },
       { id: 'flow',    type: 'pipeline',      col: 1, row: 2, cs: 12, rs: 2 },
@@ -185,11 +185,11 @@ export const TEMPLATES: TileTemplate[] = [
 
   {
     id: 'channel-analytics',
-    name: 'Channel Analytics',
-    icon: 'CHAN',
-    description: 'Grouped column volume + KPIs + trend line + status grid',
-    slideTitle: 'Channel Volume Analytics',
-    slideSubtitle: 'Multi-channel volume · Trends · Fleet health · Weekly movement',
+    name: 'Field Services',
+    icon: 'FIELD',
+    description: 'Grouped column volume, KPIs, trend line, and operating status',
+    slideTitle: 'Field Services Channel Analytics',
+    slideSubtitle: 'Dispatch volume, technician capacity, parts availability, and SLA trend',
     tiles: [
       { id: 'hdr',    type: 'accent-header',   col: 1,  row: 1, cs: 12, rs: 1 },
       { id: 'k1',     type: 'kpi',             col: 1,  row: 2, cs: 3,  rs: 2 },

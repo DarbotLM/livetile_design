@@ -47,6 +47,7 @@ function JsonBadge({ onClick }: { onClick: (e: React.MouseEvent) => void }) {
 function TypeBadge({ type }: { type: string }) {
   return (
     <div
+      aria-hidden="true"
       style={{
         position: 'absolute',
         bottom: 3,
@@ -139,7 +140,17 @@ function TileShell({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      aria-label={`Select ${tile.type} tile named ${tile.id}`}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); setFlipped(false); }}
       style={{
@@ -147,7 +158,7 @@ function TileShell({
         gridRow: `${tile.row} / span ${tile.rs}`,
         position: 'relative',
         cursor: 'pointer',
-        borderRadius: 5,
+        borderRadius: 6,
         overflow: 'hidden',
         transition: 'box-shadow 180ms ease, outline 180ms ease',
         outline: selected
@@ -237,6 +248,8 @@ export function SlideCanvas({
 
   return (
     <div
+      role="region"
+      aria-label={`${template.name} slide canvas`}
       style={{
         width: '100%',
         aspectRatio: '1280 / 720',

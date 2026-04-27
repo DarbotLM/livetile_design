@@ -16,6 +16,8 @@ export function ThemeSwitcher({ themes, selectedId, onSelect }: ThemeSwitcherPro
 
   return (
     <div
+      role="radiogroup"
+      aria-label="Theme selection"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -34,9 +36,12 @@ export function ThemeSwitcher({ themes, selectedId, onSelect }: ThemeSwitcherPro
             onMouseEnter={() => setHoveredId(t.id)}
             onMouseLeave={() => setHoveredId(null)}
           >
-            <button
+              <button
+              type="button"
               onClick={() => onSelect(t.id)}
-              aria-label={`Theme: ${t.name}`}
+              role="radio"
+              aria-checked={isSelected}
+              aria-label={`Select ${t.name} theme`}
               style={{
                 width: 22,
                 height: 22,

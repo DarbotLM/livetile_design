@@ -1,7 +1,24 @@
 export { TileRenderer } from './TileRenderer';
+export {
+  GALLERY_ASSET_COVERAGE,
+  GALLERY_ASSET_TITLES,
+  GALLERY_ASSET_TOTAL,
+} from './galleryAssetCoverage';
+export type {
+  GalleryAssetCollectionCoverage,
+  GalleryAssetCoverage,
+  GalleryAssetCoverageTarget,
+  GalleryAssetKind,
+} from './galleryAssetCoverage';
 export { HeroTile } from './HeroTile';
 export { AccentHeaderTile } from './AccentHeaderTile';
 export { KpiTile } from './KpiTile';
+export { AccuracyTile } from './AccuracyTile';
+export type { AccuracyTileData, AccuracyTrend } from './AccuracyTile';
+export { EventsSecTile } from './EventsSecTile';
+export type { EventsSecTileData } from './EventsSecTile';
+export { StatusTile } from './StatusTile';
+export type { StatusSystem, StatusTileData, SystemStatus } from './StatusTile';
 export { BarChartTile } from './BarChartTile';
 export { PieChartTile } from './PieChartTile';
 export { LineChartTile } from './LineChartTile';

@@ -23,24 +23,32 @@ function TemplateThumbnail({
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      aria-pressed={selected}
+      aria-label={`Select ${tmpl.name} template. ${tmpl.description}`}
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 4,
+        gap: 5,
         cursor: 'pointer',
         flexShrink: 0,
+        width: 92,
+        border: 'none',
+        background: 'transparent',
+        padding: 0,
+        color: 'inherit',
       }}
     >
       <div
         style={{
-          width: 80,
-          height: 50,
-          borderRadius: 4,
+          width: 86,
+          height: 54,
+          borderRadius: 6,
           background: selected ? theme.emphasisBg : 'rgba(255,255,255,0.03)',
           border: `1px solid ${
             selected ? theme.accent : hovered ? theme.border : 'rgba(255,255,255,0.08)'
@@ -78,10 +86,13 @@ function TemplateThumbnail({
           ))}
         </div>
 
-        {/* Icon (hidden when selected to let grid show through) */}
+        {/* Text cue hidden when selected to let grid show through */}
         <div
           style={{
-            fontSize: '14px',
+            fontSize: '9px',
+            fontWeight: 800,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
             position: 'relative',
             zIndex: 1,
             opacity: selected ? 0 : 0.6,
@@ -94,7 +105,7 @@ function TemplateThumbnail({
       {/* Label */}
       <div
         style={{
-          fontSize: '8.5px',
+          fontSize: '9px',
           fontWeight: selected ? 700 : 500,
           color: selected ? theme.accentLight : theme.textSubtle,
           textAlign: 'center',
@@ -104,7 +115,7 @@ function TemplateThumbnail({
       >
         {tmpl.name}
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -114,10 +125,12 @@ function TemplateThumbnail({
 export function TemplateBrowser({ templates, selectedId, onSelect, theme }: TemplateBrowserProps) {
   return (
     <div
+      role="list"
+      aria-label="Template library"
       style={{
         display: 'flex',
-        gap: 10,
-        padding: '8px 16px',
+        gap: 12,
+        padding: '9px 18px',
         overflowX: 'auto',
         overflowY: 'hidden',
         alignItems: 'flex-start',
@@ -125,13 +138,14 @@ export function TemplateBrowser({ templates, selectedId, onSelect, theme }: Temp
       }}
     >
       {templates.map((tmpl) => (
-        <TemplateThumbnail
-          key={tmpl.id}
-          tmpl={tmpl}
-          selected={tmpl.id === selectedId}
-          onClick={() => onSelect(tmpl.id)}
-          theme={theme}
-        />
+        <div role="listitem" key={tmpl.id}>
+          <TemplateThumbnail
+            tmpl={tmpl}
+            selected={tmpl.id === selectedId}
+            onClick={() => onSelect(tmpl.id)}
+            theme={theme}
+          />
+        </div>
       ))}
     </div>
   );

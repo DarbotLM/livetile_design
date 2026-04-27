@@ -1,19 +1,80 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import '@/design/index.css';
 
 import { THEMES, DEFAULT_THEME_ID } from '@/shared/themes';
 import { TEMPLATES } from '@/shared/templates';
 import { buildSlideProfile } from '@/shared/profile-builder';
 import { getDefaultContent } from '@/shared/sample-data';
+import { CURATED_GALLERY_ITEMS } from '@/shared/gallery';
+import {
+  LIVETILE_APPLE_TOUCH_ICON,
+  LIVETILE_FAVICON,
+  LIVETILE_MANIFEST_ICONS,
+  LIVETILE_PRIMARY_ICON,
+} from '@/shared/livetile-assets';
+import { getCatalogByGroup, TILE_CATALOG_STATS, type TileCatalogGroup } from '@/shared/tile-catalog';
 import { SlideCanvas } from '@/canvas/SlideCanvas';
 import { TemplateBrowser } from '@/canvas/TemplateBrowser';
 import { ThemeSwitcher } from '@/canvas/ThemeSwitcher';
 import { JsonInspector } from '@/canvas/JsonInspector';
 import { SettingsPanel } from '@/canvas/SettingsPanel';
+import { GALLERY_ASSET_COVERAGE, GALLERY_ASSET_TOTAL } from '@/tiles';
 
 import type { TileTemplate } from '@/shared/types';
 
-type InspectorMode = 'slide' | 'tile' | 'gallery';
+type InspectorMode = 'slide' | 'tile' | 'catalog' | 'gallery';
+
+const inspectorModeLabels: Record<InspectorMode, string> = {
+  slide: 'SLIDE PROFILE',
+  tile: 'TILE PROFILE',
+  catalog: 'CATALOG',
+  gallery: 'GALLERY',
+};
+
+const catalogGroupLabels: Record<TileCatalogGroup, string> = {
+  layout: 'Layout Tiles',
+  chart: 'Chart Tiles',
+  data: 'Data Tiles',
+  comparison: 'Comparison Tiles',
+  status: 'Status Tiles',
+  input: 'Input Tiles',
+  'flipcard-action': 'Flipcard Actions',
+  'flipcard-container': 'Flipcard Containers',
+  'flipcard-input': 'Flipcard Inputs',
+  'flipcard-media': 'Flipcard Media',
+  'flipcard-text': 'Flipcard Text',
+  'flipcard-layout': 'Flipcard Layout',
+  'flipcard-reference': 'Flipcard Reference',
+};
+
+const catalogGroupOrder: TileCatalogGroup[] = [
+  'layout',
+  'chart',
+  'data',
+  'comparison',
+  'status',
+  'input',
+  'flipcard-action',
+  'flipcard-container',
+  'flipcard-input',
+  'flipcard-media',
+  'flipcard-text',
+  'flipcard-layout',
+  'flipcard-reference',
+];
+
+const catalogByGroup = getCatalogByGroup();
+
+function setHeadLink(rel: string, href: string, type?: string) {
+  let link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = rel;
+    document.head.appendChild(link);
+  }
+  link.href = href;
+  if (type) link.type = type;
+}
 
 const galleryImageModules = import.meta.glob('../lib/img/*.png', {
   eager: true,
@@ -33,8 +94,15 @@ const galleryImages = Object.entries(galleryImageModules)
   })
   .sort((a, b) => a.fileName.localeCompare(b.fileName));
 
+const galleryImageByFileName = new Map(galleryImages.map((image) => [image.fileName, image]));
+
+const curatedGalleryImages = CURATED_GALLERY_ITEMS.map((item) => {
+  const image = galleryImageByFileName.get(item.fileName);
+  return image ? { ...image, ...item } : null;
+}).filter((image): image is NonNullable<typeof image> => image !== null);
+
 /**
- * LiveTile Design Studio -- main application shell.
+ * livetile design -- main application shell.
  * Wires canvas, template browser, theme switcher, settings panel,
  * and JSON inspector together.
  */
@@ -46,11 +114,34 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Settings state
-  const [gridGap, setGridGap] = useState(3);
-  const [gridPadding, setGridPadding] = useState(4);
+  const [gridGap, setGridGap] = useState(4);
+  const [gridPadding, setGridPadding] = useState(6);
   const [animSpeed, setAnimSpeed] = useState(500);
 
   const theme = THEMES[themeId] ?? THEMES[DEFAULT_THEME_ID]!;
+
+  useEffect(() => {
+    if (LIVETILE_FAVICON) {
+      setHeadLink('icon', LIVETILE_FAVICON.src, LIVETILE_FAVICON.format === 'svg' ? 'image/svg+xml' : undefined);
+    }
+
+    if (LIVETILE_APPLE_TOUCH_ICON) {
+      setHeadLink('apple-touch-icon', LIVETILE_APPLE_TOUCH_ICON.src);
+    }
+
+    const manifest = {
+      name: 'livetile design',
+      short_name: 'livetile',
+      icons: LIVETILE_MANIFEST_ICONS,
+      theme_color: '#168CFF',
+      background_color: '#080A0C',
+      display: 'standalone',
+    };
+    const manifestUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+    setHeadLink('manifest', manifestUrl, 'application/manifest+json');
+
+    return () => URL.revokeObjectURL(manifestUrl);
+  }, []);
 
   const template: TileTemplate = useMemo(
     () => TEMPLATES.find((t) => t.id === templateId) ?? TEMPLATES[0]!,
@@ -123,7 +214,7 @@ export function App() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '10px 20px',
+          padding: '9px 20px',
           borderBottom: `1px solid ${theme.border}`,
           flexShrink: 0,
           background: theme.headerGrad,
@@ -132,26 +223,42 @@ export function App() {
       >
         {/* Logo / Title -- clickable to expand settings */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
+          <button
             className="logo-tile"
             onClick={() => setSettingsOpen((v) => !v)}
-            title="Open Design Settings"
+            type="button"
+            aria-label="Open design settings"
+            aria-expanded={settingsOpen}
             style={{
               width: 28,
               height: 28,
               borderRadius: 6,
+              border: 'none',
               background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentLight})`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '14px',
-              fontWeight: 800,
-              color: '#fff',
+              padding: 3,
               boxShadow: `0 0 12px ${theme.accentGlow}`,
+              cursor: 'pointer',
             }}
           >
-            {settingsOpen ? 'S' : 'LT'}
-          </div>
+            {LIVETILE_PRIMARY_ICON ? (
+              <img
+                src={LIVETILE_PRIMARY_ICON.src}
+                alt=""
+                aria-hidden="true"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: settingsOpen ? 'brightness(1.15)' : 'none',
+                }}
+              />
+            ) : (
+              'LT'
+            )}
+          </button>
           <div>
             <div
               style={{
@@ -161,7 +268,7 @@ export function App() {
                 color: theme.text,
               }}
             >
-              LiveTile Design Studio
+              livetile design
             </div>
             <div
               style={{
@@ -228,16 +335,16 @@ export function App() {
         <div
           className="canvas-area"
           style={{
-            flex: '0 0 65%',
+            flex: '0 0 62%',
             display: 'flex',
             flexDirection: 'column',
-            padding: '16px 16px 12px 20px',
+            padding: '12px 12px 10px 18px',
             overflow: 'hidden',
           }}
         >
           {/* Canvas */}
-          <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-            <div style={{ width: '100%', maxHeight: '100%' }}>
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', position: 'relative', zIndex: 1, paddingTop: 6 }}>
+            <div style={{ width: '100%', maxWidth: 1180, maxHeight: '100%' }}>
               <SlideCanvas
                 template={template}
                 themeId={themeId}
@@ -253,7 +360,7 @@ export function App() {
           {/* Slide Title / Subtitle below canvas */}
           <div
             style={{
-              padding: '10px 0 0',
+              padding: '8px 0 0',
               textAlign: 'center',
               flexShrink: 0,
               position: 'relative',
@@ -282,13 +389,13 @@ export function App() {
           </div>
         </div>
 
-        {/* JSON Inspector Area (~35%) */}
+         {/* JSON Inspector Area */}
         <div
           style={{
-            flex: '0 0 35%',
+            flex: '0 0 38%',
             display: 'flex',
             flexDirection: 'column',
-            padding: '16px 20px 12px 8px',
+            padding: '12px 18px 10px 10px',
             overflow: 'hidden',
             borderLeft: `1px solid ${theme.border}`,
             transition: 'border-color 300ms ease',
@@ -298,12 +405,12 @@ export function App() {
           <div
             style={{
               display: 'flex',
-              gap: 2,
-              marginBottom: 8,
+              gap: 4,
+              marginBottom: 10,
               flexShrink: 0,
             }}
           >
-            {(['slide', 'tile', 'gallery'] as const).map((mode) => {
+            {(['slide', 'tile', 'catalog', 'gallery'] as const).map((mode) => {
               const isActive = inspectorMode === mode;
               const disabled = mode === 'tile' && !selectedTileProfile;
               return (
@@ -313,9 +420,9 @@ export function App() {
                   disabled={disabled}
                   style={{
                     flex: 1,
-                    padding: '5px 0',
+                    padding: '6px 4px',
                     borderRadius: 4,
-                    fontSize: '8.5px',
+                    fontSize: '9px',
                     fontWeight: 700,
                     letterSpacing: '0.06em',
                     textTransform: 'uppercase',
@@ -331,12 +438,10 @@ export function App() {
                     borderStyle: 'solid',
                     borderColor: isActive ? theme.emphasisBorder : 'transparent',
                   }}
+                  aria-pressed={isActive}
+                  aria-label={`Show ${inspectorModeLabels[mode].toLowerCase()}`}
                 >
-                  {mode === 'slide'
-                    ? 'SLIDE PROFILE'
-                    : mode === 'tile'
-                      ? 'TILE PROFILE'
-                      : 'GALLERY'}
+                  {inspectorModeLabels[mode]}
                 </button>
               );
             })}
@@ -344,7 +449,7 @@ export function App() {
 
           {/* Inspector */}
           <div style={{ flex: 1, minHeight: 0 }}>
-            {inspectorMode === 'gallery' ? (
+            {inspectorMode === 'catalog' ? (
               <div
                 style={{
                   height: '100%',
@@ -370,14 +475,277 @@ export function App() {
                         textTransform: 'uppercase',
                       }}
                     >
-                      Bakeoff Gallery
+                      Tile Catalog
                     </div>
                     <div style={{ fontSize: '8px', color: theme.textSubtle, marginTop: 2 }}>
-                      Visual evidence from the first parallel agent platform bakeoff.
+                      Slide tiles and first-class flipcard enum reference tiles.
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '8px', color: theme.textSubtle, textAlign: 'right' }}>
+                    {TILE_CATALOG_STATS.total} entries<br />
+                    {TILE_CATALOG_STATS.flipcardTiles} flipcard
+                  </div>
+                </div>
+
+                {catalogGroupOrder
+                  .filter((group) => catalogByGroup[group].length > 0)
+                  .map((group) => (
+                    <section key={group} style={{ marginBottom: 14 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: 7,
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: 800,
+                            color: theme.text,
+                            letterSpacing: '0.06em',
+                            textTransform: 'uppercase',
+                          }}
+                        >
+                          {catalogGroupLabels[group]}
+                        </div>
+                        <div style={{ fontSize: '8px', color: theme.textSubtle }}>
+                          {catalogByGroup[group].length}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+                          gap: 8,
+                        }}
+                      >
+                        {catalogByGroup[group].map((entry) => (
+                          <div
+                            key={entry.type}
+                            style={{
+                              background: theme.card,
+                              border: `1px solid ${theme.border}`,
+                              borderRadius: 8,
+                              padding: '8px 9px',
+                              minHeight: 96,
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                gap: 8,
+                                marginBottom: 5,
+                              }}
+                            >
+                              <div style={{ fontSize: '9px', fontWeight: 800, color: theme.text }}>
+                                {entry.displayName}
+                              </div>
+                              <span
+                                style={{
+                                  fontSize: '7px',
+                                  color: entry.renderableInSlide ? theme.accentLight : theme.textSubtle,
+                                  background: theme.pill,
+                                  border: `1px solid ${theme.pillBorder}`,
+                                  borderRadius: 4,
+                                  padding: '1px 4px',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {entry.renderableInSlide ? 'slide' : 'flipcard'}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '8px', color: theme.textSubtle, lineHeight: 1.35 }}>
+                              {entry.description}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 7,
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                gap: 8,
+                                fontSize: '7px',
+                                color: theme.textSubtle,
+                              }}
+                            >
+                              <span>{entry.componentName}</span>
+                              <span>{entry.minSpan.cols}x{entry.minSpan.rows}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+              </div>
+            ) : inspectorMode === 'gallery' ? (
+              <div
+                style={{
+                  height: '100%',
+                  overflowY: 'auto',
+                  paddingRight: 4,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 10,
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        color: theme.accentLight,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Pattern Library Coverage
+                    </div>
+                    <div style={{ fontSize: '8px', color: theme.textSubtle, marginTop: 2 }}>
+                      Assets audited from flipcard-pattern-library.html and related library sources.
                     </div>
                   </div>
                   <div style={{ fontSize: '8px', color: theme.textSubtle }}>
-                    {galleryImages.length} images
+                    {GALLERY_ASSET_TOTAL} assets
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
+                    gap: 10,
+                    marginBottom: 18,
+                  }}
+                >
+                  {GALLERY_ASSET_COVERAGE.map((collection) => (
+                    <div
+                      key={collection.title}
+                      style={{
+                        background: theme.card,
+                        border: `1px solid ${theme.border}`,
+                        borderRadius: 8,
+                        padding: '9px 10px',
+                        minHeight: 120,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          gap: 8,
+                          marginBottom: 5,
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: 800,
+                            color: theme.text,
+                            lineHeight: 1.25,
+                          }}
+                        >
+                          {collection.title}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '8px',
+                            fontWeight: 800,
+                            color: theme.accentLight,
+                            background: theme.emphasisBg,
+                            border: `1px solid ${theme.emphasisBorder}`,
+                            borderRadius: 999,
+                            padding: '1px 6px',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {collection.assets.length}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '8px',
+                          color: theme.textSubtle,
+                          lineHeight: 1.35,
+                          marginBottom: 7,
+                        }}
+                      >
+                        {collection.description}
+                      </div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 4,
+                        }}
+                      >
+                        {collection.assets.slice(0, 6).map((asset) => (
+                          <span
+                            key={asset.pathname}
+                            title={`${asset.title} - ${asset.source}`}
+                            style={{
+                              fontSize: '7px',
+                              lineHeight: 1.25,
+                              color: theme.textMid,
+                              background: theme.pill,
+                              border: `1px solid ${theme.pillBorder}`,
+                              borderRadius: 4,
+                              padding: '2px 5px',
+                            }}
+                          >
+                            {asset.title}
+                          </span>
+                        ))}
+                        {collection.assets.length > 6 && (
+                          <span
+                            style={{
+                              fontSize: '7px',
+                              lineHeight: 1.25,
+                              color: theme.textSubtle,
+                              border: `1px solid ${theme.border}`,
+                              borderRadius: 4,
+                              padding: '2px 5px',
+                            }}
+                          >
+                            +{collection.assets.length - 6} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 10,
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 800,
+                        color: theme.accentLight,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Curated Reference Gallery
+                    </div>
+                    <div style={{ fontSize: '8px', color: theme.textSubtle, marginTop: 2 }}>
+                      Canonical visual evidence selected from the full screenshot inventory.
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '8px', color: theme.textSubtle }}>
+                    {curatedGalleryImages.length} curated / {galleryImages.length} total
                   </div>
                 </div>
                 <div
@@ -387,7 +755,7 @@ export function App() {
                     gap: 10,
                   }}
                 >
-                  {galleryImages.map((image) => (
+                  {curatedGalleryImages.map((image) => (
                     <a
                       key={image.fileName}
                       href={image.src}
@@ -424,6 +792,9 @@ export function App() {
                         }}
                       >
                         {image.title}
+                        <div style={{ marginTop: 3, color: theme.textSubtle }}>
+                          {image.group} | {image.description}
+                        </div>
                       </div>
                     </a>
                   ))}

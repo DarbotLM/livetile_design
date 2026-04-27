@@ -1,335 +1,446 @@
 import type {
-  TileType,
-  TileContentMap,
-  KpiContent,
   BarChartDataPoint,
-  PieChartDataPoint,
+  GroupedColumnDataPoint,
+  GroupedColumnSeries,
+  KpiContent,
   LineChartDataPoint,
+  PieChartDataPoint,
   RadarChartDataPoint,
   StackedBarDataPoint,
+  StatusGridItem,
+  TileContentMap,
+  TileType,
 } from './types';
 
-import {
-  AGENT_KPI_BANK,
-  AGENT_RESPONSE_DATA,
-  BOT_MESSAGE_PIE,
-  AGENT_TREND_DATA,
-  INTENT_RADAR_DATA,
-  BOT_RESOLUTION_DATA,
-  AGENT_STATUS_ITEMS,
-} from './agent-data';
+type DomainLibrary = {
+  title: string;
+  subtitle: string;
+  badge: string;
+  headerPage: string;
+  kpis: KpiContent[];
+  barTitle: string;
+  barData: BarChartDataPoint[];
+  pieTitle: string;
+  pieData: PieChartDataPoint[];
+  lineTitle: string;
+  lineData: LineChartDataPoint[];
+  radarTitle: string;
+  radarData: RadarChartDataPoint[];
+  stackedTitle: string;
+  stackedData: StackedBarDataPoint[];
+  tableTitle: string;
+  tableColumns: string[];
+  tableRows: string[][];
+  factTitle: string;
+  factSubtitle: string;
+  facts: Array<{ key: string; value: string }>;
+  pipelineTitle: string;
+  pipelineSteps: string[];
+  completedCount: number;
+  statusTitle: string;
+  statusItems: StatusGridItem[];
+  cardsDescription: string;
+  cards: string[];
+  metaTitle: string;
+  metaEntries: Array<{ key: string; value: string; highlight?: boolean }>;
+  insightLabel: string;
+  insightText: string;
+  insightHighlights: string[];
+  compareLeftLabel: string;
+  compareLeftStrategy: string;
+  compareLeftItems: string[];
+  compareLeftFooter: string;
+  compareRightLabel: string;
+  compareRightStrategy: string;
+  compareRightItems: string[];
+  compareRightFooter: string;
+  statTitle: string;
+  stats: Array<{ label: string; value: string; up: boolean }>;
+  groupedTitle: string;
+  groupedSeries: GroupedColumnSeries[];
+  groupedData: GroupedColumnDataPoint[];
+};
 
-// ── Static Data Banks ────────────────────────────────────────────────────────
-
-/** Six KPI samples covering the evaluation audit surface */
 export const KPI_BANK: KpiContent[] = [
-  { label: 'Eval Configs',  value: '12',  delta: '+2',     up: true  },
-  { label: 'Eval Metrics',  value: '48',  delta: '+6',     up: true  },
-  { label: 'Result Runs',   value: '19',  delta: '+3',     up: true  },
-  { label: 'Best Model',    value: '92%', delta: 'stable', up: null  },
-  { label: 'Resp. Traces',  value: '38',  delta: '+8',     up: true  },
-  { label: 'Follow-ups',    value: '3',   delta: 'down 1', up: true  },
+  { label: 'Service Level', value: '96%', delta: '+2%', up: true },
+  { label: 'Cycle Time', value: '4.2d', delta: '-0.6d', up: true },
+  { label: 'Risk Items', value: '7', delta: '-3', up: true },
+  { label: 'Coverage', value: '84%', delta: '+5%', up: true },
+  { label: 'Cost Index', value: '0.91', delta: '-4%', up: true },
+  { label: 'Escalations', value: '12', delta: '+2', up: false },
 ];
 
-/** BIC (Benchmark for Information Completeness) bar chart data */
 export const BIC_DATA: BarChartDataPoint[] = [
-  { dim: 'Relevance', score: 91, prev: 88 },
-  { dim: 'Complete',  score: 84, prev: 80 },
-  { dim: 'Coherence', score: 88, prev: 86 },
-  { dim: 'Tool Acc',  score: 79, prev: 82 },
-  { dim: 'Citation',  score: 85, prev: 83 },
+  { dim: 'Quality', score: 91, prev: 87 },
+  { dim: 'Speed', score: 84, prev: 81 },
+  { dim: 'Cost', score: 88, prev: 86 },
+  { dim: 'Risk', score: 79, prev: 82 },
+  { dim: 'Experience', score: 85, prev: 80 },
 ];
 
-/** Audit evidence distribution for pie / donut charts */
 export const PIE_DATA: PieChartDataPoint[] = [
-  { name: 'Offline Eval', value: 45 },
-  { name: 'Online A/B',   value: 30 },
-  { name: 'Shadow Mode',  value: 15 },
-  { name: 'Canary',       value: 10 },
+  { name: 'Core Ops', value: 44 },
+  { name: 'Advisory', value: 28 },
+  { name: 'Automation', value: 18 },
+  { name: 'Exception', value: 10 },
 ];
 
-/** Quarterly quality trend line data */
 export const TREND_DATA: LineChartDataPoint[] = [
-  { q: "Q1 '24", bic: 0.78, latency: 2.8, tput: 88   },
-  { q: "Q2 '24", bic: 0.82, latency: 2.4, tput: 92   },
-  { q: "Q3 '24", bic: 0.85, latency: 2.1, tput: 95   },
-  { q: "Q4 '24", bic: 0.87, latency: 1.9, tput: 97   },
-  { q: "Q1 '25", bic: 0.91, latency: 1.7, tput: 99.9 },
+  { q: "Q1 '25", bic: 0.78, latency: 2.8, tput: 88 },
+  { q: "Q2 '25", bic: 0.82, latency: 2.4, tput: 92 },
+  { q: "Q3 '25", bic: 0.86, latency: 2.1, tput: 95 },
+  { q: "Q4 '25", bic: 0.89, latency: 1.9, tput: 98 },
+  { q: "Q1 '26", bic: 0.92, latency: 1.6, tput: 99 },
 ];
 
-/** Radar chart data for dimension coverage */
 export const RADAR_DATA: RadarChartDataPoint[] = [
-  { dim: 'Grounded', score: 91 },
-  { dim: 'Relevant', score: 88 },
-  { dim: 'Complete', score: 84 },
-  { dim: 'Tool Use', score: 79 },
-  { dim: 'Coherent', score: 88 },
-  { dim: 'Citation', score: 85 },
+  { dim: 'Quality', score: 91 },
+  { dim: 'Speed', score: 84 },
+  { dim: 'Cost', score: 88 },
+  { dim: 'Risk', score: 79 },
+  { dim: 'Adoption', score: 86 },
+  { dim: 'Evidence', score: 82 },
 ];
 
-/** Pass / Warn / Fail stacked bar data by quarter */
 export const STACKED_DATA: StackedBarDataPoint[] = [
-  { q: "Q3 '24", pass: 72, warn: 18, fail: 10 },
-  { q: "Q4 '24", pass: 78, warn: 15, fail: 7  },
-  { q: "Q1 '25", pass: 85, warn: 11, fail: 4  },
+  { q: 'Phase 1', pass: 72, warn: 18, fail: 10 },
+  { q: 'Phase 2', pass: 78, warn: 15, fail: 7 },
+  { q: 'Phase 3', pass: 85, warn: 11, fail: 4 },
 ];
 
-// ── Default Content Factory ──────────────────────────────────────────────────
+const BASE_LIBRARY: DomainLibrary = {
+  title: 'Operating Model Review',
+  subtitle: 'Performance, risk, adoption, and delivery quality',
+  badge: 'Library',
+  headerPage: '1 / 4',
+  kpis: KPI_BANK,
+  barTitle: 'Performance by Dimension',
+  barData: BIC_DATA,
+  pieTitle: 'Workload Distribution',
+  pieData: PIE_DATA,
+  lineTitle: 'Operating Trend',
+  lineData: TREND_DATA,
+  radarTitle: 'Capability Coverage',
+  radarData: RADAR_DATA,
+  stackedTitle: 'Readiness by Phase',
+  stackedData: STACKED_DATA,
+  tableTitle: 'Operating Review',
+  tableColumns: ['Area', 'Owner', 'Decision'],
+  tableRows: [
+    ['Demand', 'Operations', 'Scale intake'],
+    ['Quality', 'Delivery', 'Reduce rework'],
+    ['Risk', 'Controls', 'Close gaps'],
+    ['Adoption', 'Enablement', 'Improve uptake'],
+  ],
+  factTitle: 'Program Summary',
+  factSubtitle: 'Cross-industry planning view',
+  facts: [
+    { key: 'Portfolio', value: 'Shared services' },
+    { key: 'Scope', value: '12 workstreams' },
+    { key: 'Region', value: 'North America' },
+    { key: 'Review', value: 'Monthly' },
+    { key: 'Status', value: 'On track' },
+  ],
+  pipelineTitle: 'Delivery Workflow',
+  pipelineSteps: ['Intake', 'Triage', 'Plan', 'Execute', 'Validate', 'Improve'],
+  completedCount: 4,
+  statusTitle: 'Workstream Health',
+  statusItems: [
+    { label: 'Demand', subtitle: 'Volume stable', severity: 'good' },
+    { label: 'Quality', subtitle: 'Rework improving', severity: 'good' },
+    { label: 'Risk', subtitle: 'Two gaps open', severity: 'warning' },
+    { label: 'Data', subtitle: 'Lineage missing', severity: 'danger' },
+    { label: 'Change', subtitle: 'Training ready', severity: 'good' },
+    { label: 'Support', subtitle: 'Backlog steady', severity: 'good' },
+  ],
+  cardsDescription: 'Reusable specialty library cards',
+  cards: [
+    'Healthcare access',
+    'Financial controls',
+    'Retail experience',
+    'Manufacturing quality',
+    'Supply chain recovery',
+    'Cybersecurity posture',
+    'Education outcomes',
+    'Energy reliability',
+  ],
+  metaTitle: 'Library Metadata',
+  metaEntries: [
+    { key: 'Library', value: 'Generic Industries', highlight: true },
+    { key: 'Version', value: 'adaptive-slide/v1.0' },
+    { key: 'Templates', value: '12' },
+    { key: 'Tile Families', value: '18' },
+    { key: 'Use', value: 'Reusable demos' },
+  ],
+  insightLabel: 'Operating Insight',
+  insightText: 'The strongest boards pair outcome metrics with risk signals and a clear owner for the next action.',
+  insightHighlights: ['outcome metrics', 'risk signals', 'clear owner'],
+  compareLeftLabel: 'CURRENT',
+  compareLeftStrategy: 'Baseline Model',
+  compareLeftItems: ['Manual triage', 'Weekly reporting', 'Reactive controls', 'Limited instrumentation'],
+  compareLeftFooter: 'Good for small teams',
+  compareRightLabel: 'TARGET',
+  compareRightStrategy: 'Scaled Model',
+  compareRightItems: ['Automated routing', 'Daily telemetry', 'Preventive controls', 'Decision-ready evidence'],
+  compareRightFooter: 'Ready for enterprise operations',
+  statTitle: 'Movement',
+  stats: [
+    { label: 'Quality', value: '+4%', up: true },
+    { label: 'Speed', value: '+7%', up: true },
+    { label: 'Risk', value: '-3', up: true },
+  ],
+  groupedTitle: 'Volume by Channel',
+  groupedSeries: [
+    { key: 'digital', name: 'Digital' },
+    { key: 'field', name: 'Field' },
+    { key: 'partner', name: 'Partner' },
+  ],
+  groupedData: [
+    { category: 'Week 1', digital: 320, field: 180, partner: 95 },
+    { category: 'Week 2', digital: 340, field: 210, partner: 88 },
+    { category: 'Week 3', digital: 380, field: 195, partner: 102 },
+    { category: 'Week 4', digital: 410, field: 230, partner: 110 },
+    { category: 'Week 5', digital: 450, field: 250, partner: 125 },
+  ],
+};
 
-/** Template IDs that use agent/bot-focused data */
-const AGENT_TEMPLATE_IDS = new Set(['agent-analytics', 'bot-dashboard', 'conversation-flow', 'channel-analytics']);
+const LIBRARIES: Record<string, DomainLibrary> = {
+  'title-overview': {
+    ...BASE_LIBRARY,
+    title: 'Healthcare Access Program',
+    subtitle: 'Patient intake, care navigation, service quality, and outcomes',
+    badge: 'Health',
+    cardsDescription: 'Healthcare operating capabilities',
+    cards: ['Patient intake', 'Care navigation', 'Provider access', 'Claims support', 'Quality measures', 'Member outreach', 'Referral flow', 'Equity review'],
+    metaEntries: [
+      { key: 'Industry', value: 'Healthcare', highlight: true },
+      { key: 'Specialty', value: 'Access operations' },
+      { key: 'Audience', value: 'Care leadership' },
+      { key: 'Review', value: 'Weekly' },
+      { key: 'Schema', value: 'adaptive-slide/v1.0' },
+    ],
+  },
+  dashboard: {
+    ...BASE_LIBRARY,
+    title: 'Financial Services Portfolio Dashboard',
+    subtitle: 'Risk posture, service levels, client impact, and operations',
+    headerPage: '2 / 4',
+    kpis: [
+      { label: 'SLA Met', value: '97%', delta: '+1%', up: true },
+      { label: 'Open Risk', value: '14', delta: '-5', up: true },
+      { label: 'Client NPS', value: '61', delta: '+4', up: true },
+      { label: 'Cost Ratio', value: '0.78', delta: '-3%', up: true },
+    ],
+    barTitle: 'Control Scores by Domain',
+    pieTitle: 'Portfolio Exposure Mix',
+  },
+  analytics: {
+    ...BASE_LIBRARY,
+    title: 'Retail Demand and Experience Analytics',
+    subtitle: 'Demand trend, channel mix, loyalty signals, and conversion',
+    lineTitle: 'Demand Conversion Trend',
+    radarTitle: 'Experience Coverage',
+    stackedTitle: 'Promotion Readiness',
+    statTitle: 'Customer Movement',
+  },
+  comparison: {
+    ...BASE_LIBRARY,
+    title: 'Manufacturing Quality Strategy',
+    subtitle: 'Preventive controls, inspection flow, throughput, and defects',
+    compareLeftLabel: 'INSPECT',
+    compareLeftStrategy: 'Reactive Quality',
+    compareLeftItems: ['End-line inspection', 'Manual defect coding', 'Batch-level review', 'Delayed containment'],
+    compareLeftFooter: 'Higher rework exposure',
+    compareRightLabel: 'PREVENT',
+    compareRightStrategy: 'Predictive Quality',
+    compareRightItems: ['Inline signal capture', 'Automated defect taxonomy', 'Cell-level alerts', 'Fast containment loop'],
+    compareRightFooter: 'Lower scrap and rework',
+  },
+  pipeline: {
+    ...BASE_LIBRARY,
+    title: 'Supply Chain Recovery Workflow',
+    subtitle: 'Plan, source, make, deliver, resolve, and improve',
+    pipelineTitle: 'Recovery Workflow',
+    pipelineSteps: ['Detect', 'Prioritize', 'Allocate', 'Expedite', 'Communicate', 'Stabilize'],
+    statusTitle: 'Supply Health',
+    barTitle: 'Recovery Impact by Node',
+  },
+  executive: {
+    ...BASE_LIBRARY,
+    title: 'Cybersecurity Executive Brief',
+    subtitle: 'Risk reduction, response readiness, exposure, and controls',
+    factTitle: 'Security Posture',
+    factSubtitle: 'Board-ready operating summary',
+    facts: [
+      { key: 'Threat Level', value: 'Elevated' },
+      { key: 'Coverage', value: '92%' },
+      { key: 'Open Vulns', value: '17' },
+      { key: 'MTTR', value: '4.6 hours' },
+      { key: 'Status', value: 'Improving' },
+    ],
+    insightLabel: 'Risk Insight',
+    insightText: 'Exposure is down, but identity coverage and third-party evidence need tighter operating cadence.',
+    insightHighlights: ['Exposure', 'identity coverage', 'third-party evidence'],
+  },
+  'data-report': {
+    ...BASE_LIBRARY,
+    title: 'Education Program Evidence',
+    subtitle: 'Learner engagement, intervention quality, and completion',
+    tableTitle: 'Program Evidence',
+    tableColumns: ['Metric', 'Segment', 'Action'],
+    tableRows: [
+      ['Attendance', 'Grade 9', 'Target outreach'],
+      ['Completion', 'STEM', 'Add tutoring'],
+      ['Engagement', 'Hybrid', 'Refresh content'],
+      ['Support', 'Advising', 'Increase capacity'],
+    ],
+    pieTitle: 'Learner Support Mix',
+  },
+  'kpi-board': {
+    ...BASE_LIBRARY,
+    title: 'Energy Operations KPI Board',
+    subtitle: 'Reliability, safety, field response, and sustainability',
+    kpis: [
+      { label: 'Reliability', value: '99.94%', delta: '+0.02%', up: true },
+      { label: 'Safety', value: '0.7', delta: '-0.1', up: true },
+      { label: 'Response', value: '38m', delta: '-6m', up: true },
+      { label: 'Emissions', value: '-8%', delta: '-2%', up: true },
+      { label: 'Backlog', value: '42', delta: '+4', up: false },
+      { label: 'Coverage', value: '91%', delta: '+3%', up: true },
+    ],
+    radarTitle: 'Reliability Coverage',
+    pieTitle: 'Asset Work Mix',
+    lineTitle: 'Field Response Trend',
+  },
+  'agent-analytics': {
+    ...BASE_LIBRARY,
+    title: 'Customer Success Analytics',
+    subtitle: 'Adoption, retention, support quality, and expansion signals',
+    barTitle: 'Success Score by Segment',
+    pieTitle: 'Engagement Mix',
+  },
+  'bot-dashboard': {
+    ...BASE_LIBRARY,
+    title: 'Public Sector Service Dashboard',
+    subtitle: 'Case volume, response timeliness, channel demand, and outcomes',
+    statusTitle: 'Service Health',
+    stackedTitle: 'Case Outcomes by Day',
+  },
+  'conversation-flow': {
+    ...BASE_LIBRARY,
+    title: 'Legal Operations Matter Flow',
+    subtitle: 'Matter intake, review routing, evidence readiness, and closeout',
+    pipelineTitle: 'Matter Flow',
+    pipelineSteps: ['Intake', 'Conflict check', 'Assign', 'Review', 'Approve', 'Close'],
+    radarTitle: 'Practice Coverage',
+    pieTitle: 'Matter Type Mix',
+  },
+  'channel-analytics': {
+    ...BASE_LIBRARY,
+    title: 'Field Services Channel Analytics',
+    subtitle: 'Dispatch volume, technician capacity, parts availability, and SLA trend',
+    groupedTitle: 'Dispatch Volume by Channel',
+    lineTitle: 'SLA Trend',
+  },
+};
 
-/**
- * Returns typed sample content for any tile type.
- * The `index` parameter is used for types that cycle through a bank (e.g. KPI).
- * The optional `templateId` parameter switches to agent/bot data banks when
- * rendering agent-focused templates.
- */
+function getLibrary(templateId?: string): DomainLibrary {
+  return (templateId && LIBRARIES[templateId]) || BASE_LIBRARY;
+}
+
 export function getDefaultContent<T extends TileType>(
   tileType: T,
   index: number,
   templateId?: string,
 ): TileContentMap[T] {
-  const isAgent = templateId ? AGENT_TEMPLATE_IDS.has(templateId) : false;
+  const lib = getLibrary(templateId);
 
   const contentMap: Record<TileType, () => TileContentMap[TileType]> = {
-    'hero': () => ({
-      title: isAgent ? 'Agent Performance Overview' : 'Copilot Studio Evaluation Audit',
-      subtitle: isAgent
-        ? 'Sessions · Resolution · Handoffs · CSAT'
-        : 'Open workspace · Review metrics · Review results · Review responses',
-      badge: '1 / 9',
+    hero: () => ({
+      title: lib.title,
+      subtitle: lib.subtitle,
+      badge: lib.badge,
     }),
-    'accent-header': () => isAgent
-      ? {
-          title: templateId === 'bot-dashboard'
-            ? 'Bot Operations Dashboard'
-            : templateId === 'conversation-flow'
-              ? 'Conversation Flow Analytics'
-              : 'Agent Performance Analytics',
-          subtitle: templateId === 'bot-dashboard'
-            ? 'Agent health · Resolution rates · Escalation tracking'
-            : templateId === 'conversation-flow'
-              ? 'Intent distribution · Message routing · Coverage'
-              : 'Response quality · Session metrics · CSAT',
-          page: '1 / 3',
-        }
-      : {
-          title: 'Evaluation Review Dashboard',
-          subtitle: 'Native metrics · Results archive · Response evidence',
-          page: '5 / 9',
-        },
-    'kpi': () => isAgent
-      ? AGENT_KPI_BANK[index % AGENT_KPI_BANK.length]!
-      : KPI_BANK[index % KPI_BANK.length]!,
+    'accent-header': () => ({
+      title: lib.title,
+      subtitle: lib.subtitle,
+      page: lib.headerPage,
+    }),
+    kpi: () => lib.kpis[index % lib.kpis.length]!,
     'bar-chart': () => ({
-      title: isAgent ? 'Agent Response Quality Scores' : 'BIC Scores by Dimension',
-      data: isAgent ? AGENT_RESPONSE_DATA : BIC_DATA,
+      title: lib.barTitle,
+      data: lib.barData,
     }),
     'pie-chart': () => ({
-      title: isAgent ? 'Bot Message Distribution' : 'Audit Evidence Distribution',
-      data: isAgent ? BOT_MESSAGE_PIE : PIE_DATA,
+      title: lib.pieTitle,
+      data: lib.pieData,
     }),
     'line-chart': () => ({
-      title: isAgent ? 'Agent Quality Trend (Weekly)' : 'Evaluation Quality Trend',
-      data: isAgent ? AGENT_TREND_DATA : TREND_DATA,
+      title: lib.lineTitle,
+      data: lib.lineData,
     }),
     'radar-chart': () => ({
-      title: isAgent ? 'Conversation Intent Coverage' : 'Dimension Radar',
-      data: isAgent ? INTENT_RADAR_DATA : RADAR_DATA,
+      title: lib.radarTitle,
+      data: lib.radarData,
     }),
     'stacked-bar': () => ({
-      title: isAgent ? 'Resolution / Escalation / Abandoned (Daily)' : 'Pass / Warn / Fail by Review Stage',
-      data: isAgent ? BOT_RESOLUTION_DATA : STACKED_DATA,
+      title: lib.stackedTitle,
+      data: lib.stackedData,
     }),
-    'table': () => ({
-      title: isAgent ? 'Agent Roster' : 'Audit Steps',
-      columns: isAgent
-        ? ['Agent', 'Status', 'Sessions Today', 'Avg CSAT']
-        : ['Step', 'Surface', 'Review Goal'],
-      rows: isAgent
-        ? [
-            ['HR Benefits', 'Active', '342', '4.7'],
-            ['IT Helpdesk', 'Active', '218', '4.3'],
-            ['Sales Bot', 'Active', '156', '4.5'],
-            ['Onboarding', 'Active', '89', '4.8'],
-          ]
-        : [
-            ['1', 'Evaluations', 'Open evaluation dashboard'],
-            ['2', 'Metrics', 'Review native BIC metrics'],
-            ['3', 'Results', 'Inspect archived result runs'],
-            ['4', 'Responses', 'Trace individual responses'],
-          ],
+    table: () => ({
+      title: lib.tableTitle,
+      columns: lib.tableColumns,
+      rows: lib.tableRows,
     }),
     'fact-sheet': () => ({
-      title: isAgent ? 'Agent Fleet Summary' : 'Evaluation Audit',
-      subtitle: isAgent ? 'Copilot Studio deployed agents' : 'Copilot Studio review checklist',
-      entries: isAgent
-        ? [
-            { key: 'Fleet Size', value: '6 agents' },
-            { key: 'Platform', value: 'Copilot Studio' },
-            { key: 'Region', value: 'US West 2' },
-            { key: 'Last Deploy', value: '2026-03-20' },
-            { key: 'Status', value: 'All Active' },
-          ]
-        : [
-            { key: 'Agent', value: 'HR Benefits Agent' },
-            { key: 'Environment', value: 'Production' },
-            { key: 'Last Run', value: '2026-03-13' },
-            { key: 'Config Count', value: '12' },
-            { key: 'Status', value: 'Active' },
-          ],
+      title: lib.factTitle,
+      subtitle: lib.factSubtitle,
+      entries: lib.facts,
     }),
-    'pipeline': () => ({
-      title: isAgent ? 'Conversation Resolution Pipeline' : 'Evaluation Review Workflow',
-      steps: isAgent
-        ? ['Intake', 'Intent Match', 'Knowledge Retrieval', 'Tool Execution', 'Response', 'Resolution']
-        : ['Open Studio', 'Evaluations', 'Native Metrics', 'Results', 'Responses', 'Evidence'],
-      completedCount: isAgent ? 5 : 4,
+    pipeline: () => ({
+      title: lib.pipelineTitle,
+      steps: lib.pipelineSteps,
+      completedCount: lib.completedCount,
     }),
     'status-grid': () => ({
-      title: isAgent ? 'Agent Fleet Health' : 'Evaluation Review Surfaces',
-      items: isAgent
-        ? AGENT_STATUS_ITEMS
-        : [
-            { label: 'Metrics', subtitle: 'BIC scores healthy', severity: 'good' as const },
-            { label: 'Results', subtitle: 'Archive up to date', severity: 'good' as const },
-            { label: 'Responses', subtitle: 'Trace lag detected', severity: 'warning' as const },
-            { label: 'Evidence', subtitle: 'Missing citations', severity: 'danger' as const },
-            { label: 'Config', subtitle: 'All configs valid', severity: 'good' as const },
-            { label: 'Deploy', subtitle: 'Canary live', severity: 'good' as const },
-          ],
+      title: lib.statusTitle,
+      items: lib.statusItems,
     }),
     'overview-cards': () => ({
-      description: isAgent ? 'Agent capabilities and channels' : 'Evaluation audit workflow steps',
-      cards: isAgent
-        ? [
-            'Teams Channel',
-            'Web Chat Widget',
-            'Email Integration',
-            'Slack Connector',
-            'Knowledge Base',
-            'Tool Actions',
-            'Human Handoff',
-            'Analytics Feed',
-          ]
-        : [
-            'Open Copilot Studio',
-            'Navigate to Evaluations',
-            'Review Native Metrics',
-            'Inspect Archived Results',
-            'Trace Response Evidence',
-            'Check Citation Coverage',
-            'Validate Tool Accuracy',
-            'Close Audit Review',
-          ],
+      description: lib.cardsDescription,
+      cards: lib.cards,
     }),
     'meta-info': () => ({
-      title: isAgent ? 'Agent Profile' : 'Document Metadata',
-      entries: isAgent
-        ? [
-            { key: 'Name', value: 'HR Benefits Agent', highlight: true },
-            { key: 'Model', value: 'GPT-4o' },
-            { key: 'Sessions', value: '1,247' },
-            { key: 'CSAT', value: '4.6 / 5.0' },
-            { key: 'Uptime', value: '99.97%' },
-          ]
-        : [
-            { key: 'Author', value: 'DAYOURBOT Swarm', highlight: true },
-            { key: 'Date', value: '2026-03-13' },
-            { key: 'Pages', value: '1' },
-            { key: 'Citations', value: '8' },
-            { key: 'Schema', value: 'adaptive-slide/v1.0' },
-          ],
+      title: lib.metaTitle,
+      entries: lib.metaEntries,
     }),
-    'emphasis': () => ({
-      label: isAgent ? 'Agent Insight' : 'Key Insight',
-      text: isAgent
-        ? 'Resolution rate improved 2.1% this week driven by enhanced knowledge grounding and fewer tool execution failures.'
-        : 'Review metrics, results, and response traces together before closing the evaluation audit.',
-      highlights: isAgent
-        ? ['Resolution rate', 'knowledge grounding', 'tool execution']
-        : ['metrics', 'results', 'response traces'],
+    emphasis: () => ({
+      label: lib.insightLabel,
+      text: lib.insightText,
+      highlights: lib.insightHighlights,
     }),
     'compare-left': () => ({
-      label: isAgent ? 'AUTOMATED' : 'OFFLINE',
-      strategy: isAgent ? 'Agent Resolution' : 'Pre-Deploy',
+      label: lib.compareLeftLabel,
+      strategy: lib.compareLeftStrategy,
       colorScheme: 'good' as const,
-      items: isAgent
-        ? [
-            'Knowledge-grounded answers',
-            'Tool action execution',
-            'Multi-turn conversation',
-            'Instant availability 24/7',
-          ]
-        : [
-            'Static dataset evaluation',
-            'BIC scoring on held-out set',
-            'No live traffic impact',
-            'Reproducible results',
-          ],
-      footer: isAgent ? '87.3% of conversations resolved' : 'Run before every deployment',
+      items: lib.compareLeftItems,
+      footer: lib.compareLeftFooter,
     }),
     'compare-right': () => ({
-      label: isAgent ? 'HUMAN HANDOFF' : 'ONLINE',
-      strategy: isAgent ? 'Escalation Path' : 'Production',
+      label: lib.compareRightLabel,
+      strategy: lib.compareRightStrategy,
       colorScheme: 'accent' as const,
-      items: isAgent
-        ? [
-            'Complex multi-step issues',
-            'Emotional support required',
-            'Policy exception handling',
-            'Compliance-sensitive topics',
-          ]
-        : [
-            'Live A/B traffic split',
-            'Real user engagement metrics',
-            'Latency + throughput telemetry',
-            'Shadow + canary modes',
-          ],
-      footer: isAgent ? '12.7% escalation rate' : 'Continuous post-deploy monitoring',
+      items: lib.compareRightItems,
+      footer: lib.compareRightFooter,
     }),
     'stat-block': () => ({
-      title: isAgent ? 'Weekly Movement' : 'Quality Movement',
-      entries: isAgent
-        ? [
-            { label: 'Resolution', value: '+2.1%', up: true },
-            { label: 'CSAT', value: '+0.2', up: true },
-            { label: 'Escalations', value: '-12', up: true },
-          ]
-        : [
-            { label: 'Relevance', value: '+3%', up: true },
-            { label: 'Completeness', value: '+5%', up: true },
-            { label: 'Tool Accuracy', value: '-2%', up: false },
-          ],
+      title: lib.statTitle,
+      entries: lib.stats,
     }),
     'grouped-column': () => ({
-      title: isAgent ? 'Agent Channel Volume (Weekly)' : 'Evaluation Scores by Review Stage',
-      series: isAgent
-        ? [
-            { key: 'teams', name: 'Teams' },
-            { key: 'web', name: 'Web Chat' },
-            { key: 'email', name: 'Email' },
-          ]
-        : [
-            { key: 'relevance', name: 'Relevance' },
-            { key: 'completeness', name: 'Completeness' },
-            { key: 'coherence', name: 'Coherence' },
-          ],
-      data: isAgent
-        ? [
-            { category: 'Week 1', teams: 320, web: 180, email: 95 },
-            { category: 'Week 2', teams: 340, web: 210, email: 88 },
-            { category: 'Week 3', teams: 380, web: 195, email: 102 },
-            { category: 'Week 4', teams: 410, web: 230, email: 110 },
-            { category: 'Week 5', teams: 450, web: 250, email: 125 },
-          ]
-        : [
-            { category: 'Metrics', relevance: 91, completeness: 84, coherence: 88 },
-            { category: 'Results', relevance: 88, completeness: 82, coherence: 90 },
-            { category: 'Responses', relevance: 85, completeness: 79, coherence: 86 },
-            { category: 'Evidence', relevance: 92, completeness: 87, coherence: 91 },
-          ],
+      title: lib.groupedTitle,
+      series: lib.groupedSeries,
+      data: lib.groupedData,
     }),
   };
 
