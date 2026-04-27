@@ -1,6 +1,6 @@
 // ── LiveTile Design System – Shared Types ────────────────────────────────────
 
-/** All 18 tile types in the design system */
+/** Renderable tile types in the design system */
 export type TileType =
   | 'hero'
   | 'accent-header'

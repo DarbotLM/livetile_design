@@ -54,6 +54,7 @@ Standard tile sizes follow a naming convention:
 | Nano | 1W × 2R | Minimal indicator |
 | Small | 2W × 4R | KPI badge |
 | Medium | 4W × 8R | Standard tile |
+| Wide | 8W × 8R | Status dashboard |
 | Large | 8W × 16R | Detail panel |
 | XL | 16W × 32R | Full dashboard |
 

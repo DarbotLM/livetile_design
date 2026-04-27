@@ -10,6 +10,17 @@ The bridge provides a REST-like JSON API that the viewport grid polls every 12 s
 
 **Polling Interval**: 12 seconds
 
+## Related source surfaces
+
+The bridge is documented as a local runtime integration and is represented in the broader asset/coverage workflow:
+
+| Surface | Purpose |
+| --- | --- |
+| `viewport-grid.html` | Static review UI that polls the bridge. |
+| `lib\viewport-registry.js` | Standalone viewport/runbook/slot helper used by viewport-grid artifacts. |
+| `lib\adaptive-slide-export.js` | Browser helper for projecting livetile DOM nodes into adaptive-slide-style JSON. |
+| `src/tiles/galleryAssetCoverage.ts` | Registry for API/runtime assets and their tile coverage targets. |
+
 ## Endpoints
 
 ### GET /health

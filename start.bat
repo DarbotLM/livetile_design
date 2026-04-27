@@ -1,18 +1,22 @@
 @echo off
-title LiveTile Design - Dev Server
+title Adaptive Design - Dev Server
 cd /d "%~dp0"
 
 echo ============================================
-echo   LiveTile Design - Development Server
+echo   Adaptive Design - Development Server
 echo ============================================
 echo.
 
 :: Check for node_modules
 if not exist "node_modules" (
     echo Installing dependencies...
-    call npm install
+    if exist "package-lock.json" (
+        call npm ci
+    ) else (
+        call npm install
+    )
     if errorlevel 1 (
-        echo ERROR: npm install failed.
+        echo ERROR: dependency installation failed.
         pause
         exit /b 1
     )

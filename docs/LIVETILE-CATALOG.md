@@ -1,6 +1,17 @@
-# Livetile Component Catalog
+# LiveTile Component Catalog
 
-This catalog documents the livetile variants available in the viewport-grid design system. Each tile follows the BD coordinate system with slot dimensions in W (words) × R (rows).
+This catalog documents the LiveTile variants available in the viewport-grid and React design system. Each tile follows the BD coordinate system with slot dimensions in W (words) x R (rows), while the React app also exposes a searchable catalog that combines slide-rendered tiles and FlipCard reference tiles.
+
+## React catalog surfaces
+
+| Surface | Source | Count | Purpose |
+| --- | --- | ---: | --- |
+| Slide tiles | `src/shared/schema-index.ts` and `src/tiles/*Tile.tsx` | 19 | Renderable tiles used by templates and `TileRenderer`. |
+| FlipCard reference tiles | `src/shared/tile-catalog.ts` and enum/reference tiles in `src/tiles/` | 23 | Reference surfaces for Adaptive Card/FlipCard styles, inputs, media, layout, and actions. |
+| Asset coverage | `src/tiles/galleryAssetCoverage.ts` | 100 | Maps HTML, gallery, sample, API, and runtime assets to tile coverage targets. |
+| Curated gallery | `src/shared/gallery.ts` | 10 | Canonical screenshot evidence from `lib/img/` shown in the Gallery tab. |
+
+Use the in-app `CATALOG` inspector to browse tile definitions and the `GALLERY` inspector to review asset coverage and curated image evidence.
 
 ## Size Reference
 
@@ -121,6 +132,31 @@ interface StatusTileData {
 
 ---
 
+## Renderable slide tile families
+
+The React canvas supports these renderable tile types through `src/tiles/TileRenderer.tsx`:
+
+| Family | Tile types |
+| --- | --- |
+| Layout | `hero`, `accent-header`, `overview-cards`, `meta-info`, `emphasis` |
+| Metrics and charts | `kpi`, `bar-chart`, `pie-chart`, `line-chart`, `radar-chart`, `stacked-bar`, `grouped-column`, `stat-block` |
+| Data and status | `table`, `fact-sheet`, `pipeline`, `status-grid` |
+| Comparison | `compare-left`, `compare-right` |
+
+Specialized tile-spec components (`AccuracyTile`, `EventsSecTile`, and `StatusTile`) are exported from `src/tiles/index.ts` and represented in the asset coverage registry even when they are not part of the template router.
+
+## FlipCard reference tile families
+
+FlipCard reference tiles document Adaptive Card/FlipCard host behaviors and are cataloged in `src/shared/tile-catalog.ts`.
+
+| Family | Examples |
+| --- | --- |
+| Action | `ActionModeTile`, `ActionStyleTile`, `AssociatedInputsTile` |
+| Container and fallback | `ContainerStyleTile`, `FallbackOptionTile`, `ColorsTile` |
+| Input | `ChoiceInputStyleTile`, `InputStyleTile`, `InputLabelPositionTile`, `TextInputStyleTile` |
+| Media | `ImageFillModeTile`, `ImageSetStyleTile`, `ImageSizeTile`, `ImageStyleTile` |
+| Text and layout | `FontSizeTile`, `FontTypeTile`, `FontWeightTile`, `SpacingTile`, `TextBlockStyleTile`, `VerticalContentAlignmentTile` |
+
 ## Common CSS Classes
 
 ### Base Structure
@@ -238,21 +274,13 @@ export function MyTile({ data, locked }: TileProps<MyTileData>) {
 }
 ```
 
-### Step 4: Add to TILE_MANIFEST
+### Step 4: Register metadata
 
-```javascript
-'tile-my': {
-  id: 'tile-my',
-  label: 'My Tile',
-  color: '#00d4ff',
-  bdW: 4,
-  bdR: 8,
-  tsx: [...],
-  json: {...},
-  yaml: '...',
-  md: '...'
-}
-```
+For React slide tiles, add the tile type to `src/shared/types.ts`, describe its content contract in `src/shared/schema-index.ts`, provide sample content in `src/shared/sample-data.ts`, export the component from `src/tiles/index.ts`, and route it in `src/tiles/TileRenderer.tsx`.
+
+For FlipCard reference tiles, add a `TileCatalogEntry` in `src/shared/tile-catalog.ts` and export the component from `src/tiles/index.ts`.
+
+For source assets, add or update the matching entry in `src/tiles/galleryAssetCoverage.ts`.
 
 ### Step 5: Define Runbook Schedule
 
@@ -290,5 +318,6 @@ Layer 0 tiles:
 ## References
 
 - [BD Coordinate System](./BD-COORDINATE-SYSTEM.md)
+- [Asset Coverage Registry](./ASSET-COVERAGE.md)
 - [Design Tokens](../tokens/design-tokens.json)
 - [Bridge API](./BRIDGE-API.md)

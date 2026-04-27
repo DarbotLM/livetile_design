@@ -4,14 +4,18 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 echo "============================================"
-echo "  LiveTile Design - Development Server"
+echo "  Adaptive Design - Development Server"
 echo "============================================"
 echo ""
 
 # Check for node_modules
 if [ ! -d "node_modules" ]; then
     echo "Installing dependencies..."
-    npm install
+    if [ -f "package-lock.json" ]; then
+        npm ci
+    else
+        npm install
+    fi
     echo ""
 fi
 

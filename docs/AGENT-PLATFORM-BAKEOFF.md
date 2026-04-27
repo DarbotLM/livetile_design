@@ -57,15 +57,22 @@ The repository now reflects the bakeoff in several concrete surfaces:
 
 | Surface | Purpose |
 | --- | --- |
-| `src\canvas\` | Interactive React canvas for reviewing tile composition and settings. |
-| `src\shared\schema-index.ts` | Typed catalog that describes tile categories, fields, and content expectations. |
-| `src\tiles\` | Renderers and tile implementations used by the canvas and generated layouts. |
-| `docs\LIVETILE-CATALOG.md` | Human-readable tile catalog for GitHub review. |
-| `docs\BD-COORDINATE-SYSTEM.md` | Coordinate-system reference for consistent layout reasoning. |
-| `docs\BRIDGE-API.md` | Optional local bridge contract for telemetry and agent state. |
-| `lib\img\` | Captured bakeoff screenshots and visual review evidence. |
-| `breakpoint-tester.html` | Local breakpoint review page for validating responsive behavior. |
-| `tile-spec-viewer.html` | Local review page for inspecting tile specification output. |
+| `src/canvas/` | Interactive React canvas for reviewing tile composition and settings. |
+| `src/shared/schema-index.ts` | Typed catalog that describes tile categories, fields, and content expectations. |
+| `src/shared/tile-catalog.ts` | Searchable catalog that combines renderable slide tiles with FlipCard reference tiles. |
+| `src/shared/gallery.ts` | Curated screenshot manifest for canonical image evidence in `lib/img/`. |
+| `src/engines/flipcard_livetile_engine.ts` | Runtime model that projects LiveTile templates into FlipCard front/back JSON cards. |
+| `src/tiles/` | Renderers and tile implementations used by the canvas and generated layouts. |
+| `src/tiles/galleryAssetCoverage.ts` | Coverage registry mapping static HTML, external samples, APIs, and runtime assets to tile targets. |
+| `docs/LIVETILE-CATALOG.md` | Human-readable tile catalog for GitHub review. |
+| `docs/ASSET-COVERAGE.md` | Maintenance guide for asset coverage and source-to-tile mapping. |
+| `docs/BD-COORDINATE-SYSTEM.md` | Coordinate-system reference for consistent layout reasoning. |
+| `docs/BRIDGE-API.md` | Optional local bridge contract for telemetry and agent state. |
+| `lib/img/` | Captured bakeoff screenshots and visual review evidence. |
+| `lib/MVP_proto/` | Preserved static review artifacts for pattern-library, tile-spec, Unovis, and bundled app surfaces. |
+| `lib/MVP_proto/breakpoint-tester.html` | Local breakpoint review page for validating responsive behavior. |
+| `lib/MVP_proto/tile-spec-viewer.html` | Local review page for inspecting tile specification output. |
+| `lib/MVP_proto/unovis-gallery-flipcards.html` | Static gallery artifact that seeded Unovis, Adaptive Card, and FlipCard coverage entries. |
 
 ## Evaluation dimensions
 
@@ -88,6 +95,7 @@ The orchestrator role was active, not passive. The strongest results came from c
 - Side-by-side iteration exposed strengths and weaknesses faster than serial evaluation.
 - Buildable artifacts mattered more than polished narrative alone.
 - Screenshots were useful evidence, but source-backed review pages made iteration more repeatable.
+- The asset coverage registry made static HTML, external feeds, and runtime helpers auditable from the React app.
 - The most useful platform outputs were the ones that could be compiled into the shared system without large rewrites.
 
 ## Engineering lessons
@@ -102,11 +110,11 @@ Parallel agents generate many plausible directions. The orchestrator's synthesis
 
 ### Build artifacts should not be the source of truth
 
-The Vite build can produce a self-contained `dist\index.html`, but source files and docs should remain the reviewable source of truth. Generated output can always be rebuilt from `src\`, `docs\`, and configuration.
+The Vite build can produce a self-contained `dist/index.html`, but source files and docs should remain the reviewable source of truth. Generated output can always be rebuilt from `src/`, `docs/`, and configuration.
 
 ### Evidence belongs near the system
 
-Keeping review images in `lib\img\` and documentation in `docs\` makes the bakeoff easier to audit from GitHub. The evidence is close enough to the implementation to explain why the source evolved.
+Keeping review images in `lib/img/` and documentation in `docs/` makes the bakeoff easier to audit from GitHub. The evidence is close enough to the implementation to explain why the source evolved.
 
 ## Repository hygiene decisions
 
@@ -117,13 +125,14 @@ The check-in preparation added standard project hygiene around the bakeoff outpu
 - Root `.gitignore` to keep dependencies, generated builds, TypeScript incremental metadata, logs, editor settings, and local environment files out of future commits.
 - Package metadata updated to declare the MIT license.
 - Generated build output treated as reproducible output rather than committed source.
+- Preserved static MVP artifacts kept in `lib/MVP_proto/` while `src/`, `docs/`, and root review pages remain the active source of truth.
 
 ## Reproducing the review flow
 
 Install dependencies:
 
 ```bash
-npm install
+npm ci
 ```
 
 Run the development server:
@@ -141,8 +150,9 @@ npm run build
 Open the local review pages directly when comparing static artifacts:
 
 ```text
-breakpoint-tester.html
-tile-spec-viewer.html
+lib/MVP_proto/breakpoint-tester.html
+lib/MVP_proto/tile-spec-viewer.html
+lib/MVP_proto/unovis-gallery-flipcards.html
 viewport-grid.html
 ```
 

@@ -147,6 +147,6 @@ export declare function getGridForDPI(dpi: number): GridConfig;
 export declare function detectOptimalGrid(): GridConfig;
 
 export declare const GRIDS: Record<15 | 20 | 30, GridConfig>;
-export declare const TILE_SLOTS: Record<'nano' | 'small' | 'medium' | 'large' | 'xl', TileSlot>;
+export declare const TILE_SLOTS: Record<'nano' | 'small' | 'medium' | 'wide' | 'large' | 'xl', TileSlot>;
 export declare const WORD_WIDTH: 4;
 export declare const version: string;
