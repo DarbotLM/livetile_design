@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BD Grid Breakpoint Tester</title>
+  <link rel="stylesheet" href="../tokens/design-tokens.css">
+  <style>
+    :root {
+      --test-success: var(--accent-green);
+      --test-warning: var(--accent-gold);
+      --test-failure: var(--accent-red);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-app);
+      color: var(--text-strong);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: var(--text-xl);
+      font-weight: 600;
+      color: var(--text-hi);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .viewport-info {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .info-badge {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      padding: 4px 10px;
+      background: var(--surface-chip);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .info-badge.active {
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan-soft);
+      background: rgba(0, 212, 255, 0.08);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      padding: 8px 16px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      color: var(--text-strong);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    button:hover {
+      background: var(--surface-2);
+      color: var(--text-hi);
+    }
+
+    button.primary {
+      background: var(--accent-cyan-soft);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    button.primary:hover {
+      background: rgba(0, 212, 255, 0.2);
+    }
+
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .test-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      transition: var(--transition-normal);
+    }
+
+    .test-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .test-card.passed {
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    .test-card.warning {
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    .test-card.failed {
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .test-name {
+      font-size: var(--text-md);
+      font-weight: 600;
+      color: var(--text-hi);
+    }
+
+    .test-status {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+    }
+
+    .test-status.pass { background: var(--accent-green-soft); color: var(--accent-green); }
+    .test-status.warn { background: var(--accent-gold-soft); color: var(--accent-gold); }
+    .test-status.fail { background: var(--accent-red-soft); color: var(--accent-red); }
+    .test-status.pending { background: var(--surface-chip); color: var(--text-dim); }
+
+    .test-details {
+      font-size: var(--text-sm);
+      color: var(--text-med);
+      line-height: 1.6;
+    }
+
+    .test-details code {
+      font-family: var(--font-mono);
+      background: var(--surface-0);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
+    }
+
+    .tile-preview-area {
+      background: var(--bg-page-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+      min-height: 300px;
+      position: relative;
+    }
+
+    .tile-preview-area h3 {
+      font-size: var(--text-sm);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+      margin-bottom: 16px;
+    }
+
+    .tile-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    /* Responsive tile grid based on detected grid size */
+    .tile-grid.grid-15 { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); }
+    .tile-grid.grid-20 { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+    .tile-grid.grid-30 { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+
+    .preview-tile {
+      background: var(--surface-2);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      transition: var(--transition-fast);
+    }
+
+    .preview-tile:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+    }
+
+    .preview-tile .slot-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .preview-tile .dimensions {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--accent-cyan);
+    }
+
+    /* Tile size classes */
+    .preview-tile.nano { grid-column: span 1; grid-row: span 1; min-height: 40px; }
+    .preview-tile.small { grid-column: span 2; grid-row: span 2; min-height: 80px; }
+    .preview-tile.medium { grid-column: span 4; grid-row: span 4; min-height: 160px; }
+    .preview-tile.large { grid-column: span 6; grid-row: span 6; min-height: 240px; }
+
+    .summary-bar {
+      display: flex;
+      gap: 20px;
+      padding: 12px 16px;
+      background: var(--surface-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-top: 20px;
+    }
+
+    .summary-stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .summary-stat .count {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      font-weight: 600;
+    }
+
+    .summary-stat .label {
+      font-size: var(--text-sm);
+      color: var(--text-dim);
+    }
+
+    .summary-stat.passed .count { color: var(--accent-green); }
+    .summary-stat.warnings .count { color: var(--accent-gold); }
+    .summary-stat.failed .count { color: var(--accent-red); }
+
+    /* Responsive breakpoint indicator */
+    @media (max-width: 640px) {
+      .header { flex-direction: column; gap: 12px; text-align: center; }
+      .viewport-info { flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>BD Grid Breakpoint Tester</h1>
+    <div class="viewport-info">
+      <span class="info-badge" id="vpWidth">Width: --</span>
+      <span class="info-badge" id="vpHeight">Height: --</span>
+      <span class="info-badge" id="vpDPR">DPR: --</span>
+      <span class="info-badge active" id="vpGrid">Grid: --</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="primary" onclick="runAllTests()">Run All Tests</button>
+    <button onclick="resetTests()">Reset</button>
+    <button onclick="exportResults()">Export Results</button>
+  </div>
+
+  <div class="tile-preview-area">
+    <h3>Tile Size Preview at Current Grid</h3>
+    <div class="tile-grid" id="tilePreviewGrid">
+      <div class="preview-tile nano">
+        <span class="slot-label">Nano</span>
+        <span class="dimensions" id="nanoSize">1W×2R</span>
+      </div>
+      <div class="preview-tile small">
+        <span class="slot-label">Small</span>
+        <span class="dimensions" id="smallSize">2W×4R</span>
+      </div>
+      <div class="preview-tile medium">
+        <span class="slot-label">Medium</span>
+        <span class="dimensions" id="mediumSize">4W×8R</span>
+      </div>
+      <div class="preview-tile large">
+        <span class="slot-label">Large</span>
+        <span class="dimensions" id="largeSize">8W×16R</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-grid" id="testGrid">
+    <!-- Tests will be injected here -->
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-stat passed">
+      <span class="count" id="passCount">0</span>
+      <span class="label">Passed</span>
+    </div>
+    <div class="summary-stat warnings">
+      <span class="count" id="warnCount">0</span>
+      <span class="label">Warnings</span>
+    </div>
+    <div class="summary-stat failed">
+      <span class="count" id="failCount">0</span>
+      <span class="label">Failed</span>
+    </div>
+  </div>
+
+  <script>
+    // ========================================
+    // Test Definitions
+    // ========================================
+    const TESTS = [
+      {
+        id: 'grid-detection',
+        name: 'Grid Size Detection',
+        description: 'Verifies correct grid size is selected based on DPR',
+        run: function() {
+          const dpr = window.devicePixelRatio || 1;
+          const expectedGrid = dpr <= 1 ? 15 : (dpr <= 1.5 ? 20 : 30);
+          const detectedGrid = detectGrid();
+
+          if (detectedGrid.size === expectedGrid) {
+            return { status: 'pass', message: `Grid ${detectedGrid.size}px correctly detected for DPR ${dpr}` };
+          } else {
+            return { status: 'warn', message: `Expected grid ${expectedGrid}px, got ${detectedGrid.size}px` };
+          }
+        }
+      },
+      {
+        id: 'tile-dimensions',
+        name: 'Tile Dimension Calculation',
+        description: 'Verifies W×R to pixel calculations are correct',
+        run: function() {
+          const grid = detectGrid();
+          const tests = [
+            { w: 1, r: 2, expected: { width: 4 * grid.size, height: 2 * grid.size } },
+            { w: 2, r: 4, expected: { width: 8 * grid.size, height: 4 * grid.size } },
+            { w: 4, r: 8, expected: { width: 16 * grid.size, height: 8 * grid.size } }
+          ];
+
+          let passed = 0;
+          for (const t of tests) {
+            const calc = calculateTileSize(t.w, t.r, grid.size);
+            if (calc.width === t.expected.width && calc.height === t.expected.height) passed++;
+          }
+
+          if (passed === tests.length) {
+            return { status: 'pass', message: `All ${tests.length} dimension tests passed` };
+          } else {
+            return { status: 'fail', message: `${passed}/${tests.length} dimension tests passed` };
+          }
+        }
+      },
+      {
+        id: 'viewport-fit',
+        name: 'Viewport Tile Fit',
+        description: 'Tests how many standard tiles fit in current viewport',
+        run: function() {
+          const grid = detectGrid();
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+
+          // Calculate how many 2W×4R tiles fit
+          const tileW = 8 * grid.size;
+          const tileH = 4 * grid.size;
+          const cols = Math.floor(vw / tileW);
+          const rows = Math.floor(vh / tileH);
+          const total = cols * rows;
+
+          if (total >= 8) {
+            return { status: 'pass', message: `${cols}×${rows} = ${total} small tiles fit (grid: ${grid.size}px)` };
+          } else if (total >= 4) {
+            return { status: 'warn', message: `Only ${total} tiles fit - consider smaller grid` };
+          } else {
+            return { status: 'fail', message: `Only ${total} tiles fit - viewport too small` };
+          }
+        }
+      },
+      {
+        id: 'css-vars',
+        name: 'CSS Variables Loading',
+        description: 'Verifies design tokens CSS is properly loaded',
+        run: function() {
+          const root = document.documentElement;
+          const style = getComputedStyle(root);
+          const vars = ['--grid-20', '--accent-cyan', '--bg-app', '--text-hi'];
+          let found = 0;
+
+          for (const v of vars) {
+            if (style.getPropertyValue(v).trim()) found++;
+          }
+
+          if (found === vars.length) {
+            return { status: 'pass', message: `All ${vars.length} design tokens loaded` };
+          } else {
+            return { status: 'fail', message: `Only ${found}/${vars.length} tokens found` };
+          }
+        }
+      },
+      {
+        id: 'breakpoint-sm',
+        name: 'Small Breakpoint (≤640px)',
+        description: 'Tests responsive behavior at small viewport',
+        run: function() {
+          const vw = window.innerWidth;
+          if (vw <= 640) {
+            return { status: 'pass', message: `Currently at small breakpoint (${vw}px)` };
+          } else {
+            return { status: 'pending', message: `Resize to ≤640px to test (current: ${vw}px)` };
+          }
+        }
+      },
+      {
+        id: 'breakpoint-md',
+        name: 'Medium Breakpoint (641-1024px)',
+        description: 'Tests responsive behavior at medium viewport',
+        run: function() {
+          const vw = window.innerWidth;
+          if (vw > 640 && vw <= 1024) {
+            return { status: 'pass', message: `Currently at medium breakpoint (${vw}px)` };
+          } else {
+            return { status: 'pending', message: `Resize to 641-1024px to test (current: ${vw}px)` };
+          }
+        }
+      },
+      {
+        id: 'breakpoint-lg',
+        name: 'Large Breakpoint (>1024px)',
+        description: 'Tests responsive behavior at large viewport',
+        run: function() {
+          const vw = window.innerWidth;
+          if (vw > 1024) {
+            return { status: 'pass', message: `Currently at large breakpoint (${vw}px)` };
+          } else {
+            return { status: 'pending', message: `Resize to >1024px to test (current: ${vw}px)` };
+          }
+        }
+      },
+      {
+        id: 'dpi-theme',
+        name: 'DPI Theme Color',
+        description: 'Verifies correct accent color for detected DPI',
+        run: function() {
+          const grid = detectGrid();
+          const expectedColors = { 15: '#00d4ff', 20: '#f59e0b', 30: '#22c55e' };
+          const expected = expectedColors[grid.size];
+
+          if (grid.accentColor === expected) {
+            return { status: 'pass', message: `Theme color ${expected} matches grid ${grid.size}px` };
+          } else {
+            return { status: 'warn', message: `Expected ${expected}, got ${grid.accentColor}` };
+          }
+        }
+      },
+      {
+        id: 'tile-overflow',
+        name: 'Tile Overflow Check',
+        description: 'Checks if XL tile overflows viewport',
+        run: function() {
+          const grid = detectGrid();
+          const xlWidth = 64 * grid.size;  // 16W × 4 × grid
+          const xlHeight = 32 * grid.size; // 32R × grid
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+
+          if (xlWidth <= vw && xlHeight <= vh) {
+            return { status: 'pass', message: `XL tile (${xlWidth}×${xlHeight}px) fits` };
+          } else if (xlWidth <= vw || xlHeight <= vh) {
+            return { status: 'warn', message: `XL tile partially overflows (${xlWidth}×${xlHeight}px vs ${vw}×${vh}px)` };
+          } else {
+            return { status: 'fail', message: `XL tile overflows both dimensions` };
+          }
+        }
+      },
+      {
+        id: 'touch-target',
+        name: 'Touch Target Size',
+        description: 'Verifies minimum touch target size (44×44px)',
+        run: function() {
+          const grid = detectGrid();
+          const nanoW = 4 * grid.size;
+          const nanoH = 2 * grid.size;
+
+          if (nanoW >= 44 && nanoH >= 44) {
+            return { status: 'pass', message: `Nano tile (${nanoW}×${nanoH}px) meets 44×44 minimum` };
+          } else if (nanoW >= 44 || nanoH >= 44) {
+            return { status: 'warn', message: `Nano tile (${nanoW}×${nanoH}px) - one dimension below 44px` };
+          } else {
+            return { status: 'fail', message: `Nano tile (${nanoW}×${nanoH}px) - too small for touch` };
+          }
+        }
+      }
+    ];
+
+    // ========================================
+    // Grid Detection
+    // ========================================
+    const GRIDS = {
+      15: { size: 15, theme: 'cyan', dpi: 72, accentColor: '#00d4ff' },
+      20: { size: 20, theme: 'gold', dpi: 96, accentColor: '#f59e0b' },
+      30: { size: 30, theme: 'green', dpi: 144, accentColor: '#22c55e' }
+    };
+
+    function detectGrid() {
+      const dpr = window.devicePixelRatio || 1;
+      if (dpr <= 1) return GRIDS[15];
+      if (dpr <= 1.5) return GRIDS[20];
+      return GRIDS[30];
+    }
+
+    function calculateTileSize(w, r, gridSize) {
+      return {
+        width: w * 4 * gridSize,
+        height: r * gridSize
+      };
+    }
+
+    // ========================================
+    // Test Runner
+    // ========================================
+    let testResults = {};
+
+    function runAllTests() {
+      testResults = {};
+      TESTS.forEach(test => {
+        try {
+          testResults[test.id] = test.run();
+        } catch (e) {
+          testResults[test.id] = { status: 'fail', message: 'Error: ' + e.message };
+        }
+      });
+      renderTests();
+      updateSummary();
+    }
+
+    function resetTests() {
+      testResults = {};
+      TESTS.forEach(test => {
+        testResults[test.id] = { status: 'pending', message: 'Not yet run' };
+      });
+      renderTests();
+      updateSummary();
+    }
+
+    function renderTests() {
+      const grid = document.getElementById('testGrid');
+      grid.innerHTML = TESTS.map(test => {
+        const result = testResults[test.id] || { status: 'pending', message: 'Not yet run' };
+        const cardClass = result.status === 'pass' ? 'passed' :
+                         result.status === 'warn' ? 'warning' :
+                         result.status === 'fail' ? 'failed' : '';
+        return `
+          <div class="test-card ${cardClass}">
+            <div class="test-header">
+              <span class="test-name">${test.name}</span>
+              <span class="test-status ${result.status}">${result.status}</span>
+            </div>
+            <div class="test-details">
+              <p>${test.description}</p>
+              <p style="margin-top: 8px;"><code>${result.message}</code></p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateSummary() {
+      let pass = 0, warn = 0, fail = 0;
+      Object.values(testResults).forEach(r => {
+        if (r.status === 'pass') pass++;
+        else if (r.status === 'warn') warn++;
+        else if (r.status === 'fail') fail++;
+      });
+      document.getElementById('passCount').textContent = pass;
+      document.getElementById('warnCount').textContent = warn;
+      document.getElementById('failCount').textContent = fail;
+    }
+
+    function exportResults() {
+      const report = {
+        timestamp: new Date().toISOString(),
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          dpr: window.devicePixelRatio
+        },
+        grid: detectGrid(),
+        results: testResults
+      };
+
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `breakpoint-test-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ========================================
+    // UI Updates
+    // ========================================
+    function updateViewportInfo() {
+      const grid = detectGrid();
+      document.getElementById('vpWidth').textContent = `Width: ${window.innerWidth}px`;
+      document.getElementById('vpHeight').textContent = `Height: ${window.innerHeight}px`;
+      document.getElementById('vpDPR').textContent = `DPR: ${window.devicePixelRatio.toFixed(2)}`;
+      document.getElementById('vpGrid').textContent = `Grid: ${grid.size}px`;
+
+      // Update tile preview grid class
+      const previewGrid = document.getElementById('tilePreviewGrid');
+      previewGrid.className = 'tile-grid grid-' + grid.size;
+
+      // Update tile dimensions
+      const sizes = [
+        { id: 'nanoSize', w: 1, r: 2 },
+        { id: 'smallSize', w: 2, r: 4 },
+        { id: 'mediumSize', w: 4, r: 8 },
+        { id: 'largeSize', w: 8, r: 16 }
+      ];
+
+      sizes.forEach(s => {
+        const calc = calculateTileSize(s.w, s.r, grid.size);
+        document.getElementById(s.id).textContent = `${s.w}W×${s.r}R = ${calc.width}×${calc.height}px`;
+      });
+    }
+
+    // ========================================
+    // Initialization
+    // ========================================
+    window.addEventListener('resize', () => {
+      updateViewportInfo();
+      if (Object.keys(testResults).length > 0) {
+        runAllTests();
+      }
+    });
+
+    updateViewportInfo();
+    resetTests();
+  </script>
+
+</body>
+</html>

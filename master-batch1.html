@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiveTile Studio Canvas — Batch 1</title>
+<style>
+:root{
+  --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Cascadia Code', Consolas, monospace;
+  --teal:#22d3ee; --teal-dim:rgba(34,211,238,.12);
+  --navy:#60a5fa; --navy-dim:rgba(96,165,250,.12);
+  --gold:#fbbf24; --gold-dim:rgba(251,191,36,.12);
+  --green:#34d399; --green-dim:rgba(52,211,153,.12);
+  --red:#fb7185; --red-dim:rgba(251,113,133,.12);
+  --plum:#c084fc; --plum-dim:rgba(192,132,252,.12);
+  --slate:#94a3b8; --slate-dim:rgba(148,163,184,.12);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--text);
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse at 18% 0%, var(--accent-soft) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 100%, var(--teal-dim) 0%, transparent 35%),
+    linear-gradient(180deg, rgba(255,255,255,.02), transparent 45%);
+  overflow:hidden;
+}
+body[data-theme="midnight"]{
+  --bg:#08111f; --bg-elevated:#0d1728; --surface:rgba(15,23,42,.86); --surface-alt:rgba(30,41,59,.78);
+  --panel:rgba(2,6,23,.82); --panel-strong:rgba(8,15,28,.92); --border:rgba(148,163,184,.16);
+  --border-bright:rgba(191,219,254,.24); --text:#e6eefc; --text-dim:#9fb0c8; --text-subtle:#70829c;
+  --accent:#60a5fa; --accent-soft:rgba(96,165,250,.18); --accent-glow:rgba(96,165,250,.35);
+  --back-bg:#020617; --back-border:#1e293b; --back-text:#cbd5e1; --back-green:#86efac;
+}
+body[data-theme="emerald"]{
+  --bg:#071710; --bg-elevated:#0d2219; --surface:rgba(11,31,23,.86); --surface-alt:rgba(16,56,40,.76);
+  --panel:rgba(3,15,10,.84); --panel-strong:rgba(5,19,13,.92); --border:rgba(110,231,183,.16);
+  --border-bright:rgba(110,231,183,.26); --text:#ebfff7; --text-dim:#b2d9ca; --text-subtle:#7ca598;
+  --accent:#34d399; --accent-soft:rgba(52,211,153,.18); --accent-glow:rgba(52,211,153,.34);
+  --back-bg:#03130c; --back-border:#134e4a; --back-text:#d1fae5; --back-green:#86efac;
+}
+body[data-theme="crimson"]{
+  --bg:#1a0a0f; --bg-elevated:#261018; --surface:rgba(46,18,28,.84); --surface-alt:rgba(77,26,40,.74);
+  --panel:rgba(20,6,11,.84); --panel-strong:rgba(30,8,15,.92); --border:rgba(251,113,133,.16);
+  --border-bright:rgba(253,164,175,.26); --text:#fff0f3; --text-dim:#f0b6c1; --text-subtle:#bf8793;
+  --accent:#fb7185; --accent-soft:rgba(251,113,133,.18); --accent-glow:rgba(251,113,133,.34);
+  --back-bg:#12050a; --back-border:#4c0519; --back-text:#fecdd3; --back-green:#bbf7d0;
+}
+body[data-theme="amethyst"]{
+  --bg:#12091b; --bg-elevated:#1d122a; --surface:rgba(31,16,49,.84); --surface-alt:rgba(58,28,86,.74);
+  --panel:rgba(11,5,18,.84); --panel-strong:rgba(18,8,28,.92); --border:rgba(196,132,252,.16);
+  --border-bright:rgba(221,214,254,.26); --text:#f7f1ff; --text-dim:#d7c2ef; --text-subtle:#a38bbc;
+  --accent:#c084fc; --accent-soft:rgba(192,132,252,.18); --accent-glow:rgba(192,132,252,.36);
+  --back-bg:#0e0714; --back-border:#3b0764; --back-text:#ede9fe; --back-green:#a7f3d0;
+}
+body[data-theme="solar"]{
+  --bg:#1a1204; --bg-elevated:#291b07; --surface:rgba(53,37,11,.84); --surface-alt:rgba(96,67,16,.74);
+  --panel:rgba(22,14,3,.84); --panel-strong:rgba(31,20,4,.92); --border:rgba(251,191,36,.16);
+  --border-bright:rgba(253,224,71,.28); --text:#fff8e5; --text-dim:#e9d49d; --text-subtle:#b89b59;
+  --accent:#fbbf24; --accent-soft:rgba(251,191,36,.18); --accent-glow:rgba(251,191,36,.34);
+  --back-bg:#130d02; --back-border:#78350f; --back-text:#fef3c7; --back-green:#bbf7d0;
+}
+body[data-theme="arctic"]{
+  --bg:#071721; --bg-elevated:#0d2430; --surface:rgba(14,35,48,.86); --surface-alt:rgba(23,58,74,.76);
+  --panel:rgba(5,17,24,.84); --panel-strong:rgba(8,22,31,.92); --border:rgba(34,211,238,.16);
+  --border-bright:rgba(103,232,249,.26); --text:#ecfbff; --text-dim:#aedbe5; --text-subtle:#78a7b1;
+  --accent:#22d3ee; --accent-soft:rgba(34,211,238,.18); --accent-glow:rgba(34,211,238,.34);
+  --back-bg:#031017; --back-border:#155e75; --back-text:#cffafe; --back-green:#86efac;
+}
+button{font:inherit}
+a{color:var(--teal)}
+/* -- Layer architecture: L0 = settings drawer (behind), L1 = full-screen card (front) -- */
+.app-shell{position:relative;height:100%;min-height:0}
+
+/* Layer 0 -- settings / detail drawer, hidden behind L1 by default */
+.app-header{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .28s ease}
+.app-header.l0-visible{opacity:1;pointer-events:auto;z-index:20}
+.l0-card{max-width:700px;width:100%;background:linear-gradient(180deg,rgba(255,255,255,.04),transparent),var(--panel);border:1px solid var(--border);border-radius:22px;padding:24px 28px;box-shadow:0 24px 80px rgba(0,0,0,.3);backdrop-filter:blur(20px)}
+.l0-title{font-size:22px;font-weight:700;letter-spacing:-.03em;margin:0 0 6px}
+.l0-subtitle{font-size:13px;color:var(--text-dim);line-height:1.5;margin:0 0 16px}
+.l0-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.top-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 12px;min-width:108px;backdrop-filter:blur(14px)}
+.top-stat .value{display:block;font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--accent)}
+.top-stat .label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);margin-top:2px}
+.l0-inventory{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.l0-inventory .stage-pill{padding:6px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--border);min-width:80px}
+.l0-inventory .stage-pill .k{display:block;font-family:var(--font-mono);font-size:9px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.08em}
+.l0-inventory .stage-pill .v{display:block;font-size:12px;font-weight:600;color:var(--text);margin-top:1px}
+.l0-section-label{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin:12px 0 8px}
+.l0-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.theme-toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.theme-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer;transition:all .2s ease;backdrop-filter:blur(14px)}
+.theme-btn:hover{border-color:var(--border-bright);box-shadow:0 0 0 1px var(--accent-soft),0 10px 28px rgba(0,0,0,.18)}
+.theme-btn[aria-pressed="true"]{background:linear-gradient(180deg,var(--accent-soft),transparent),var(--surface)}
+.l0-close{position:absolute;top:16px;right:20px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;font:inherit;font-size:13px;transition:all .2s ease;backdrop-filter:blur(14px)}
+.l0-close:hover{border-color:var(--border-bright);box-shadow:0 0 0 1px var(--accent-soft)}
+
+/* Layer 1 -- full-screen adaptive card */
+.stage-panel{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--panel);box-shadow:0 0 0 1px var(--border) inset}
+
+/* Card chrome bar: title + thumbs + nav inside the card */
+.card-chrome{display:flex;align-items:center;gap:8px;padding:4px 10px;border-bottom:1px solid var(--border);flex-shrink:0;min-height:0;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+.card-title{font-size:13px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0}
+.card-kicker{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-right:4px;flex-shrink:0}
+.card-slide-info{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-left:4px;flex-shrink:0}
+.card-thumbs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;padding:2px 0}
+.card-thumbs::-webkit-scrollbar{height:0}
+.card-actions{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.nav-btn,.settings-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:4px 9px;border-radius:8px;cursor:pointer;transition:all .2s ease;font:inherit;font-size:11px;backdrop-filter:blur(14px);white-space:nowrap}
+.nav-btn:hover,.settings-btn:hover{border-color:var(--border-bright);box-shadow:0 0 0 1px var(--accent-soft),0 10px 28px rgba(0,0,0,.18)}
+.settings-btn{background:linear-gradient(180deg,var(--accent-soft),transparent),var(--surface)}
+
+/* Thumb strip inside card chrome */
+.thumb-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.thumb-strip::-webkit-scrollbar{height:0}
+.thumb{position:relative;min-width:96px;max-width:96px;height:50px;padding:3px;border-radius:8px;border:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--surface);cursor:pointer;display:grid;grid-template-rows:1fr auto;gap:2px;transition:all .2s ease;backdrop-filter:blur(14px);flex-shrink:0}
+.thumb:hover{transform:translateY(-1px);border-color:var(--border-bright)}
+.thumb.is-active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-soft),0 8px 20px rgba(0,0,0,.22)}
+.thumb-preview{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(7,minmax(0,1fr));gap:2px;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent),var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:3px;overflow:hidden}
+.thumb-tile{border-radius:4px;opacity:.9;border:1px solid rgba(255,255,255,.08)}
+.thumb-label{display:flex;justify-content:space-between;gap:6px;align-items:center}
+.thumb-title{font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb-index{font-family:var(--font-mono);font-size:8px;color:var(--text-dim)}
+.panel-card{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent),var(--panel);border:1px solid var(--border);border-radius:16px;padding:10px 10px 12px;backdrop-filter:blur(16px);box-shadow:0 16px 42px rgba(0,0,0,.16)}
+.panel-card h2,.panel-card h3{margin:0}
+.panel-eyebrow{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:6px}
+.panel-title{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.panel-subtitle{font-size:11px;color:var(--text-dim);line-height:1.42}
+.note-list{display:grid;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.note-list li{position:relative;padding-left:12px;font-size:10px;color:var(--text-dim);line-height:1.4}
+.note-list li::before{content:'';position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.badge-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.badge{font-family:var(--font-mono);font-size:9px;font-weight:600;padding:3px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.06em;border:1px solid transparent;color:#b0bec9}
+.badge-teal{background:rgba(8,145,178,.12);color:#7dd3d8;border-color:rgba(8,145,178,.35)}
+.badge-navy{background:rgba(59,130,246,.1);color:#93b8f2;border-color:rgba(59,130,246,.3)}
+.badge-gold{background:rgba(217,167,6,.1);color:#e6c45a;border-color:rgba(217,167,6,.28)}
+.badge-green{background:rgba(5,150,105,.1);color:#6dd8a8;border-color:rgba(5,150,105,.3)}
+.badge-red{background:rgba(239,68,68,.1);color:#f08080;border-color:rgba(239,68,68,.28)}
+.badge-plum{background:rgba(168,85,247,.1);color:#c4a5f0;border-color:rgba(168,85,247,.28)}
+.badge-slate{background:rgba(148,163,184,.1);color:#a8b8c8;border-color:rgba(148,163,184,.25)}
+.inventory-list{display:grid;gap:6px;margin-top:8px}
+.inventory-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 8px;border-radius:10px;background:var(--surface-alt);font-size:11px;color:var(--text-dim)}
+.inventory-row strong{font-family:var(--font-mono);font-size:10px;color:var(--text)}
+.framework-list{display:grid;gap:8px;margin-top:8px}
+.framework-item{padding:8px 10px;border-radius:10px;background:var(--surface-alt);border:1px solid var(--border)}
+.framework-item strong{display:block;font-size:11px;margin-bottom:3px}
+.framework-item span{font-size:10px;color:var(--text-dim);line-height:1.4}
+.stage-viewport{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;position:relative}
+.stage-scale{width:1280px;height:720px;transform-origin:center center;flex:none}
+.canvas-grid{width:1280px;height:720px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(7,minmax(0,1fr));gap:12px;padding:16px;border-radius:20px;background:radial-gradient(circle at top, rgba(255,255,255,.06), transparent 42%),linear-gradient(180deg, rgba(255,255,255,.04), transparent),var(--bg-elevated);border:1px solid var(--border);position:relative;overflow:hidden}
+.canvas-grid::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);background-size:calc(100% / 12) calc(100% / var(--grid-rows, 7));pointer-events:none;opacity:.45}
+.tile-card{min-width:0;min-height:0;perspective:1200px;position:relative;outline:none;opacity:0;animation:tileIn .48s cubic-bezier(.22,1,.36,1) forwards;animation-delay:calc(var(--delay,0) * 42ms)}
+@keyframes tileIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes dotPop{0%{opacity:0;transform:scale(0)}60%{opacity:1;transform:scale(1.3)}100%{opacity:.88;transform:scale(1)}}
+@keyframes hullFade{from{opacity:0}to{opacity:1}}
+@keyframes dotFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(var(--fy,-2px)) scale(1)}}
+@keyframes rankGrow{from{width:0}to{width:var(--target-w)}}
+@keyframes sparkDraw{from{stroke-dashoffset:var(--spark-len)}to{stroke-dashoffset:0}}
+.flip-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:18px}
+.flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.22,1,.36,1)}
+.flip-card[aria-pressed="true"] .flip-inner{transform:rotateY(180deg)}
+.flip-front,.flip-back{position:absolute;inset:0;display:flex;flex-direction:column;border-radius:18px;overflow:hidden;backface-visibility:hidden}
+.flip-front{background:linear-gradient(180deg,rgba(255,255,255,.04),transparent),var(--surface);border:1px solid var(--border);box-shadow:0 14px 34px rgba(0,0,0,.16)}
+.flip-card:hover .flip-front{border-color:var(--border-bright);box-shadow:0 22px 48px rgba(0,0,0,.22)}
+.flip-back{transform:rotateY(180deg);background:var(--back-bg);border:1px solid var(--back-border);box-shadow:0 18px 48px rgba(0,0,0,.3)}
+.cat-teal{border-left:3px solid var(--teal)} .cat-navy{border-left:3px solid var(--navy)} .cat-gold{border-left:3px solid var(--gold)} .cat-green{border-left:3px solid var(--green)} .cat-red{border-left:3px solid var(--red)} .cat-plum{border-left:3px solid var(--plum)} .cat-slate{border-left:3px solid var(--slate)}
+.tile-header,.tile-back-header{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.tile-back-header{border-bottom-color:var(--back-border)}
+.tile-title{display:flex;align-items:center;gap:6px;min-width:0}
+.tile-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flip-back .tile-name{color:var(--back-text)}
+.hint{font-size:10px;color:var(--text-subtle);opacity:0;transition:opacity .15s}
+.flip-card:hover .hint,.flip-card:focus-visible .hint{opacity:1}
+.copy-btn{font-family:var(--font-mono);font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--back-border);background:rgba(255,255,255,.04);color:var(--back-text);cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.copy-btn:hover,.copy-btn:focus-visible{background:#1f2937;border-color:#475569}
+.tile-body{flex:1;min-height:0;padding:10px 12px;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.tile-back-body{flex:1;min-height:0;padding:10px 12px;overflow:auto}
+.tile-back-body pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:var(--font-mono);font-size:10px;line-height:1.55;color:var(--back-green)}
+.tile-kicker{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-subtle)}
+.chart-subtitle,.tile-note{font-size:10px;color:var(--text-dim);line-height:1.4}
+.chart-subtitle:empty{display:none}
+.hero-panel{display:flex;flex-direction:column;gap:6px;height:100%;min-height:0}
+.hero-title{font-size:20px;font-weight:700;letter-spacing:-.03em;line-height:1.15}
+.hero-summary{font-size:11px;color:var(--text-dim);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.hero-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;min-height:0}
+.hero-metric{padding:6px 8px;border-radius:10px;background:var(--surface-alt);border:1px solid var(--border)}
+.hero-metric span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-subtle)}
+.hero-metric strong{display:block;font-size:14px;margin-top:2px}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto}
+.tag{font-family:var(--font-mono);font-size:8px;padding:2px 6px;border-radius:999px;border:1px solid var(--border);background:var(--surface-alt);color:var(--text-dim)}
+.flow-row{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px;align-items:center;min-height:0;flex:1}
+.flow-stage{padding:6px 8px;border-radius:10px;background:var(--surface-alt);border:1px solid var(--border);display:grid;gap:3px;min-width:0}
+.flow-stage.ok{box-shadow:inset 0 0 0 1px rgba(52,211,153,.15)}
+.flow-stage.watch{box-shadow:inset 0 0 0 1px rgba(251,191,36,.15)}
+.flow-stage.risk{box-shadow:inset 0 0 0 1px rgba(251,113,133,.15)}
+.flow-name{font-size:11px;font-weight:700}
+.flow-meta{font-size:9px;color:var(--text-subtle)}
+.flow-pill{font-family:var(--font-mono);font-size:8px;padding:2px 6px;border-radius:999px;width:max-content;text-transform:uppercase;letter-spacing:.06em}
+.flow-pill.ok{background:var(--green-dim);color:var(--green)} .flow-pill.watch{background:var(--gold-dim);color:var(--gold)} .flow-pill.risk{background:var(--red-dim);color:var(--red)}
+.flow-arrow{font-size:14px;color:var(--text-subtle);text-align:center}
+.stat-panel,.metric-panel{display:flex;flex-direction:column;gap:4px;height:100%;min-height:0}
+.kpi-panel{display:flex;flex-direction:column;gap:6px;height:100%;min-height:0}
+.stat-value,.metric-value{font-size:26px;font-weight:700;letter-spacing:-.03em}
+.kpi-value{font-size:32px;font-weight:700;letter-spacing:-.03em}
+.stat-label,.metric-label{font-size:11px;font-weight:600}
+.delta-chip{font-family:var(--font-mono);font-size:9px;padding:3px 7px;border-radius:999px;width:max-content;border:1px solid transparent;text-transform:uppercase;letter-spacing:.04em}
+.delta-chip.positive{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.delta-chip.negative{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+.delta-chip.neutral{background:var(--slate-dim);border-color:var(--slate);color:var(--slate)}
+.spark-wrap{margin-top:auto;flex:1;min-height:0;max-height:48px}
+.spark-svg{width:100%;height:100%}
+.chart-svg{width:100%;height:100%}
+.chart-shell{display:flex;flex-direction:column;gap:2px;height:100%;min-height:0}
+.chart-legend{display:flex;gap:8px;flex-wrap:wrap;font-size:9px}
+.legend-item{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:var(--text-dim);font-family:var(--font-mono)}
+.legend-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.chart-visual{flex:1;min-height:0;display:flex;align-items:stretch;overflow:hidden}
+.chart-footer{font-size:10px;color:var(--text-subtle);font-family:var(--font-mono)}
+.scatter-wrap{position:relative;width:100%;height:100%;border-left:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
+.scatter-dot{position:absolute;width:10px;height:10px;border-radius:50%;opacity:0;transform:scale(0);animation:dotPop .5s cubic-bezier(.22,1,.36,1) var(--pop-d,.2s) forwards,dotFloat var(--float-dur,3s) ease-in-out var(--float-d,1s) infinite;--fy:-2.5px;box-shadow:0 0 6px 1px currentColor;margin:-5px 0 0 -5px}
+.scatter-hull{position:absolute;inset:0;opacity:0;animation:hullFade .8s ease-out var(--hull-d,.4s) forwards}
+.scatter-hull svg{width:100%;height:100%}
+.chart-footer:empty{display:none}
+.grid-line{stroke:rgba(255,255,255,.08);stroke-width:1}
+.axis-line{stroke:rgba(255,255,255,.16);stroke-width:1}
+.axis-label{fill:var(--text-subtle);font-size:10px;font-family:var(--font-mono)}
+.value-label{fill:var(--text);font-size:10px;font-weight:600}
+.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;flex:1;min-height:0;align-content:start}
+.status-card{padding:6px 8px;border-radius:10px;background:var(--surface-alt);border:1px solid var(--border);display:grid;gap:2px}
+.status-head{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600}
+.status-dot{width:8px;height:8px;border-radius:50%}
+.status-note{font-size:10px;color:var(--text-subtle)}
+.table-shell{display:flex;flex-direction:column;gap:8px;height:100%;min-height:0}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.02)}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:11px}
+.table-wrap th{position:sticky;top:0;background:var(--surface-alt);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-subtle);padding:9px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.table-wrap td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05);color:var(--text-dim)}
+.table-wrap tr:last-child td{border-bottom:none}
+.table-wrap td strong{color:var(--text)}
+.compare-shell{display:grid;gap:10px;height:100%}
+.compare-row{display:grid;grid-template-columns:110px 1fr auto auto;gap:10px;align-items:center}
+.compare-row .label{font-size:11px;color:var(--text-dim);font-weight:600}
+.dual-bar{position:relative;height:18px;border-radius:999px;background:var(--surface-alt);overflow:hidden;border:1px solid var(--border)}
+.dual-bar .control,.dual-bar .treatment{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+.dual-bar .control{background:rgba(148,163,184,.4)}
+.dual-bar .treatment{background:var(--accent)}
+.compare-val{font-family:var(--font-mono);font-size:10px;color:var(--text-dim)}
+.stack-shell{display:grid;gap:10px;height:100%}
+.stack-row{display:grid;grid-template-columns:92px 1fr auto;gap:10px;align-items:center}
+.stack-label{font-size:11px;color:var(--text-dim);font-weight:600}
+.stack-track{display:flex;height:18px;border-radius:999px;overflow:hidden;border:1px solid var(--border);background:var(--surface-alt)}
+.stack-segment{display:block;height:100%}
+.stack-meta{font-family:var(--font-mono);font-size:10px;color:var(--text-subtle);text-align:right}
+.timeline-shell{display:grid;grid-template-rows:auto 1fr;gap:8px;height:100%}
+.timeline-track{position:relative;height:100%}
+.timeline-track::before{content:'';position:absolute;left:0;right:0;top:28px;height:2px;background:linear-gradient(90deg,var(--accent),rgba(255,255,255,.06))}
+.timeline-point{position:absolute;top:16px;transform:translateX(-50%);display:grid;justify-items:center;gap:6px}
+.timeline-point .dot{width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px var(--accent-soft)}
+.timeline-point .name{font-size:10px;font-weight:600;white-space:nowrap}
+.timeline-point .meta{font-size:9px;color:var(--text-subtle);white-space:nowrap}
+.pill-stack{display:flex;gap:6px;flex-wrap:wrap}
+.mono{font-family:var(--font-mono)}
+.rank-shell{display:flex;flex-direction:column;gap:2px;height:100%;min-height:0;overflow:hidden}
+.rank-row{display:grid;grid-template-columns:18px 72px 1fr 36px;gap:4px;align-items:center}
+.rank-num{font-family:var(--font-mono);font-size:9px;color:var(--text-subtle);text-align:right}
+.rank-label{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-bar{height:12px;border-radius:999px;background:var(--surface-alt);overflow:hidden;border:1px solid var(--border)}
+.rank-fill{height:100%;border-radius:999px;width:0;animation:rankGrow .7s cubic-bezier(.22,1,.36,1) forwards;animation-delay:var(--rank-delay,0s)}
+.spark-svg path.spark-animated{stroke-dasharray:var(--spark-len);stroke-dashoffset:var(--spark-len);animation:sparkDraw 1.2s ease-out .3s forwards}
+.rank-val{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);text-align:right}
+.g3d-pillar{stroke-width:1.2}
+.schema-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:4px 9px;border-radius:8px;cursor:pointer;transition:all .2s;font:inherit;font-size:11px;white-space:nowrap}
+.schema-btn:hover{border-color:var(--border-bright)}
+.schema-btn.is-active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.mode-toggle{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;font:inherit;font-size:11px;background:var(--surface);flex-shrink:0}
+.mode-toggle button{border:none;background:transparent;color:var(--text-dim);padding:4px 10px;cursor:pointer;transition:all .2s;font:inherit;font-size:11px;white-space:nowrap;position:relative}
+.mode-toggle button:hover{color:var(--text)}
+.mode-toggle button.is-active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.mode-toggle button+button{border-left:1px solid var(--border)}
+.view-mode .flip-card{cursor:default}
+.view-mode .flip-card .hint{display:none}
+.view-mode .tile-body{cursor:pointer}
+.view-mode .tile-body:hover{filter:brightness(1.08)}
+.edit-mode .tile-body{pointer-events:none}
+/* Overlap mode: stacked tiles get offset + elevated shadow */
+.canvas-grid .tile-card[data-overlap-index="1"]{z-index:2;transform:translate(6px,6px)}
+.canvas-grid .tile-card[data-overlap-index="2"]{z-index:3;transform:translate(12px,12px)}
+.canvas-grid .tile-card[data-overlap-index="3"]{z-index:4;transform:translate(18px,18px)}
+.canvas-grid .tile-card[data-overlap-offset]{transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.canvas-grid .tile-card[data-overlap-index] .flip-front{box-shadow:0 18px 42px rgba(0,0,0,.28)}
+/* Overlap indicator badge */
+.overlap-indicator{position:absolute;top:4px;right:4px;font-family:var(--font-mono);font-size:8px;padding:2px 6px;border-radius:6px;background:rgba(251,191,36,.18);color:#e6c45a;border:1px solid rgba(251,191,36,.3);z-index:10;pointer-events:none;letter-spacing:.04em;text-transform:uppercase}
+/* Settings overlap section */
+.l0-overlap-section{margin-top:8px}
+.overlap-toggle-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.overlap-seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;font:inherit;font-size:11px;background:var(--surface)}
+.overlap-seg button{border:none;background:transparent;color:var(--text-dim);padding:6px 14px;cursor:pointer;transition:all .2s;font:inherit;font-size:11px;white-space:nowrap}
+.overlap-seg button:hover{color:var(--text)}
+.overlap-seg button.is-active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.overlap-seg button+button{border-left:1px solid var(--border)}
+.overlap-note{font-size:10px;color:var(--text-subtle);margin-top:4px;line-height:1.4}
+.l0-overlap-section.is-hidden{display:none}
+@media (max-width: 1180px){
+  .app-shell{grid-template-columns:1fr;grid-template-rows:auto minmax(720px,1fr);grid-template-areas:"header" "stage";overflow:auto}
+  .stage-panel{min-height:720px;margin:0 12px 14px}
+  .header-actions{min-width:0}
+}
+@media (prefers-reduced-motion: reduce){
+  .tile-card,.flip-inner,.thumb,.theme-btn,.nav-btn{animation:none!important;transition:none!important}
+  .chart-svg circle,.chart-svg polygon,.scatter-dot,.scatter-hull{animation:none!important;opacity:.88!important;transform:none!important}
+  .rank-fill{animation:none!important;width:var(--target-w)!important}
+  .spark-animated{animation:none!important;stroke-dashoffset:0!important}
+}
+</style>
+</head>
+<body data-theme="midnight">
+<div class="app-shell">
+  <!-- Layer 0: settings / detail drawer (hidden behind card by default) -->
+  <header class="app-header" id="layer0">
+    <button class="l0-close" type="button" id="l0Close">Close</button>
+    <div class="l0-card">
+      <h1 class="l0-title">ML Platform deck rebuilt on the shared flip-card framework</h1>
+      <p class="l0-subtitle">Slides 1-8 now use the same front-face and back-face contract as the LiveTile Studio canvas tiles in the pattern library: category badge, flip hint, copyable schema JSON, accessible keyboard flip, richer visual rendering, and real thumbnail previews.</p>
+      <div class="l0-stats">
+        <div class="top-stat"><span class="value" id="statSlides">8</span><span class="label">Slides</span></div>
+        <div class="top-stat"><span class="value" id="statTiles">0</span><span class="label">Tiles</span></div>
+        <div class="top-stat"><span class="value" id="statTheme">Midnight</span><span class="label">Theme</span></div>
+        <div class="top-stat"><span class="value" id="statFramework">FlipCard</span><span class="label">Front/back contract</span></div>
+      </div>
+      <div class="l0-inventory" id="headerInventory"></div>
+      <div class="l0-section-label">Slide Tags</div>
+      <div class="l0-chips" id="l0Chips"></div>
+      <div class="l0-overlap-section" id="overlapSection">
+        <div class="l0-section-label">Tile Overlap</div>
+        <div class="overlap-toggle-row">
+          <span class="overlap-seg" id="overlapToggle">
+            <button type="button" data-overlap="overlap" class="is-active">Overlap</button>
+            <button type="button" data-overlap="shift">Shift</button>
+            <button type="button" data-overlap="off">Off</button>
+          </span>
+          <span id="overlapCount" style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim)"></span>
+        </div>
+        <p class="overlap-note">Overlap: tiles stack with offset at shared positions. Shift: colliding tiles nudge to adjacent cells. Off: standard grid, no collision logic.</p>
+      </div>
+      <div class="l0-section-label">Theme</div>
+      <div class="theme-toolbar" id="themeToolbar">
+        <button class="theme-btn" type="button" data-theme="midnight" aria-pressed="true">Midnight Blue</button>
+        <button class="theme-btn" type="button" data-theme="emerald" aria-pressed="false">Emerald Night</button>
+        <button class="theme-btn" type="button" data-theme="crimson" aria-pressed="false">Crimson Dark</button>
+        <button class="theme-btn" type="button" data-theme="amethyst" aria-pressed="false">Amethyst Shadow</button>
+        <button class="theme-btn" type="button" data-theme="solar" aria-pressed="false">Solar Gold</button>
+        <button class="theme-btn" type="button" data-theme="arctic" aria-pressed="false">Arctic Frost</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Layer 1: full-screen adaptive card -->
+  <main class="stage-panel">
+    <div class="card-chrome" id="cardChrome">
+      <span class="card-kicker" id="chromeKicker">01/8</span>
+      <span class="card-title" id="chromeTitle">ML Platform Overview</span>
+      <div class="card-thumbs" id="thumbnailStrip"></div>
+      <div class="card-actions">
+        <span class="mode-toggle" id="modeToggle">
+          <button type="button" data-mode="view">View</button>
+          <button type="button" data-mode="edit" class="is-active">Edit</button>
+        </span>
+        <button class="nav-btn" type="button" data-nav="prev">Prev</button>
+        <button class="nav-btn" type="button" data-nav="next">Next</button>
+        <button class="schema-btn" type="button" id="schemaBtn">Schema</button>
+        <button class="settings-btn" type="button" id="settingsBtn">Settings</button>
+      </div>
+    </div>
+    <div class="stage-viewport" id="stageViewport">
+      <div class="stage-scale" id="stageScale">
+        <div class="canvas-grid" id="canvas"></div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+(() => {
+  const TYPE_META = {
+    hero:{badge:'HERO', category:'navy'}, pipeline:{badge:'FLOW', category:'teal'}, 'stat-block':{badge:'STAT', category:'slate'},
+    kpi:{badge:'KPI', category:'green'}, 'line-chart':{badge:'LINE', category:'plum'}, 'bar-chart':{badge:'BAR', category:'gold'},
+    'radar-chart':{badge:'RADAR', category:'plum'}, table:{badge:'TABLE', category:'slate'}, 'scatter-plot':{badge:'SCATTER', category:'gold'},
+    'metric-card':{badge:'METRIC', category:'teal'}, 'grouped-column':{badge:'GROUPED', category:'gold'}, 'stacked-bar':{badge:'STACK', category:'gold'},
+    gauge:{badge:'GAUGE', category:'teal'}, 'progress-ring':{badge:'RING', category:'green'}, sparkline:{badge:'SPARK', category:'teal'},
+    'area-chart':{badge:'AREA', category:'plum'}, histogram:{badge:'HISTO', category:'gold'}, 'pie-chart':{badge:'DONUT', category:'navy'},
+    heatmap:{badge:'HEATMAP', category:'red'}, 'status-grid':{badge:'STATUS', category:'green'}, waterfall:{badge:'WATERFALL', category:'gold'},
+    comparison:{badge:'COMPARE', category:'navy'}, timeline:{badge:'TIMELINE', category:'slate'},
+    'cluster-scatter':{badge:'CLUSTER', category:'plum'}, ranking:{badge:'RANK', category:'navy'}, 'graph-3d':{badge:'3D', category:'teal'}
+  };
+
+  const THEME_LABELS = { midnight:'Midnight', emerald:'Emerald', crimson:'Crimson', amethyst:'Amethyst', solar:'Solar', arctic:'Arctic' };
+
+  const slides = [
+    {
+      id:'ml-platform-overview',
+      title:'ML Platform Overview',
+      subtitle:'Executive command center for training, serving, and platform reliability.',
+      chips:['Executive view','MLOps','Realtime'],
+      notes:[
+        'The canvas now follows the shared flip-card contract from the reference library instead of using stripped-down placeholder cards.',
+        'This overview optimizes for morning scan speed: model inventory, delivery flow, quality, and serving latency in one surface.'
+      ],
+      tiles:[
+        /* Row 1: Overview stats — 4 stat-blocks with sparklines */
+        { id:'ov-models', type:'stat-block', title:'Active Models', grid:{col:1,row:1,colSpan:3,rowSpan:1}, content:{ value:'47', label:'Active models', note:'12 champion · 8 shadow · 27 experimental', trend:[34,36,39,41,43,45,47] } },
+        { id:'ov-predictions', type:'stat-block', title:'Daily Predictions', grid:{col:4,row:1,colSpan:3,rowSpan:1}, content:{ value:'2.8M', label:'Daily predictions', note:'p95 throughput 41.2 req/s', trend:[1.9,2.0,2.15,2.3,2.45,2.6,2.8] } },
+        { id:'ov-champions', type:'stat-block', title:'Champion Models', grid:{col:7,row:1,colSpan:3,rowSpan:1}, content:{ value:'12', label:'Champion models', note:'3 promoted this sprint', trend:[8,8,9,10,10,11,12] } },
+        { id:'ov-freshness', type:'stat-block', title:'Data Freshness', grid:{col:10,row:1,colSpan:3,rowSpan:1}, content:{ value:'4.2m', label:'Avg data freshness', note:'Feature store lag median', trend:[6.1,5.8,5.2,4.9,4.5,4.3,4.2] } },
+        /* Row 2: KPIs — 4 key performance indicators with deltas */
+        { id:'ov-accuracy', type:'kpi', title:'Model Accuracy', grid:{col:1,row:2,colSpan:3,rowSpan:1}, content:{ label:'Model accuracy', value:'96.4%', delta:'+1.2 pts', note:'Weighted F1 across routed intents', tone:'positive' } },
+        { id:'ov-pipeline', type:'kpi', title:'Pipeline Success', grid:{col:4,row:2,colSpan:3,rowSpan:1}, content:{ label:'Pipeline success', value:'99.1%', delta:'+0.3 pts', note:'Last 30 scheduled runs', tone:'positive' } },
+        { id:'ov-latency', type:'kpi', title:'Serving Latency', grid:{col:7,row:2,colSpan:3,rowSpan:1}, content:{ label:'Serving latency', value:'12ms', delta:'-8% WoW', note:'p50 latency · p99 at 45ms', tone:'positive' } },
+        { id:'ov-uptime', type:'kpi', title:'Platform Uptime', grid:{col:10,row:2,colSpan:3,rowSpan:1}, content:{ label:'Platform uptime', value:'99.97%', delta:'+0.02%', note:'30-day rolling SLA', tone:'positive' } },
+        /* Row 3: Gauges + metric — utilization visuals */
+        { id:'ov-gpu', type:'gauge', title:'GPU Utilization', grid:{col:1,row:3,colSpan:3,rowSpan:1}, content:{ title:'GPU cluster', subtitle:'Target < 85%', value:78, target:85 } },
+        { id:'ov-cpu', type:'gauge', title:'CPU Pool', grid:{col:4,row:3,colSpan:3,rowSpan:1}, content:{ title:'CPU pool', subtitle:'Target < 70%', value:54, target:70 } },
+        { id:'ov-memory', type:'gauge', title:'Memory Usage', grid:{col:7,row:3,colSpan:3,rowSpan:1}, content:{ title:'Memory usage', subtitle:'Heap + RSS', value:67, target:80 } },
+        { id:'ov-cost', type:'metric-card', title:'Cost per Prediction', grid:{col:10,row:3,colSpan:3,rowSpan:1}, content:{ label:'Cost / prediction', value:'$0.0003', note:'14% cheaper than last month', trend:[0.00048,0.00044,0.00041,0.00038,0.00035,0.00032,0.0003] } },
+        /* Row 4: Charts — bar, sparkline, donut, status */
+        { id:'ov-throughput', type:'bar-chart', title:'Team Throughput', grid:{col:1,row:4,colSpan:3,rowSpan:1}, content:{ title:'Team throughput', subtitle:'', values:[8,12,14,10], labels:['Platfm','Research','MLOps','Analytcs'], unit:'' } },
+        { id:'ov-experiments', type:'sparkline', title:'Experiment Runs', grid:{col:4,row:4,colSpan:3,rowSpan:1}, content:{ title:'Experiment runs', subtitle:'91 today — +12% WoW', values:[45,52,48,67,72,58,63,81,76,69,88,91], footer:'' } },
+        { id:'ov-allocation', type:'pie-chart', title:'Cost Allocation', grid:{col:7,row:4,colSpan:3,rowSpan:1}, content:{ title:'Cost by team', subtitle:'', segments:[{label:'Platform',value:40,color:'var(--teal)'},{label:'Research',value:30,color:'var(--navy)'},{label:'Products',value:20,color:'var(--gold)'},{label:'Analytics',value:10,color:'var(--plum)'}], centerLabel:'$20K' } },
+        { id:'ov-health', type:'status-grid', title:'Service Health', grid:{col:10,row:4,colSpan:3,rowSpan:1}, content:{ title:'Service health', subtitle:'Endpoint status', items:[{label:'Inference API',status:'ok',note:'p99 < 50ms'},{label:'Feature store',status:'ok',note:'Synced'},{label:'Training jobs',status:'watch',note:'2 queued'},{label:'Data pipeline',status:'ok',note:'Lag < 5m'}] } }
+      ]
+    },
+    {
+      id:'model-performance',
+      title:'Model Performance',
+      subtitle:'Champion model quality, learning curves, and class-by-class behavior.',
+      chips:['Training','Validation','Classification'],
+      notes:[
+        'Top-row KPI tiles use the same badge, hint, and JSON back-face treatment as the reference library.',
+        'The chart cards are no longer placeholder SVG fragments; they render structured axes, legends, and labelled data.'
+      ],
+      tiles:[
+        { id:'perf-f1', type:'kpi', title:'F1 score', grid:{col:1,row:1,colSpan:3,rowSpan:2}, content:{ label:'F1 score', value:'0.943', delta:'+0.011 vs last release', note:'Production validation blend', tone:'positive' } },
+        { id:'perf-precision', type:'kpi', title:'Precision', grid:{col:4,row:1,colSpan:3,rowSpan:2}, content:{ label:'Precision', value:'0.961', delta:'+0.007', note:'False positives down', tone:'positive' } },
+        { id:'perf-recall', type:'kpi', title:'Recall', grid:{col:7,row:1,colSpan:3,rowSpan:2}, content:{ label:'Recall', value:'0.926', delta:'-0.003', note:'Long-tail intents need work', tone:'negative' } },
+        { id:'perf-auc', type:'kpi', title:'AUC-ROC', grid:{col:10,row:1,colSpan:3,rowSpan:2}, content:{ label:'AUC-ROC', value:'0.987', delta:'+0.002', note:'Stable against benchmark set', tone:'positive' } },
+        { id:'perf-loss', type:'line-chart', title:'Training loss', grid:{col:1,row:3,colSpan:6,rowSpan:5}, content:{ title:'Training loss by epoch', subtitle:'Champion vs validation curve · 100 epochs', xLabels:['0','20','40','60','80','100'], series:[{ name:'Train loss', color:'var(--accent)', values:[0.92,0.78,0.64,0.49,0.38,0.29,0.22,0.18,0.14,0.11] },{ name:'Validation loss', color:'var(--teal)', values:[0.95,0.83,0.73,0.59,0.47,0.39,0.34,0.31,0.29,0.27] }], unit:'loss' } },
+        { id:'perf-class', type:'bar-chart', title:'Per-class accuracy', grid:{col:7,row:3,colSpan:6,rowSpan:3}, content:{ title:'Per-class accuracy', subtitle:'Held-out validation set', labels:['Routing','Billing','Support','IT','HR'], values:[97,94,91,96,88], unit:'%' } },
+        { id:'perf-radar', type:'radar-chart', title:'Capability tradeoff', grid:{col:7,row:6,colSpan:6,rowSpan:2}, content:{ title:'Capability tradeoff', subtitle:'Champion vs benchmark', axes:['Accuracy','Speed','Memory','Robustness','Interpretability'], series:[{ name:'Champion', color:'var(--accent)', values:[96,82,74,91,68] },{ name:'Benchmark', color:'var(--gold)', values:[90,74,66,80,62] }], max:100 } }
+      ]
+    },
+    {
+      id:'experiment-tracker',
+      title:'Experiment Tracker',
+      subtitle:'Run registry with search-space exploration and compute spend.',
+      chips:['Experiments','Hyperparameters','Cost'],
+      notes:[
+        'The table now behaves like a proper dashboard tile with sticky header styling and readable schema-backed JSON on the back.',
+        'Metric cards expose both outcome and trend instead of raw placeholder text.'
+      ],
+      tiles:[
+        { id:'exp-table', type:'table', title:'Experiment runs', grid:{col:1,row:1,colSpan:8,rowSpan:4}, content:{ title:'Latest experiment runs', subtitle:'Top recent candidates ranked by weighted F1', columns:['Run ID','Model','LR','Epochs','F1','Status'], rows:[['run-047','DeBERTa-v3','0.0008','48','0.961','Champion'],['run-046','BERT-large','0.0010','42','0.954','Shadow'],['run-045','RoBERTa','0.0006','56','0.949','Archived'],['run-044','DistilBERT','0.0012','38','0.937','Candidate'],['run-043','BiLSTM','0.0004','72','0.921','Archived'],['run-042','CNN-fasttext','0.0015','30','0.903','Baseline']] } },
+        { id:'exp-scatter', type:'scatter-plot', title:'Learning rate search', grid:{col:9,row:1,colSpan:4,rowSpan:4}, content:{ title:'Learning rate vs F1', subtitle:'Sweet spot clusters near 8e-4', xLabel:'Learning rate', yLabel:'F1 score', xDomain:[0.0002,0.0016], yDomain:[0.89,0.97], points:[{x:0.0002,y:0.903,size:6,color:'var(--slate)'},{x:0.0004,y:0.921,size:7,color:'var(--teal)'},{x:0.0006,y:0.949,size:8,color:'var(--accent)'},{x:0.0008,y:0.961,size:9,color:'var(--green)'},{x:0.0010,y:0.954,size:8,color:'var(--gold)'},{x:0.0012,y:0.937,size:8,color:'var(--red)'},{x:0.0014,y:0.912,size:7,color:'var(--slate)'},{x:0.0016,y:0.898,size:6,color:'var(--red)'}] } },
+        { id:'exp-best', type:'metric-card', title:'Best run', grid:{col:1,row:5,colSpan:3,rowSpan:3}, content:{ label:'Best run', value:'run-047', note:'0.961 weighted F1 · deployed to shadow', trend:[91,92,93,94,95,96,96.1] } },
+        { id:'exp-runs', type:'metric-card', title:'Weekly runs', grid:{col:4,row:5,colSpan:3,rowSpan:3}, content:{ label:'Weekly runs', value:'142', note:'24 succeeded overnight', trend:[96,102,118,126,131,138,142] } },
+        { id:'exp-compute', type:'metric-card', title:'Compute hours', grid:{col:7,row:5,colSpan:3,rowSpan:3}, content:{ label:'Compute hours', value:'847h', note:'GPU-heavy sweep in progress', trend:[620,655,690,720,761,812,847] } },
+        { id:'exp-cost', type:'metric-card', title:'Experiment cost', grid:{col:10,row:5,colSpan:3,rowSpan:3}, content:{ label:'Experiment cost', value:'$4,231', note:'14% under weekly budget', trend:[5.1,4.9,4.7,4.6,4.4,4.3,4.2] } }
+      ]
+    },
+    {
+      id:'pipeline-health',
+      title:'Training Pipeline Health',
+      subtitle:'Stage timing, resource composition, and SLA posture for the current run set.',
+      chips:['Pipeline','SLA','Utilization'],
+      notes:[
+        'Grouped columns, stacked bars, gauges, and rings all now share consistent chrome and flip behavior.',
+        'This slide mirrors the LiveTile canvas convention: front content is visual, back content is schema-first and copyable.'
+      ],
+      tiles:[
+        { id:'pipe-flow', type:'pipeline', title:'Pipeline stages', grid:{col:1,row:1,colSpan:12,rowSpan:2}, content:{ title:'Training pipeline', subtitle:'Six-stage run with one watch condition in training', stages:[{name:'Ingestion',meta:'03:01',status:'ok'},{name:'Validation',meta:'03:07',status:'ok'},{name:'Transform',meta:'03:12',status:'ok'},{name:'Train',meta:'03:40',status:'watch'},{name:'Eval',meta:'04:08',status:'ok'},{name:'Deploy',meta:'04:19',status:'ok'}] } },
+        { id:'pipe-duration', type:'grouped-column', title:'Duration by stage', grid:{col:1,row:3,colSpan:6,rowSpan:3}, content:{ title:'Stage duration by run', subtitle:'Minutes by stage across Mon / Wed / Fri', categories:['Ingest','Feature','Train','Eval','Deploy'], series:[{ name:'Mon', color:'var(--accent)', values:[8,14,29,11,6] },{ name:'Wed', color:'var(--teal)', values:[9,15,31,10,7] },{ name:'Fri', color:'var(--gold)', values:[7,13,27,9,5] }], unit:'min' } },
+        { id:'pipe-resource', type:'stacked-bar', title:'Resource mix', grid:{col:7,row:3,colSpan:6,rowSpan:3}, content:{ title:'Resource composition by stage', subtitle:'CPU / GPU / IO share', rows:[{ label:'Ingest', segments:[{label:'CPU',value:42,color:'var(--accent)'},{label:'GPU',value:6,color:'var(--teal)'},{label:'IO',value:52,color:'var(--gold)'}] },{ label:'Feature', segments:[{label:'CPU',value:51,color:'var(--accent)'},{label:'GPU',value:18,color:'var(--teal)'},{label:'IO',value:31,color:'var(--gold)'}] },{ label:'Train', segments:[{label:'CPU',value:18,color:'var(--accent)'},{label:'GPU',value:68,color:'var(--teal)'},{label:'IO',value:14,color:'var(--gold)'}] },{ label:'Eval', segments:[{label:'CPU',value:34,color:'var(--accent)'},{label:'GPU',value:44,color:'var(--teal)'},{label:'IO',value:22,color:'var(--gold)'}] }] } },
+        { id:'pipe-sla', type:'gauge', title:'Pipeline SLA', grid:{col:1,row:6,colSpan:3,rowSpan:2}, content:{ title:'Pipeline SLA', subtitle:'Target 99.0%', value:98.7, target:99 } },
+        { id:'pipe-quality', type:'gauge', title:'Data quality', grid:{col:4,row:6,colSpan:3,rowSpan:2}, content:{ title:'Data quality', subtitle:'Target 98.5%', value:99.2, target:98.5 } },
+        { id:'pipe-current', type:'progress-ring', title:'Current run progress', grid:{col:7,row:6,colSpan:3,rowSpan:2}, content:{ title:'Current run progress', subtitle:'Epoch 29 of 40', value:73 } },
+        { id:'pipe-trend', type:'sparkline', title:'Duration trend', grid:{col:10,row:6,colSpan:3,rowSpan:2}, content:{ title:'7-day duration trend', subtitle:'Median run time · minutes', values:[44,42,39,41,38,36,35], footer:'p95 49m · best 34m' } }
+      ]
+    },
+    {
+      id:'inference-performance',
+      title:'Inference Performance',
+      subtitle:'Serving latency, tail distribution, and traffic split by model version.',
+      chips:['Latency','Serving','Versions'],
+      notes:[
+        'The area chart, histogram, and donut chart now read as production tiles rather than generic SVG placeholders.',
+        'Metric cards on the right carry a stronger front-face hierarchy and more useful notes.'
+      ],
+      tiles:[
+        { id:'serve-latency', type:'area-chart', title:'Latency percentiles', grid:{col:1,row:1,colSpan:8,rowSpan:4}, content:{ title:'Latency percentiles over 24h', subtitle:'p50 / p95 / p99 request latency', xLabels:['00','04','08','12','16','20','24'], series:[{ name:'p50', color:'var(--green)', values:[8,9,8,10,9,8,8] },{ name:'p95', color:'var(--teal)', values:[18,19,22,24,21,20,19] },{ name:'p99', color:'var(--accent)', values:[31,34,42,45,39,36,33] }], unit:'ms' } },
+        { id:'serve-p50', type:'stat-block', title:'p50 latency', grid:{col:9,row:1,colSpan:4,rowSpan:2}, content:{ value:'8ms', label:'p50 latency', note:'Median request latency', trend:[10,9,9,8,8,8,8] } },
+        { id:'serve-p99', type:'stat-block', title:'p99 latency', grid:{col:9,row:3,colSpan:4,rowSpan:2}, content:{ value:'45ms', label:'p99 latency', note:'Tail latency during noon spike', trend:[56,54,50,48,45,44,45] } },
+        { id:'serve-hist', type:'histogram', title:'Latency distribution', grid:{col:1,row:5,colSpan:6,rowSpan:3}, content:{ title:'Latency distribution', subtitle:'Bucketed requests over the last hour', labels:['0-10','10-20','20-50','50-100','100+'], values:[142,264,188,54,11] } },
+        { id:'serve-version', type:'pie-chart', title:'Traffic by version', grid:{col:7,row:5,colSpan:6,rowSpan:3}, content:{ title:'Traffic by model version', subtitle:'Serving share across deployed versions', centerLabel:'2.8M req', segments:[{label:'v3.2',value:62,color:'var(--accent)'},{label:'v3.1',value:28,color:'var(--teal)'},{label:'v2.9',value:10,color:'var(--gold)'}] } }
+      ]
+    },
+    {
+      id:'data-drift',
+      title:'Data Drift Monitor',
+      subtitle:'Feature PSI, divergence trend, and retraining recommendation.',
+      chips:['Drift','Monitoring','Retrain'],
+      notes:[
+        'The heatmap now uses labelled axes and an interpretable color scale instead of placeholder blocks.',
+        'Status cards and KPIs follow the same front/back LiveTile treatment as the rest of the canvas.'
+      ],
+      tiles:[
+        { id:'drift-heatmap', type:'heatmap', title:'Feature drift heatmap', grid:{col:1,row:1,colSpan:6,rowSpan:4}, content:{ title:'Feature drift heatmap', subtitle:'Population Stability Index by feature and day', xLabels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], yLabels:['session_count','avg_handle_time','sentiment_score','retry_rate','escalation_path','plan_tier','device_mix','knowledge_hits'], matrix:[[0.04,0.05,0.05,0.06,0.06,0.07,0.08],[0.09,0.10,0.12,0.13,0.11,0.10,0.12],[0.14,0.16,0.18,0.19,0.17,0.16,0.18],[0.05,0.05,0.06,0.07,0.07,0.08,0.07],[0.07,0.08,0.08,0.09,0.11,0.13,0.15],[0.03,0.04,0.05,0.05,0.06,0.06,0.07],[0.11,0.13,0.17,0.18,0.20,0.22,0.24],[0.06,0.07,0.09,0.10,0.11,0.12,0.14]] } },
+        { id:'drift-kl', type:'line-chart', title:'KL divergence', grid:{col:7,row:1,colSpan:6,rowSpan:3}, content:{ title:'KL divergence · 30 day trend', subtitle:'Threshold at 0.18', xLabels:['W1','W2','W3','W4','W5','W6','W7','W8'], series:[{ name:'Observed', color:'var(--accent)', values:[0.07,0.08,0.10,0.12,0.15,0.17,0.19,0.21] }], threshold:0.18, unit:'divergence' } },
+        { id:'drift-status', type:'status-grid', title:'Feature health', grid:{col:7,row:4,colSpan:6,rowSpan:2}, content:{ title:'Feature health', subtitle:'Latest drift scan by feature', items:[{label:'session_count',status:'ok',note:'PSI 0.08'},{label:'sentiment_score',status:'watch',note:'PSI 0.18'},{label:'retry_rate',status:'ok',note:'PSI 0.07'},{label:'device_mix',status:'risk',note:'PSI 0.24'},{label:'knowledge_hits',status:'watch',note:'PSI 0.14'},{label:'plan_tier',status:'ok',note:'PSI 0.07'},{label:'escalation_path',status:'watch',note:'PSI 0.15'},{label:'avg_handle_time',status:'watch',note:'PSI 0.12'}] } },
+        { id:'drift-top', type:'bar-chart', title:'Top drifters', grid:{col:1,row:5,colSpan:4,rowSpan:3}, content:{ title:'Top drifting features', subtitle:'Highest PSI scores this week', labels:['device_mix','sentiment_score','escalation_path'], values:[0.24,0.18,0.15], unit:'PSI' } },
+        { id:'drift-count', type:'kpi', title:'Features drifting', grid:{col:5,row:6,colSpan:4,rowSpan:2}, content:{ label:'Features drifting', value:'3 / 24', delta:'+2 since Monday', note:'Escalate to retraining council', tone:'negative' } },
+        { id:'drift-retrain', type:'kpi', title:'Retrain recommendation', grid:{col:9,row:6,colSpan:4,rowSpan:2}, content:{ label:'Retrain recommendation', value:'Yes', delta:'Window opens tonight 22:00 UTC', note:'Triggered by PSI and KL thresholds', tone:'negative' } }
+      ]
+    },
+    {
+      id:'infra-cost',
+      title:'Infrastructure & Cost',
+      subtitle:'Cloud cost composition, capacity posture, and unit economics.',
+      chips:['FinOps','Capacity','Efficiency'],
+      notes:[
+        'Waterfall and donut visuals now align with the same canvas tile framework rather than using ad hoc blocks.',
+        'Gauge tiles share a consistent semicircle treatment and schema payload on the back.'
+      ],
+      tiles:[
+        { id:'cost-waterfall', type:'waterfall', title:'Monthly cost waterfall', grid:{col:1,row:1,colSpan:8,rowSpan:4}, content:{ title:'Monthly cost waterfall', subtitle:'April spend build-up to $20K', steps:[{label:'Base',value:12},{label:'Compute',value:8},{label:'Storage',value:3},{label:'Network',value:1},{label:'Savings',value:-4}], unit:'$K' } },
+        { id:'cost-pie', type:'pie-chart', title:'Cost by team', grid:{col:9,row:1,colSpan:4,rowSpan:4}, content:{ title:'Cost by team', subtitle:'Monthly cloud allocation', centerLabel:'$20K', segments:[{label:'Platform',value:40,color:'var(--accent)'},{label:'Research',value:30,color:'var(--teal)'},{label:'Products',value:20,color:'var(--gold)'},{label:'Analytics',value:10,color:'var(--plum)'}] } },
+        { id:'cost-gpu', type:'gauge', title:'GPU cluster', grid:{col:1,row:5,colSpan:3,rowSpan:3}, content:{ title:'GPU cluster', subtitle:'Target < 85%', value:78, target:85 } },
+        { id:'cost-cpu', type:'gauge', title:'CPU pool', grid:{col:4,row:5,colSpan:3,rowSpan:3}, content:{ title:'CPU pool', subtitle:'Target < 70%', value:54, target:70 } },
+        { id:'cost-storage', type:'gauge', title:'Storage', grid:{col:7,row:5,colSpan:3,rowSpan:3}, content:{ title:'Storage', subtitle:'OneLake + object store', value:67, target:75 } },
+        { id:'cost-unit', type:'metric-card', title:'Cost per prediction', grid:{col:10,row:5,colSpan:3,rowSpan:3}, content:{ label:'Cost / prediction', value:'$0.0003', note:'14% cheaper than last month', trend:[0.00042,0.00039,0.00037,0.00035,0.00034,0.00031,0.00030] } }
+      ]
+    },
+    {
+      id:'ab-test',
+      title:'A/B Test Results',
+      subtitle:'Treatment impact, segment lift, and experiment timeline.',
+      chips:['Experiment','Causal lift','Decision'],
+      notes:[
+        'The comparison tile now renders explicit control vs treatment bars and values rather than flat placeholder text.',
+        'KPI and timeline cards have been normalized to the same front/back schema contract as the rest of the canvas.'
+      ],
+      tiles:[
+        { id:'ab-compare', type:'comparison', title:'Control vs treatment', grid:{col:1,row:1,colSpan:6,rowSpan:4}, content:{ title:'Control vs treatment', subtitle:'Primary experiment metrics', metrics:[{label:'Conversion',control:3.2,treatment:4.1,unit:'%'},{label:'Latency',control:15,treatment:12,unit:'ms'},{label:'Error rate',control:0.8,treatment:0.6,unit:'%'},{label:'Resolution',control:88,treatment:92,unit:'%'}] } },
+        { id:'ab-lift', type:'bar-chart', title:'Lift by segment', grid:{col:7,row:1,colSpan:6,rowSpan:4}, content:{ title:'Lift by segment', subtitle:'Treatment uplift against control', labels:['New','Return','Power','Enterprise'], values:[32,18,8,41], unit:'%' } },
+        { id:'ab-power', type:'kpi', title:'Statistical power', grid:{col:1,row:5,colSpan:3,rowSpan:2}, content:{ label:'Statistical power', value:'0.94', delta:'Above 0.80 threshold', note:'Ready for final readout', tone:'positive' } },
+        { id:'ab-pvalue', type:'kpi', title:'P-value', grid:{col:4,row:5,colSpan:3,rowSpan:2}, content:{ label:'P-value', value:'0.003', delta:'Strong significance', note:'Two-sided test on primary metric', tone:'positive' } },
+        { id:'ab-effect', type:'kpi', title:'Effect size', grid:{col:7,row:5,colSpan:3,rowSpan:2}, content:{ label:'Effect size', value:'+28.1%', delta:'Treatment beats control', note:'Normalized across segments', tone:'positive' } },
+        { id:'ab-sample', type:'kpi', title:'Sample size', grid:{col:10,row:5,colSpan:3,rowSpan:2}, content:{ label:'Sample size', value:'48,291', delta:'+6.2K in final ramp', note:'Balanced across variants', tone:'neutral' } },
+        { id:'ab-timeline', type:'timeline', title:'Experiment timeline', grid:{col:1,row:7,colSpan:12,rowSpan:1}, content:{ title:'Experiment timeline', subtitle:'Ramp plan and decision checkpoints', events:[{label:'Start',meta:'Mar 1',pos:0},{label:'10% ramp',meta:'Mar 3',pos:20},{label:'50% ramp',meta:'Mar 8',pos:46},{label:'100% ramp',meta:'Mar 12',pos:74},{label:'Decision',meta:'Mar 15',pos:100}] } }
+      ]
+    },
+    {
+      id:'embedding-space',
+      title:'Neural Embedding Space',
+      subtitle:'Intent cluster topology, feature importance ranking, and separation metrics.',
+      chips:['Embeddings','Clustering','Features'],
+      notes:['Cluster scatter uses convex hull polygons from angular sort around cluster centroids.','Ranking bars show permutation importance scores sorted descending.'],
+      tiles:[
+        { id:'embed-clusters', type:'cluster-scatter', title:'Intent embedding clusters', grid:{col:1,row:1,colSpan:8,rowSpan:5}, content:{ title:'Intent embedding t-SNE projection', subtitle:'3 primary clusters from 847 labeled samples', xLabel:'t-SNE dimension 1', yLabel:'t-SNE dimension 2', clusters:[{name:'Transactional',color:'var(--accent)',points:[[0.28,0.72],[0.32,0.68],[0.25,0.76],[0.35,0.71],[0.30,0.65],[0.27,0.73],[0.33,0.69],[0.29,0.74],[0.31,0.66],[0.26,0.70],[0.34,0.67],[0.30,0.77],[0.28,0.64],[0.36,0.73],[0.24,0.69],[0.32,0.75],[0.29,0.62]]},{name:'Informational',color:'var(--green)',points:[[0.68,0.32],[0.72,0.28],[0.65,0.35],[0.70,0.30],[0.74,0.26],[0.67,0.33],[0.71,0.29],[0.69,0.31],[0.73,0.27],[0.66,0.36],[0.75,0.24],[0.70,0.34],[0.68,0.26],[0.72,0.32],[0.64,0.30],[0.76,0.28]]},{name:'Navigational',color:'var(--gold)',points:[[0.18,0.22],[0.22,0.18],[0.15,0.25],[0.20,0.20],[0.24,0.16],[0.17,0.23],[0.21,0.19],[0.19,0.24],[0.23,0.17],[0.16,0.20],[0.25,0.14],[0.20,0.26],[0.14,0.22],[0.22,0.15],[0.18,0.27],[0.26,0.19]]}] } },
+        { id:'embed-rank', type:'ranking', title:'Feature importance', grid:{col:9,row:1,colSpan:4,rowSpan:5}, content:{ title:'Feature importance ranking', subtitle:'Permutation importance scores', unit:'', items:[{label:'Intent confidence',value:0.94,color:'var(--accent)'},{label:'Entity count',value:0.87,color:'var(--green)'},{label:'Sentiment score',value:0.81,color:'var(--teal)'},{label:'Token count',value:0.76,color:'var(--gold)'},{label:'Sentence length',value:0.72,color:'var(--plum)'},{label:'Response time',value:0.65,color:'var(--slate)'},{label:'Session depth',value:0.58,color:'var(--red)'}] } },
+        { id:'embed-silhouette', type:'kpi', title:'Silhouette coefficient', grid:{col:1,row:6,colSpan:3,rowSpan:2}, content:{ label:'Silhouette coefficient', value:'0.847', delta:'+0.031 vs 2-cluster', note:'Well-separated cluster topology', tone:'positive' } },
+        { id:'embed-separation', type:'kpi', title:'Cluster separation', grid:{col:4,row:6,colSpan:3,rowSpan:2}, content:{ label:'Avg cluster separation', value:'3.42', delta:'Inter / intra ratio', note:'Higher is better', tone:'positive' } },
+        { id:'embed-dim', type:'stat-block', title:'Embedding dimensions', grid:{col:7,row:6,colSpan:3,rowSpan:2}, content:{ value:'768', label:'Embedding dimensions', note:'DeBERTa-v3 hidden size', trend:[256,384,512,640,704,768,768] } },
+        { id:'embed-count', type:'stat-block', title:'Total embeddings', grid:{col:10,row:6,colSpan:3,rowSpan:2}, content:{ value:'12.4K', label:'Total embeddings', note:'Labeled intent corpus', trend:[8.2,9.1,9.8,10.4,11.1,11.8,12.4] } }
+      ]
+    },
+    {
+      id:'model-landscape',
+      title:'3D Model Landscape',
+      subtitle:'Isometric projection of the model registry across accuracy, latency, and cost dimensions.',
+      chips:['3D Viz','Isometric','Animation'],
+      notes:['The scatter starts as a flat 2D chart, then morphs to an isometric 3D projection using real trigonometric transforms.','Pillars grow from the floor plane to each data point, revealing the third dimension (cost).'],
+      tiles:[
+        { id:'landscape-3d', type:'graph-3d', title:'Model landscape', grid:{col:1,row:1,colSpan:8,rowSpan:5}, content:{ title:'Model accuracy vs latency vs cost', subtitle:'Each point is a model version in the registry', xRange:[0.89,0.97], yRange:[0,50], zRange:[0,0.01], series:[{name:'DeBERTa',color:'var(--accent)'},{name:'BERT',color:'var(--teal)'},{name:'DistilBERT',color:'var(--gold)'},{name:'BiLSTM',color:'var(--plum)'}], points:[{x:0.961,y:12,z:0.003,color:'var(--accent)',size:6,label:'DeBERTa-v3'},{x:0.954,y:15,z:0.004,color:'var(--accent)',size:5,label:'DeBERTa-v2'},{x:0.943,y:18,z:0.005,color:'var(--teal)',size:5,label:'BERT-large'},{x:0.937,y:22,z:0.006,color:'var(--teal)',size:5,label:'BERT-base'},{x:0.921,y:8,z:0.002,color:'var(--gold)',size:5,label:'DistilBERT'},{x:0.912,y:32,z:0.008,color:'var(--plum)',size:5,label:'BiLSTM-att'},{x:0.903,y:45,z:0.009,color:'var(--plum)',size:4,label:'BiLSTM'},{x:0.949,y:14,z:0.004,color:'var(--accent)',size:5,label:'DeBERTa-ft'},{x:0.898,y:6,z:0.001,color:'var(--gold)',size:4,label:'DistilBERT-q'},{x:0.931,y:25,z:0.007,color:'var(--teal)',size:5,label:'BERT-mid'}] } },
+        { id:'landscape-radar', type:'radar-chart', title:'Model family tradeoffs', grid:{col:9,row:1,colSpan:4,rowSpan:3}, content:{ title:'Family comparison', subtitle:'Normalized across dimensions', axes:['Accuracy','Speed','Memory','Cost','Interpretability'], series:[{name:'DeBERTa',color:'var(--accent)',values:[96,78,62,70,55]},{name:'DistilBERT',color:'var(--gold)',values:[72,95,88,92,80]}], max:100 } },
+        { id:'landscape-bar', type:'bar-chart', title:'Pareto frontier', grid:{col:9,row:4,colSpan:4,rowSpan:2}, content:{ title:'Pareto-optimal models', subtitle:'Efficiency frontier F1 scores', labels:['DeBERTa','DistilBERT','BERT-mid'], values:[96.1,92.1,93.1], unit:'%' } },
+        { id:'landscape-cost', type:'kpi', title:'Cost frontier', grid:{col:1,row:6,colSpan:3,rowSpan:2}, content:{ label:'Cost frontier', value:'$0.003', delta:'-18% from baseline', note:'DeBERTa-v3 at Pareto optimum', tone:'positive' } },
+        { id:'landscape-latency', type:'kpi', title:'Latency frontier', grid:{col:4,row:6,colSpan:3,rowSpan:2}, content:{ label:'Latency frontier', value:'6ms', delta:'DistilBERT-quantized', note:'Fastest model in registry', tone:'positive' } },
+        { id:'landscape-accuracy', type:'kpi', title:'Accuracy frontier', grid:{col:7,row:6,colSpan:3,rowSpan:2}, content:{ label:'Accuracy frontier', value:'0.961', delta:'+0.011 vs baseline', note:'DeBERTa-v3 champion', tone:'positive' } },
+        { id:'landscape-models', type:'stat-block', title:'Registry size', grid:{col:10,row:6,colSpan:3,rowSpan:2}, content:{ value:'47', label:'Models in registry', note:'10 Pareto-optimal candidates', trend:[28,31,35,38,41,44,47] } }
+      ]
+    }
+  ];
+
+  const state = { activeSlide: 0, theme: 'midnight' };
+  let overlapMode = 'overlap'; /* 'overlap' | 'shift' | 'off' */
+  const canvas = document.getElementById('canvas');
+  const thumbStrip = document.getElementById('thumbnailStrip');
+  const stageViewport = document.getElementById('stageViewport');
+  const stageScale = document.getElementById('stageScale');
+  const themeToolbar = document.getElementById('themeToolbar');
+  const layer0 = document.getElementById('layer0');
+  const l0Close = document.getElementById('l0Close');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const chromeTitle = document.getElementById('chromeTitle');
+  const chromeKicker = document.getElementById('chromeKicker');
+  const l0Chips = document.getElementById('l0Chips');
+  const cardChrome = document.getElementById('cardChrome');
+  const schemaBtn = document.getElementById('schemaBtn');
+  const modeToggle = document.getElementById('modeToggle');
+  const overlapToggle = document.getElementById('overlapToggle');
+  const overlapSection = document.getElementById('overlapSection');
+  const overlapCountEl = document.getElementById('overlapCount');
+  let schemaView = false;
+  let editMode = true;
+
+  function esc(value){
+    return String(value ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function pretty(value){ return JSON.stringify(value, null, 2); }
+  function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
+  function heatColor(v){
+    if (v < 0.08) return 'rgba(52,211,153,0.85)';
+    if (v < 0.14) return 'rgba(250,204,21,0.85)';
+    if (v < 0.20) return 'rgba(251,146,60,0.9)';
+    return 'rgba(251,113,133,0.92)';
+  }
+  function copyToClipboard(text){
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    const area = document.createElement('textarea');
+    area.value = text; document.body.appendChild(area); area.select(); document.execCommand('copy'); area.remove();
+    return Promise.resolve();
+  }
+  function statusInfo(status){
+    return status === 'ok' ? {label:'Healthy', cls:'ok', color:'var(--green)'} : status === 'watch' ? {label:'Watch', cls:'watch', color:'var(--gold)'} : {label:'Risk', cls:'risk', color:'var(--red)'};
+  }
+  function sparkPath(values, width = 180, height = 44, pad = 4){
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const range = max - min || 1;
+    return values.map((value, index) => {
+      const x = pad + ((width - pad * 2) / Math.max(1, values.length - 1)) * index;
+      const y = height - pad - ((value - min) / range) * (height - pad * 2);
+      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    }).join(' ');
+  }
+  function chartPoints(values, width, height, pad, min, max){
+    const range = max - min || 1;
+    return values.map((value, index) => {
+      const x = pad.l + ((width - pad.l - pad.r) / Math.max(1, values.length - 1)) * index;
+      const y = height - pad.b - ((value - min) / range) * (height - pad.t - pad.b);
+      return [x, y];
+    });
+  }
+  function linePath(points){
+    return points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point[0].toFixed(2)} ${point[1].toFixed(2)}`).join(' ');
+  }
+  function areaPath(points, height, bottom){
+    if (!points.length) return '';
+    return `${linePath(points)} L ${points[points.length - 1][0].toFixed(2)} ${bottom.toFixed(2)} L ${points[0][0].toFixed(2)} ${bottom.toFixed(2)} Z`;
+  }
+  function gridMarkup(width, height, pad, ticks = 4){
+    let lines = '';
+    for (let i = 0; i <= ticks; i += 1) {
+      const y = pad.t + ((height - pad.t - pad.b) / ticks) * i;
+      lines += `<line class="grid-line" x1="${pad.l}" y1="${y.toFixed(2)}" x2="${(width - pad.r).toFixed(2)}" y2="${y.toFixed(2)}" />`;
+    }
+    lines += `<line class="axis-line" x1="${pad.l}" y1="${height - pad.b}" x2="${width - pad.r}" y2="${height - pad.b}" />`;
+    lines += `<line class="axis-line" x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${height - pad.b}" />`;
+    return lines;
+  }
+  function legend(items){
+    return `<div class="chart-legend">${items.map((item) => `<span class="legend-item"><span class="legend-dot" style="background:${item.color}"></span>${esc(item.name)}</span>`).join('')}</div>`;
+  }
+  function badgeHtml(type){
+    const meta = TYPE_META[type] || { badge:type.toUpperCase(), category:'slate' };
+    return `<span class="badge badge-${meta.category}">${esc(meta.badge)}</span>`;
+  }
+  function themeButtonState(){
+    themeToolbar.querySelectorAll('.theme-btn').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.theme === state.theme));
+    });
+    document.getElementById('statTheme').textContent = THEME_LABELS[state.theme];
+  }
+  function buildTileSchema(slide, tile){
+    const meta = TYPE_META[tile.type] || { badge: tile.type.toUpperCase(), category: 'slate' };
+    return {
+      $schema: 'https://darbotlabs.dev/schemas/livetile-card.schema.json',
+      version: '1.0',
+      framework: 'flip-card',
+      template: { id: slide.id, title: slide.title, subtitle: slide.subtitle },
+      tile: {
+        id: tile.id,
+        type: tile.type,
+        title: tile.title,
+        badge: meta.badge,
+        category: meta.category,
+        grid: { column: tile.grid.col, row: tile.grid.row, columnSpan: tile.grid.colSpan, rowSpan: tile.grid.rowSpan },
+        interaction: { flip: true, keyboard: true, copyJson: true },
+        content: tile.content
+      }
+    };
+  }
+  function renderHero(tile){
+    const c = tile.content;
+    const metrics = c.metrics.map((metric) => `<div class="hero-metric"><span>${esc(metric.label)}</span><strong>${esc(metric.value)}</strong></div>`).join('');
+    const tags = c.tags.map((tag) => `<span class="tag">${esc(tag)}</span>`).join('');
+    return `<div class="hero-panel"><div class="tile-kicker">${esc(c.eyebrow)}</div><div class="hero-title">${esc(c.headline)}</div><div class="hero-summary">${esc(c.summary)}</div><div class="hero-metrics">${metrics}</div><div class="tag-row">${tags}</div></div>`;
+  }
+  function renderPipeline(tile){
+    const c = tile.content;
+    const stageHtml = c.stages.map((stage, index) => {
+      const status = statusInfo(stage.status);
+      return `${index > 0 ? `<div class="flow-arrow">→</div>` : ''}<div class="flow-stage ${status.cls}"><span class="flow-name">${esc(stage.name)}</span><span class="flow-meta">${esc(stage.meta)}</span><span class="flow-pill ${status.cls}">${status.label}</span></div>`;
+    }).join('');
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="flow-row">${stageHtml}</div></div>`;
+  }
+  function renderStatBlock(tile){
+    const c = tile.content;
+    return `<div class="stat-panel"><div class="stat-value">${esc(c.value)}</div><div class="stat-label">${esc(c.label)}</div><div class="tile-note">${esc(c.note)}</div><div class="spark-wrap"><svg class="spark-svg" viewBox="0 0 180 44" preserveAspectRatio="none"><path class="spark-animated" d="${sparkPath(c.trend, 180, 44)}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="--spark-len:400"/></svg></div></div>`;
+  }
+  function renderKpi(tile){
+    const c = tile.content;
+    return `<div class="kpi-panel"><div class="tile-kicker">${esc(c.label)}</div><div class="kpi-value">${esc(c.value)}</div><div class="delta-chip ${esc(c.tone || 'neutral')}">${esc(c.delta)}</div><div class="tile-note">${esc(c.note)}</div></div>`;
+  }
+  function renderMetricCard(tile){
+    const c = tile.content;
+    return `<div class="metric-panel"><div class="tile-kicker">${esc(c.label)}</div><div class="metric-value">${esc(c.value)}</div><div class="tile-note">${esc(c.note)}</div><div class="spark-wrap"><svg class="spark-svg" viewBox="0 0 180 44" preserveAspectRatio="none"><path d="${sparkPath(c.trend, 180, 44)}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>`;
+  }
+  function renderLineChart(tile){
+    const c = tile.content;
+    const width = 420, height = 210, pad = { t: 18, r: 16, b: 36, l: 38 };
+    const all = c.series.flatMap((series) => series.values);
+    if (c.threshold !== undefined) all.push(c.threshold);
+    const min = c.min !== undefined ? c.min : Math.min(...all);
+    const max = c.max !== undefined ? c.max : Math.max(...all);
+    const yTicks = 4;
+    const tickLabels = Array.from({ length: yTicks + 1 }, (_, i) => {
+      const value = max - ((max - min) / yTicks) * i;
+      const y = pad.t + ((height - pad.t - pad.b) / yTicks) * i;
+      return `<text class="axis-label" x="${pad.l - 8}" y="${(y + 3).toFixed(2)}" text-anchor="end">${value.toFixed(c.unit === 'loss' || c.unit === 'divergence' ? 2 : 0)}${c.unit === '%' || c.unit === 'ms' ? c.unit : ''}</text>`;
+    }).join('');
+    const xLabels = (c.xLabels || []).map((label, index) => {
+      const x = pad.l + ((width - pad.l - pad.r) / Math.max(1, c.xLabels.length - 1)) * index;
+      return `<text class="axis-label" x="${x.toFixed(2)}" y="${height - 10}" text-anchor="middle">${esc(label)}</text>`;
+    }).join('');
+    const threshold = c.threshold !== undefined ? (() => {
+      const y = height - pad.b - ((c.threshold - min) / ((max - min) || 1)) * (height - pad.t - pad.b);
+      return `<line x1="${pad.l}" y1="${y.toFixed(2)}" x2="${width - pad.r}" y2="${y.toFixed(2)}" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="5 4"/><text class="axis-label" x="${width - pad.r}" y="${(y - 6).toFixed(2)}" text-anchor="end">threshold ${c.threshold}</text>`;
+    })() : '';
+    const seriesMarkup = c.series.map((series) => {
+      const points = chartPoints(series.values, width, height, pad, min, max);
+      const path = linePath(points);
+      const dots = points.map((point) => `<circle cx="${point[0].toFixed(2)}" cy="${point[1].toFixed(2)}" r="3.4" fill="${series.color}" stroke="${series.color}"/>`).join('');
+      return `<path d="${path}" fill="none" stroke="${series.color}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>${dots}`;
+    }).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-label="${esc(c.title)}">${gridMarkup(width, height, pad)}${tickLabels}${xLabels}${threshold}${seriesMarkup}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${legend(c.series)}<div class="chart-visual">${svg}</div>${c.threshold !== undefined ? `<div class="chart-footer">Threshold shown as dashed reference line.</div>` : ''}</div>`;
+  }
+  function renderAreaChart(tile){
+    const c = tile.content;
+    const width = 420, height = 210, pad = { t: 18, r: 16, b: 36, l: 38 };
+    const all = c.series.flatMap((series) => series.values);
+    const min = 0;
+    const max = Math.max(...all);
+    const tickLabels = Array.from({ length: 5 }, (_, i) => {
+      const value = max - (max / 4) * i;
+      const y = pad.t + ((height - pad.t - pad.b) / 4) * i;
+      return `<text class="axis-label" x="${pad.l - 8}" y="${(y + 3).toFixed(2)}" text-anchor="end">${Math.round(value)}${c.unit}</text>`;
+    }).join('');
+    const xLabels = (c.xLabels || []).map((label, index) => {
+      const x = pad.l + ((width - pad.l - pad.r) / Math.max(1, c.xLabels.length - 1)) * index;
+      return `<text class="axis-label" x="${x.toFixed(2)}" y="${height - 10}" text-anchor="middle">${esc(label)}</text>`;
+    }).join('');
+    const seriesMarkup = c.series.map((series) => {
+      const points = chartPoints(series.values, width, height, pad, min, max);
+      const area = areaPath(points, height, height - pad.b);
+      const line = linePath(points);
+      const dots = points.map((point) => `<circle cx="${point[0].toFixed(2)}" cy="${point[1].toFixed(2)}" r="2.6" fill="${series.color}"/>`).join('');
+      return `<path d="${area}" fill="${series.color}" opacity="0.12"></path><path d="${line}" fill="none" stroke="${series.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>${dots}`;
+    }).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${gridMarkup(width, height, pad)}${tickLabels}${xLabels}${seriesMarkup}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${legend(c.series)}<div class="chart-visual">${svg}</div></div>`;
+  }
+  function renderBarChart(tile){
+    const c = tile.content;
+    const width = 420, height = 210, pad = { t: 18, r: 16, b: 44, l: 38 };
+    const max = Math.max(...c.values) * 1.1;
+    const slot = (width - pad.l - pad.r) / c.values.length;
+    const barWidth = slot * 0.58;
+    const bars = c.values.map((value, index) => {
+      const x = pad.l + slot * index + (slot - barWidth) / 2;
+      const y = height - pad.b - (value / max) * (height - pad.t - pad.b);
+      const h = height - pad.b - y;
+      return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${barWidth.toFixed(2)}" height="${h.toFixed(2)}" rx="8" fill="var(--accent)"></rect><text class="value-label" x="${(x + barWidth / 2).toFixed(2)}" y="${(y - 6).toFixed(2)}" text-anchor="middle">${value}${c.unit}</text><text class="axis-label" x="${(x + barWidth / 2).toFixed(2)}" y="${height - 12}" text-anchor="middle">${esc(c.labels[index])}</text>`;
+    }).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${gridMarkup(width, height, pad)}${bars}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="chart-visual">${svg}</div></div>`;
+  }
+  function renderGroupedColumn(tile){
+    const c = tile.content;
+    const width = 420, height = 210, pad = { t: 18, r: 16, b: 44, l: 38 };
+    const max = Math.max(...c.series.flatMap((series) => series.values)) * 1.15;
+    const slot = (width - pad.l - pad.r) / c.categories.length;
+    const groupWidth = slot * 0.76;
+    const barWidth = groupWidth / c.series.length;
+    const columns = c.categories.map((category, catIndex) => {
+      const left = pad.l + slot * catIndex + (slot - groupWidth) / 2;
+      const bars = c.series.map((series, seriesIndex) => {
+        const value = series.values[catIndex];
+        const x = left + barWidth * seriesIndex;
+        const y = height - pad.b - (value / max) * (height - pad.t - pad.b);
+        const h = height - pad.b - y;
+        return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${(barWidth - 4).toFixed(2)}" height="${h.toFixed(2)}" rx="6" fill="${series.color}"></rect>`;
+      }).join('');
+      const x = pad.l + slot * catIndex + slot / 2;
+      return `${bars}<text class="axis-label" x="${x.toFixed(2)}" y="${height - 12}" text-anchor="middle">${esc(category)}</text>`;
+    }).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${gridMarkup(width, height, pad)}${columns}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${legend(c.series)}<div class="chart-visual">${svg}</div><div class="chart-footer">Units: ${esc(c.unit)}</div></div>`;
+  }
+  function renderStackedBar(tile){
+    const c = tile.content;
+    const legendItems = [];
+    c.rows.forEach((row) => row.segments.forEach((segment) => { if (!legendItems.some((item) => item.name === segment.label)) legendItems.push({ name: segment.label, color: segment.color }); }));
+    const rows = c.rows.map((row) => {
+      const total = row.segments.reduce((sum, segment) => sum + segment.value, 0) || 1;
+      const bars = row.segments.map((segment) => `<span class="stack-segment" style="width:${(segment.value / total) * 100}%;background:${segment.color}"></span>`).join('');
+      return `<div class="stack-row"><span class="stack-label">${esc(row.label)}</span><div class="stack-track">${bars}</div><span class="stack-meta">${row.segments.map((segment) => `${segment.label} ${segment.value}%`).join(' · ')}</span></div>`;
+    }).join('');
+    return `<div class="stack-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${legend(legendItems)}${rows}</div>`;
+  }
+  function renderRadarChart(tile){
+    const c = tile.content;
+    const width = 320, height = 180, cx = 148, cy = 92, radius = 64;
+    const levels = [0.25, 0.5, 0.75, 1];
+    const axisPoints = c.axes.map((axis, index) => {
+      const angle = (-Math.PI / 2) + (index / c.axes.length) * Math.PI * 2;
+      return { axis, angle, x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius };
+    });
+    const grids = levels.map((level) => {
+      const pts = axisPoints.map((point) => `${(cx + Math.cos(point.angle) * radius * level).toFixed(2)},${(cy + Math.sin(point.angle) * radius * level).toFixed(2)}`).join(' ');
+      return `<polygon points="${pts}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"></polygon>`;
+    }).join('');
+    const axes = axisPoints.map((point) => `<line x1="${cx}" y1="${cy}" x2="${point.x.toFixed(2)}" y2="${point.y.toFixed(2)}" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text class="axis-label" x="${(cx + Math.cos(point.angle) * (radius + 18)).toFixed(2)}" y="${(cy + Math.sin(point.angle) * (radius + 18)).toFixed(2)}" text-anchor="middle">${esc(point.axis)}</text>`).join('');
+    const series = c.series.map((series) => {
+      const pts = series.values.map((value, index) => {
+        const ratio = value / c.max;
+        const point = axisPoints[index];
+        return `${(cx + Math.cos(point.angle) * radius * ratio).toFixed(2)},${(cy + Math.sin(point.angle) * radius * ratio).toFixed(2)}`;
+      }).join(' ');
+      return `<polygon points="${pts}" fill="${series.color}" opacity="0.14"></polygon><polygon points="${pts}" fill="none" stroke="${series.color}" stroke-width="2.2"></polygon>`;
+    }).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${grids}${axes}${series}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${legend(c.series)}<div class="chart-visual">${svg}</div></div>`;
+  }
+  function renderScatterPlot(tile){
+    const c = tile.content;
+    const width = 340, height = 210, pad = { t: 18, r: 16, b: 38, l: 42 };
+    const mapX = (value) => pad.l + ((value - c.xDomain[0]) / (c.xDomain[1] - c.xDomain[0])) * (width - pad.l - pad.r);
+    const mapY = (value) => height - pad.b - ((value - c.yDomain[0]) / (c.yDomain[1] - c.yDomain[0])) * (height - pad.t - pad.b);
+    const points = c.points.map((point) => `<circle cx="${mapX(point.x).toFixed(2)}" cy="${mapY(point.y).toFixed(2)}" r="${point.size}" fill="${point.color}" opacity="0.88"></circle>`).join('');
+    const xLabels = [c.xDomain[0], ((c.xDomain[0] + c.xDomain[1]) / 2), c.xDomain[1]].map((value, index) => `<text class="axis-label" x="${(pad.l + ((width - pad.l - pad.r) / 2) * index).toFixed(2)}" y="${height - 10}" text-anchor="middle">${value.toFixed(4)}</text>`).join('');
+    const yLabels = [c.yDomain[1], (c.yDomain[0] + c.yDomain[1]) / 2, c.yDomain[0]].map((value, index) => {
+      const y = pad.t + ((height - pad.t - pad.b) / 2) * index;
+      return `<text class="axis-label" x="${pad.l - 10}" y="${(y + 3).toFixed(2)}" text-anchor="end">${value.toFixed(3)}</text>`;
+    }).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${gridMarkup(width, height, pad, 2)}${xLabels}${yLabels}${points}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="chart-visual">${svg}</div><div class="chart-footer">${esc(c.xLabel)} vs ${esc(c.yLabel)}</div></div>`;
+  }
+  function renderTable(tile){
+    const c = tile.content;
+    const head = c.columns.map((column) => `<th>${esc(column)}</th>`).join('');
+    const rows = c.rows.map((row) => `<tr>${row.map((cell, index) => `<td>${index === 0 ? `<strong>${esc(cell)}</strong>` : esc(cell)}</td>`).join('')}</tr>`).join('');
+    return `<div class="table-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }
+  function renderGauge(tile){
+    const c = tile.content;
+    const width = 220, height = 150, cx = 110, cy = 118, r = 74;
+    const start = -180, end = 0;
+    function polar(angle){ const radians = (angle - 90) * Math.PI / 180; return { x: cx + r * Math.cos(radians), y: cy + r * Math.sin(radians) }; }
+    function arcPath(angle){ const startPoint = polar(start); const endPoint = polar(angle); return `M ${startPoint.x.toFixed(2)} ${startPoint.y.toFixed(2)} A ${r} ${r} 0 0 1 ${endPoint.x.toFixed(2)} ${endPoint.y.toFixed(2)}`; }
+    const angle = start + clamp(c.value, 0, 100) / 100 * (end - start);
+    const targetAngle = start + clamp(c.target, 0, 100) / 100 * (end - start);
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet"><path d="${arcPath(end)}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="16" stroke-linecap="round"></path><path d="${arcPath(angle)}" fill="none" stroke="var(--accent)" stroke-width="16" stroke-linecap="round"></path><line x1="${polar(targetAngle).x.toFixed(2)}" y1="${polar(targetAngle).y.toFixed(2)}" x2="${(polar(targetAngle).x + 0.1).toFixed(2)}" y2="${(polar(targetAngle).y - 18).toFixed(2)}" stroke="var(--gold)" stroke-width="2"></line><text class="value-label" x="${cx}" y="92" text-anchor="middle" style="font-size:30px">${c.value}%</text><text class="axis-label" x="${cx}" y="110" text-anchor="middle">target ${c.target}%</text></svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="chart-visual">${svg}</div></div>`;
+  }
+  function renderProgressRing(tile){
+    const c = tile.content;
+    const r = 58, circumference = 2 * Math.PI * r, dash = circumference * (c.value / 100);
+    const svg = `<svg class="chart-svg" viewBox="0 0 180 180" preserveAspectRatio="xMidYMid meet"><circle cx="90" cy="90" r="${r}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="14"></circle><circle cx="90" cy="90" r="${r}" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${dash} ${circumference - dash}" transform="rotate(-90 90 90)"></circle><text class="value-label" x="90" y="86" text-anchor="middle" style="font-size:28px">${c.value}%</text><text class="axis-label" x="90" y="106" text-anchor="middle">${esc(c.subtitle)}</text></svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">Progress ring</div><div class="chart-visual">${svg}</div></div>`;
+  }
+  function renderSparkline(tile){
+    const c = tile.content;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="chart-visual"><svg class="chart-svg" viewBox="0 0 220 80" preserveAspectRatio="none"><path d="${sparkPath(c.values, 220, 80, 6)}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg></div><div class="chart-footer">${esc(c.footer)}</div></div>`;
+  }
+  function renderHistogram(tile){
+    const c = tile.content;
+    const width = 380, height = 210, pad = { t: 18, r: 16, b: 44, l: 38 };
+    const max = Math.max(...c.values) * 1.15;
+    const slot = (width - pad.l - pad.r) / c.values.length;
+    const bars = c.values.map((value, index) => {
+      const x = pad.l + slot * index + 4;
+      const w = slot - 8;
+      const y = height - pad.b - (value / max) * (height - pad.t - pad.b);
+      const h = height - pad.b - y;
+      return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="6" fill="var(--accent)"></rect><text class="axis-label" x="${(x + w / 2).toFixed(2)}" y="${height - 12}" text-anchor="middle">${esc(c.labels[index])}</text>`;
+    }).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${gridMarkup(width, height, pad)}${bars}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="chart-visual">${svg}</div></div>`;
+  }
+  function renderPieChart(tile){
+    const c = tile.content;
+    const total = c.segments.reduce((sum, segment) => sum + segment.value, 0) || 1;
+    const radius = 58, circumference = 2 * Math.PI * radius;
+    let offset = 0;
+    const arcs = c.segments.map((segment) => {
+      const len = circumference * (segment.value / total);
+      const arc = `<circle cx="90" cy="90" r="${radius}" fill="none" stroke="${segment.color}" stroke-width="18" stroke-linecap="round" stroke-dasharray="${len} ${Math.max(0, circumference - len)}" stroke-dashoffset="${-offset}" transform="rotate(-90 90 90)"></circle>`;
+      offset += len;
+      return arc;
+    }).join('');
+    const legendHtml = c.segments.map((segment) => ({ name: `${segment.label} ${segment.value}%`, color: segment.color }));
+    const svg = `<svg class="chart-svg" viewBox="0 0 180 180" preserveAspectRatio="xMidYMid meet"><circle cx="90" cy="90" r="${radius}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="18"></circle>${arcs}<text class="value-label" x="90" y="85" text-anchor="middle" style="font-size:20px">${esc(c.centerLabel)}</text><text class="axis-label" x="90" y="103" text-anchor="middle">live mix</text></svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${legend(legendHtml)}<div class="chart-visual">${svg}</div></div>`;
+  }
+  function renderHeatmap(tile){
+    const c = tile.content;
+    const width = 420, height = 220, pad = { t: 24, r: 10, b: 22, l: 88 };
+    const cellW = (width - pad.l - pad.r) / c.xLabels.length;
+    const cellH = (height - pad.t - pad.b) / c.yLabels.length;
+    let labels = c.xLabels.map((label, index) => `<text class="axis-label" x="${(pad.l + cellW * index + cellW / 2).toFixed(2)}" y="16" text-anchor="middle">${esc(label)}</text>`).join('');
+    labels += c.yLabels.map((label, index) => `<text class="axis-label" x="${pad.l - 8}" y="${(pad.t + cellH * index + cellH / 2 + 3).toFixed(2)}" text-anchor="end">${esc(label)}</text>`).join('');
+    const cells = c.matrix.map((row, rowIndex) => row.map((value, colIndex) => `<rect x="${(pad.l + cellW * colIndex + 2).toFixed(2)}" y="${(pad.t + cellH * rowIndex + 2).toFixed(2)}" width="${(cellW - 4).toFixed(2)}" height="${(cellH - 4).toFixed(2)}" rx="6" fill="${heatColor(value)}"></rect>`).join('')).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${labels}${cells}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="chart-visual">${svg}</div><div class="chart-footer">Green = healthy, amber = watch, red = retrain pressure.</div></div>`;
+  }
+  function renderStatusGrid(tile){
+    const c = tile.content;
+    const cards = c.items.map((item) => {
+      const info = statusInfo(item.status);
+      return `<div class="status-card"><div class="status-head"><span class="status-dot" style="background:${info.color}"></span><span>${esc(item.label)}</span></div><div class="status-note">${esc(item.note)}</div></div>`;
+    }).join('');
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="status-grid">${cards}</div></div>`;
+  }
+  function renderWaterfall(tile){
+    const c = tile.content;
+    const width = 420, height = 210, pad = { t: 18, r: 16, b: 44, l: 38 };
+    let running = 0;
+    const totals = [0];
+    c.steps.forEach((step) => { running += step.value; totals.push(running); });
+    const max = Math.max(...totals, 0) * 1.15;
+    const slot = (width - pad.l - pad.r) / c.steps.length;
+    running = 0;
+    const bars = c.steps.map((step, index) => {
+      const start = running;
+      running += step.value;
+      const from = Math.max(start, running);
+      const to = Math.min(start, running);
+      const yTop = height - pad.b - (from / max) * (height - pad.t - pad.b);
+      const yBottom = height - pad.b - (to / max) * (height - pad.t - pad.b);
+      const h = Math.max(8, yBottom - yTop);
+      const x = pad.l + slot * index + 8;
+      const color = step.value >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<rect x="${x.toFixed(2)}" y="${yTop.toFixed(2)}" width="${(slot - 16).toFixed(2)}" height="${h.toFixed(2)}" rx="6" fill="${color}"></rect><text class="axis-label" x="${(x + (slot - 16) / 2).toFixed(2)}" y="${height - 12}" text-anchor="middle">${esc(step.label)}</text><text class="value-label" x="${(x + (slot - 16) / 2).toFixed(2)}" y="${(yTop - 6).toFixed(2)}" text-anchor="middle">${step.value > 0 ? '+' : ''}${step.value}${c.unit}</text>`;
+    }).join('');
+    const svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">${gridMarkup(width, height, pad)}${bars}</svg>`;
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div><div class="chart-visual">${svg}</div><div class="chart-footer">Net spend after savings: 20${esc(c.unit)}</div></div>`;
+  }
+  function renderComparison(tile){
+    const c = tile.content;
+    const max = Math.max(...c.metrics.flatMap((metric) => [metric.control, metric.treatment]));
+    const rows = c.metrics.map((metric) => {
+      const controlWidth = (metric.control / max) * 100;
+      const treatmentWidth = (metric.treatment / max) * 100;
+      return `<div class="compare-row"><span class="label">${esc(metric.label)}</span><div class="dual-bar"><span class="control" style="width:${controlWidth}%"></span><span class="treatment" style="width:${treatmentWidth}%"></span></div><span class="compare-val">C ${metric.control}${metric.unit}</span><span class="compare-val">T ${metric.treatment}${metric.unit}</span></div>`;
+    }).join('');
+    return `<div class="compare-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${rows}</div>`;
+  }
+  function renderTimeline(tile){
+    const c = tile.content;
+    const events = c.events.map((event) => `<div class="timeline-point" style="left:${event.pos}%"><span class="dot"></span><span class="name">${esc(event.label)}</span><span class="meta">${esc(event.meta)}</span></div>`).join('');
+    return `<div class="timeline-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="timeline-track">${events}</div></div>`;
+  }
+  function renderClusterScatter(tile){
+    const c = tile.content;
+    let dotsHtml = '', hullsHtml = '';
+    let dotIdx = 0;
+    c.clusters.forEach((cl, ci) => {
+      // compute convex hull as SVG polygon using percentage coords
+      const centX = cl.points.reduce((s,p) => s+p[0], 0)/cl.points.length;
+      const centY = cl.points.reduce((s,p) => s+p[1], 0)/cl.points.length;
+      const sorted = [...cl.points].sort((a,b) => Math.atan2(a[1]-centY,a[0]-centX)-Math.atan2(b[1]-centY,b[0]-centX));
+      const hullPts = sorted.map(p => `${(p[0]*100).toFixed(1)},${((1-p[1])*100).toFixed(1)}`).join(' ');
+      hullsHtml += `<div class="scatter-hull" style="--hull-d:${(ci*0.25+0.4).toFixed(2)}s"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="${hullPts}" fill="${cl.color}" opacity="0.10" stroke="${cl.color}" stroke-width="0.4" stroke-opacity="0.3"/></svg></div>`;
+      cl.points.forEach((p, pi) => {
+        const left = (p[0] * 100).toFixed(1);
+        const top = ((1 - p[1]) * 100).toFixed(1);
+        const popDelay = (ci * 0.18 + pi * 0.04 + 0.2).toFixed(3);
+        const floatDelay = (parseFloat(popDelay) + 0.55 + dotIdx * 0.1).toFixed(2);
+        const floatDur = (2.5 + Math.sin(dotIdx * 1.7) * 0.8).toFixed(1);
+        const fy = (Math.cos(dotIdx * 2.3) * 2.5).toFixed(1);
+        dotsHtml += `<div class="scatter-dot" style="left:${left}%;top:${top}%;color:${cl.color};background:${cl.color};--pop-d:${popDelay}s;--float-d:${floatDelay}s;--float-dur:${floatDur}s;--fy:${fy}px"></div>`;
+        dotIdx++;
+      });
+    });
+    const items = c.clusters.map(cl => ({name:cl.name, color:cl.color}));
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${legend(items)}<div class="chart-visual"><div class="scatter-wrap">${hullsHtml}${dotsHtml}</div></div><div class="chart-footer">${esc(c.xLabel)} vs ${esc(c.yLabel)}</div></div>`;
+  }
+  function renderRanking(tile){
+    const c = tile.content;
+    const max = Math.max(...c.items.map(i => i.value));
+    const rows = c.items.map((item, i) => {
+      const pct = (item.value / max) * 100;
+      const delay = (i * 0.08 + 0.15).toFixed(2);
+      return `<div class="rank-row"><span class="rank-num">${i+1}</span><span class="rank-label">${esc(item.label)}</span><div class="rank-bar"><div class="rank-fill" style="--target-w:${pct}%;--rank-delay:${delay}s;background:${item.color||'var(--accent)'}"></div></div><span class="rank-val">${typeof item.value==='number'&&item.value<1?item.value.toFixed(2):item.value}${esc(c.unit||'')}</span></div>`;
+    }).join('');
+    return `<div class="rank-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${rows}</div>`;
+  }
+  function renderGraph3D(tile){
+    const c = tile.content;
+    const W = 420, H = 280;
+    const padL = 38, padR = 16, padT = 18, padB = 36;
+    const norm = c.points.map(p => ({
+      nx:(p.x-c.xRange[0])/(c.xRange[1]-c.xRange[0]),
+      ny:(p.y-c.yRange[0])/(c.yRange[1]-c.yRange[0]),
+      nz:(p.z-c.zRange[0])/(c.zRange[1]-c.zRange[0]),
+      color:p.color, size:p.size||5, label:p.label
+    }));
+    const flat = norm.map(p => ({ x:padL+p.nx*(W-padL-padR), y:H-padB-p.ny*(H-padT-padB) }));
+    const cos30 = Math.cos(Math.PI/6), sin30 = Math.sin(Math.PI/6);
+    const sc = 100, ox = W/2, oy = H*0.55;
+    function isoProj(nx,ny,nz){
+      const x3=(nx-0.5)*2, y3=(ny-0.5)*2, z3=nz*1.6;
+      return { x:ox+(x3*cos30-y3*cos30)*sc, y:oy+(x3*sin30+y3*sin30)*sc-z3*sc*0.65 };
+    }
+    const iso = norm.map(p => isoProj(p.nx,p.ny,p.nz));
+    const base = norm.map(p => isoProj(p.nx,p.ny,0));
+    let axes2d = gridMarkup(W,H,{t:padT,r:padR,b:padB,l:padL},4);
+    let floorGrid = '';
+    for(let i=0;i<=4;i++){
+      const t=i/4;
+      const a=isoProj(t,0,0),b=isoProj(t,1,0);
+      floorGrid+=`<line class="g3d-grid" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="rgba(255,255,255,.06)" opacity="0"/>`;
+      const a2=isoProj(0,t,0),b2=isoProj(1,t,0);
+      floorGrid+=`<line class="g3d-grid" x1="${a2.x.toFixed(1)}" y1="${a2.y.toFixed(1)}" x2="${b2.x.toFixed(1)}" y2="${b2.y.toFixed(1)}" stroke="rgba(255,255,255,.06)" opacity="0"/>`;
+    }
+    const pillars = norm.map((_,i) =>
+      `<line class="g3d-pillar" x1="${flat[i].x.toFixed(1)}" y1="${flat[i].y.toFixed(1)}" x2="${flat[i].x.toFixed(1)}" y2="${flat[i].y.toFixed(1)}" stroke="${norm[i].color}" opacity="0"/>`
+    ).join('');
+    const circles = norm.map((p,i) =>
+      `<circle class="g3d-pt" cx="${flat[i].x.toFixed(1)}" cy="${flat[i].y.toFixed(1)}" r="${p.size}" fill="${p.color}" `+
+      `data-fx="${flat[i].x.toFixed(1)}" data-fy="${flat[i].y.toFixed(1)}" `+
+      `data-tx="${iso[i].x.toFixed(1)}" data-ty="${iso[i].y.toFixed(1)}" `+
+      `data-bx="${base[i].x.toFixed(1)}" data-by="${base[i].y.toFixed(1)}"/>`
+    ).join('');
+    const svg = `<svg class="chart-svg graph3d-canvas" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`+
+      `<g class="g3d-axes2d">${axes2d}</g><g class="g3d-floor-g">${floorGrid}</g>${pillars}${circles}</svg>`;
+    const items = (c.series||[]);
+    return `<div class="chart-shell"><div class="tile-kicker">${esc(c.title)}</div><div class="chart-subtitle">${esc(c.subtitle)}</div>${items.length?legend(items):''}<div class="chart-visual">${svg}</div><div class="chart-footer">Flat scatter morphs to isometric 3D projection</div></div>`;
+  }
+
+  const renderers = {
+    hero: renderHero,
+    pipeline: renderPipeline,
+    'stat-block': renderStatBlock,
+    kpi: renderKpi,
+    'line-chart': renderLineChart,
+    'bar-chart': renderBarChart,
+    'radar-chart': renderRadarChart,
+    table: renderTable,
+    'scatter-plot': renderScatterPlot,
+    'metric-card': renderMetricCard,
+    'grouped-column': renderGroupedColumn,
+    'stacked-bar': renderStackedBar,
+    gauge: renderGauge,
+    'progress-ring': renderProgressRing,
+    sparkline: renderSparkline,
+    'area-chart': renderAreaChart,
+    histogram: renderHistogram,
+    'pie-chart': renderPieChart,
+    heatmap: renderHeatmap,
+    'status-grid': renderStatusGrid,
+    waterfall: renderWaterfall,
+    comparison: renderComparison,
+    timeline: renderTimeline,
+    'cluster-scatter': renderClusterScatter,
+    ranking: renderRanking,
+    'graph-3d': renderGraph3D
+  };
+
+  function renderThumbnails(){
+    thumbStrip.innerHTML = slides.map((slide, index) => {
+      const previewTiles = slide.tiles.map((tile) => {
+        const meta = TYPE_META[tile.type] || { category: 'slate' };
+        return `<span class="thumb-tile" style="grid-column:${tile.grid.col} / span ${tile.grid.colSpan};grid-row:${tile.grid.row} / span ${tile.grid.rowSpan};background:var(--${meta.category});"></span>`;
+      }).join('');
+      return `<button class="thumb ${index === state.activeSlide ? 'is-active' : ''}" type="button" data-slide-index="${index}" aria-label="Open ${esc(slide.title)}"><div class="thumb-preview">${previewTiles}</div><div class="thumb-label"><span class="thumb-title">${esc(slide.title)}</span><span class="thumb-index">${String(index + 1).padStart(2, '0')}</span></div></button>`;
+    }).join('');
+  }
+
+  function renderSidebar(){ /* sidebar removed -- metadata merged into stage header and footer */ }
+
+  function renderStageHeader(){
+    const slide = slides[state.activeSlide];
+    const chartCount = slide.tiles.filter((tile) => !['hero','pipeline','kpi','stat-block','metric-card','status-grid','timeline'].includes(tile.type)).length;
+    const counts = slide.tiles.reduce((acc, tile) => {
+      const meta = TYPE_META[tile.type] || { badge: tile.type.toUpperCase() };
+      acc[meta.badge] = (acc[meta.badge] || 0) + 1;
+      return acc;
+    }, {});
+    const inventoryPills = Object.entries(counts).map(([badge, count]) => `<div class="stage-pill"><span class="k">${badge}</span><span class="v">${count}</span></div>`).join('');
+    /* Update chrome bar */
+    chromeKicker.textContent = `${String(state.activeSlide + 1).padStart(2,'0')}/${slides.length}`;
+    chromeTitle.textContent = slide.title;
+    l0Chips.innerHTML = slide.chips.map((chip) => `<span class="badge badge-${['Executive view','Experiments','FinOps'].includes(chip) ? 'gold' : ['MLOps','Pipeline','Latency','Serving','Realtime','Monitoring','Embeddings','Clustering','3D Viz','Isometric','Animation'].includes(chip) ? 'teal' : 'slate'}">${esc(chip)}</span>`).join('');
+    /* Inventory pills go into L0 settings drawer */
+    const headerInv = document.getElementById('headerInventory');
+    if (headerInv) {
+      headerInv.innerHTML =
+        `<div class="stage-pill"><span class="k">Tiles</span><span class="v">${slide.tiles.length}</span></div>` +
+        `<div class="stage-pill"><span class="k">Charts</span><span class="v">${chartCount}</span></div>` +
+        inventoryPills +
+        `<div class="stage-pill"><span class="k">Theme</span><span class="v">${THEME_LABELS[state.theme]}</span></div>`;
+    }
+  }
+
+  function createTileElement(tile, slide, index){
+    const meta = TYPE_META[tile.type] || { badge: tile.type.toUpperCase(), category: 'slate' };
+    const el = document.createElement('div');
+    el.className = 'tile-card flip-card';
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-pressed', 'false');
+    el.setAttribute('aria-label', editMode ? `${tile.title} — Click to flip` : `${tile.title} — Click to interact`);
+    el.style.gridColumn = `${tile.grid.col} / span ${tile.grid.colSpan}`;
+    el.style.gridRow = `${tile.grid.row} / span ${tile.grid.rowSpan}`;
+    el.style.setProperty('--delay', index);
+    const front = renderers[tile.type] ? renderers[tile.type](tile) : `<div class="tile-note">Renderer missing for ${esc(tile.type)}</div>`;
+    const backJson = esc(pretty(buildTileSchema(slide, tile)));
+    el.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-front cat-${meta.category}">
+          <div class="tile-header">
+            <span class="tile-title">${badgeHtml(tile.type)}<span class="tile-name">${esc(tile.title)}</span></span>
+            <span class="hint">Click to flip</span>
+          </div>
+          <div class="tile-body">${front}</div>
+        </div>
+        <div class="flip-back">
+          <div class="tile-back-header">
+            <span class="tile-title"><span class="badge badge-${meta.category}">JSON</span><span class="tile-name">${esc(tile.title)} schema</span></span>
+            <button class="copy-btn" type="button">Copy JSON</button>
+          </div>
+          <div class="tile-back-body"><pre>${backJson}</pre></div>
+        </div>
+      </div>`;
+    return el;
+  }
+
+  function setMode(isEdit){
+    editMode = isEdit;
+    canvas.classList.toggle('edit-mode', isEdit);
+    canvas.classList.toggle('view-mode', !isEdit);
+    modeToggle.querySelectorAll('button').forEach(function(btn){
+      btn.classList.toggle('is-active', btn.dataset.mode === (isEdit ? 'edit' : 'view'));
+    });
+    /* Show/hide overlap section based on mode */
+    if (overlapSection) overlapSection.classList.toggle('is-hidden', !isEdit);
+    if (!isEdit) {
+      schemaView = false;
+      if (schemaBtn) schemaBtn.classList.remove('is-active');
+      canvas.querySelectorAll('.flip-card[aria-pressed="true"]').forEach(function(c){
+        c.setAttribute('aria-pressed','false');
+      });
+    }
+  }
+
+  /* ---- Tile overlap / collision system ---- */
+  function detectCollisions(tiles){
+    /* Build a cell occupancy map: cell key -> list of tile indices */
+    var cellMap = {};
+    tiles.forEach(function(tile, idx){
+      var g = tile.grid;
+      for(var c = g.col; c < g.col + g.colSpan; c++){
+        for(var r = g.row; r < g.row + g.rowSpan; r++){
+          var key = c + ',' + r;
+          if(!cellMap[key]) cellMap[key] = [];
+          cellMap[key].push(idx);
+        }
+      }
+    });
+    /* Group overlapping tile indices (tiles that share any cell) */
+    var overlapGroups = {}; /* tileIdx -> group set of overlapping tile indices */
+    Object.values(cellMap).forEach(function(idxList){
+      if(idxList.length < 2) return;
+      idxList.forEach(function(a){
+        if(!overlapGroups[a]) overlapGroups[a] = new Set();
+        idxList.forEach(function(b){ if(a !== b) overlapGroups[a].add(b); });
+      });
+    });
+    /* Build collision pairs (for counting) */
+    var pairs = new Set();
+    Object.keys(overlapGroups).forEach(function(a){
+      overlapGroups[a].forEach(function(b){
+        var key = Math.min(+a,+b) + ':' + Math.max(+a,+b);
+        pairs.add(key);
+      });
+    });
+    return { cellMap: cellMap, overlapGroups: overlapGroups, pairCount: pairs.size };
+  }
+
+  function applyOverlapMode(tiles, tileElements){
+    if(overlapMode === 'off') return 0;
+    var result = detectCollisions(tiles);
+    if(result.pairCount === 0) return 0;
+    if(overlapMode === 'overlap'){
+      /* Stack mode: offset overlapping tiles with incrementing translate */
+      var groupIndexes = {}; /* tileIdx -> stacking order within its overlap group */
+      var visited = new Set();
+      tiles.forEach(function(tile, idx){
+        if(!result.overlapGroups[idx] || visited.has(idx)) return;
+        /* BFS to find full overlap cluster */
+        var cluster = [idx];
+        var queue = [idx];
+        visited.add(idx);
+        while(queue.length){
+          var cur = queue.shift();
+          if(result.overlapGroups[cur]){
+            result.overlapGroups[cur].forEach(function(neighbor){
+              if(!visited.has(neighbor)){
+                visited.add(neighbor);
+                cluster.push(neighbor);
+                queue.push(neighbor);
+              }
+            });
+          }
+        }
+        cluster.forEach(function(tidx, order){
+          if(order > 0) groupIndexes[tidx] = order;
+        });
+      });
+      Object.keys(groupIndexes).forEach(function(tidx){
+        var el = tileElements[+tidx];
+        if(!el) return;
+        var order = Math.min(groupIndexes[tidx], 3);
+        el.setAttribute('data-overlap-index', String(order));
+        el.style.zIndex = String(order + 1);
+        el.style.transform = 'translate(' + (order * 6) + 'px,' + (order * 6) + 'px)';
+        /* Add indicator badge */
+        var badge = document.createElement('span');
+        badge.className = 'overlap-indicator';
+        badge.textContent = 'L' + order;
+        el.appendChild(badge);
+      });
+    } else if(overlapMode === 'shift'){
+      /* Shift mode: nudge colliding tiles to adjacent open cells */
+      var occupied = {}; /* cell key -> first tile index that claimed it */
+      tiles.forEach(function(tile, idx){
+        var g = tile.grid;
+        var hasConflict = false;
+        for(var c = g.col; c < g.col + g.colSpan && !hasConflict; c++){
+          for(var r = g.row; r < g.row + g.rowSpan && !hasConflict; r++){
+            if(occupied[c+','+r] !== undefined && occupied[c+','+r] !== idx) hasConflict = true;
+          }
+        }
+        if(!hasConflict){
+          /* Claim cells */
+          for(var c2 = g.col; c2 < g.col + g.colSpan; c2++){
+            for(var r2 = g.row; r2 < g.row + g.rowSpan; r2++){
+              occupied[c2+','+r2] = idx;
+            }
+          }
+        } else {
+          /* Find nearest open position by scanning right then down */
+          var placed = false;
+          for(var tryRow = 1; tryRow <= 7 && !placed; tryRow++){
+            for(var tryCol = 1; tryCol <= 12 && !placed; tryCol++){
+              if(tryCol + g.colSpan - 1 > 12) continue;
+              if(tryRow + g.rowSpan - 1 > 7) continue;
+              var fits = true;
+              for(var dc = 0; dc < g.colSpan && fits; dc++){
+                for(var dr = 0; dr < g.rowSpan && fits; dr++){
+                  if(occupied[(tryCol+dc)+','+(tryRow+dr)] !== undefined) fits = false;
+                }
+              }
+              if(fits){
+                var el = tileElements[idx];
+                if(el){
+                  el.style.gridColumn = tryCol + ' / span ' + g.colSpan;
+                  el.style.gridRow = tryRow + ' / span ' + g.rowSpan;
+                  el.setAttribute('data-overlap-offset', 'shifted');
+                  /* Add indicator */
+                  var badge = document.createElement('span');
+                  badge.className = 'overlap-indicator';
+                  badge.textContent = 'SHIFTED';
+                  el.appendChild(badge);
+                }
+                for(var dc2 = 0; dc2 < g.colSpan; dc2++){
+                  for(var dr2 = 0; dr2 < g.rowSpan; dr2++){
+                    occupied[(tryCol+dc2)+','+(tryRow+dr2)] = idx;
+                  }
+                }
+                placed = true;
+              }
+            }
+          }
+          if(!placed){
+            /* Could not place -- fall back to overlap stacking */
+            var el2 = tileElements[idx];
+            if(el2){
+              el2.setAttribute('data-overlap-index', '1');
+              el2.style.zIndex = '2';
+              el2.style.transform = 'translate(6px,6px)';
+            }
+          }
+        }
+      });
+    }
+    return result.pairCount;
+  }
+
+  function updateOverlapUI(collisionCount){
+    if(overlapCountEl){
+      if(collisionCount > 0){
+        overlapCountEl.textContent = collisionCount + ' collision' + (collisionCount === 1 ? '' : 's');
+      } else {
+        overlapCountEl.textContent = 'No collisions';
+      }
+    }
+    if(overlapToggle){
+      overlapToggle.querySelectorAll('button').forEach(function(btn){
+        btn.classList.toggle('is-active', btn.dataset.overlap === overlapMode);
+      });
+    }
+  }
+
+  function renderCanvas(){
+    const slide = slides[state.activeSlide];
+    canvas.innerHTML = '';
+    schemaView = false;
+    if (schemaBtn) schemaBtn.classList.remove('is-active');
+    /* Dynamically set grid rows based on tile data */
+    const maxRow = Math.max(...slide.tiles.map(t => (t.grid.row || 1) + (t.grid.rowSpan || 1) - 1));
+    canvas.style.gridTemplateRows = 'repeat(' + maxRow + ', minmax(0, 1fr))';
+    canvas.style.setProperty('--grid-rows', maxRow);
+    slide.tiles.forEach((tile, index) => canvas.appendChild(createTileElement(tile, slide, index)));
+    /* Apply overlap collision logic */
+    var tileElements = Array.from(canvas.querySelectorAll('.tile-card'));
+    var collisionCount = applyOverlapMode(slide.tiles, tileElements);
+    updateOverlapUI(collisionCount);
+    setMode(editMode);
+    requestAnimationFrame(fitStage);
+    animateGraph3D();
+  }
+
+  function updateStats(){
+    document.getElementById('statSlides').textContent = String(slides.length);
+    document.getElementById('statTiles').textContent = String(slides.reduce((sum, slide) => sum + slide.tiles.length, 0));
+  }
+
+  function animateGraph3D(){
+    document.querySelectorAll('.graph3d-canvas').forEach(function(svg){
+      var pts = svg.querySelectorAll('.g3d-pt');
+      var pls = svg.querySelectorAll('.g3d-pillar');
+      var ax = svg.querySelector('.g3d-axes2d');
+      var grd = svg.querySelectorAll('.g3d-grid');
+      if(!pts.length) return;
+      var t0 = performance.now() + 1200;
+      var dur = 2200;
+      function ease(t){ return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+      (function tick(now){
+        var raw = Math.min(1,Math.max(0,(now-t0)/dur));
+        var t = ease(raw);
+        if(ax) ax.style.opacity = String(1-t);
+        grd.forEach(function(g){ g.setAttribute('opacity',String(t*.7)); });
+        pts.forEach(function(pt,i){
+          var fx=+pt.dataset.fx, fy=+pt.dataset.fy;
+          var tx=+pt.dataset.tx, ty=+pt.dataset.ty;
+          var bx=+pt.dataset.bx, by=+pt.dataset.by;
+          var cx=fx+(tx-fx)*t, cy=fy+(ty-fy)*t;
+          pt.setAttribute('cx',cx.toFixed(1));
+          pt.setAttribute('cy',cy.toFixed(1));
+          if(pls[i]){
+            pls[i].setAttribute('x1',cx.toFixed(1));
+            pls[i].setAttribute('y1',cy.toFixed(1));
+            pls[i].setAttribute('x2',(fx+(bx-fx)*t).toFixed(1));
+            pls[i].setAttribute('y2',(fy+(by-fy)*t).toFixed(1));
+            pls[i].setAttribute('opacity',String(t*.35));
+          }
+        });
+        if(now<t0||raw<1) requestAnimationFrame(tick);
+      })(performance.now());
+    });
+  }
+
+  function syncHeaderToggle(){}
+
+  function setHeaderCollapsed(){}
+
+  function showLayer0(show){
+    if (show) layer0.classList.add('l0-visible');
+    else layer0.classList.remove('l0-visible');
+  }
+
+  function fitStage(){
+    const width = stageViewport.clientWidth;
+    const height = stageViewport.clientHeight;
+    if (!width || !height) return;
+    const scale = Math.min(1, (width - 4) / 1280, (height - 4) / 720);
+    stageScale.style.transform = `scale(${Math.max(0.35, scale)})`;
+  }
+
+  function setTheme(theme){
+    state.theme = theme;
+    document.body.setAttribute('data-theme', theme);
+    themeButtonState();
+    renderThumbnails();
+    renderSidebar();
+    renderStageHeader();
+  }
+
+  function goToSlide(index){
+    state.activeSlide = (index + slides.length) % slides.length;
+    renderThumbnails();
+    renderSidebar();
+    renderStageHeader();
+    renderCanvas();
+  }
+
+  thumbStrip.addEventListener('click', (event) => {
+    const button = event.target.closest('.thumb');
+    if (!button) return;
+    goToSlide(Number(button.dataset.slideIndex));
+  });
+
+  themeToolbar.addEventListener('click', (event) => {
+    const button = event.target.closest('.theme-btn');
+    if (!button) return;
+    setTheme(button.dataset.theme);
+    showLayer0(false);
+  });
+
+  /* Nav buttons live inside card-chrome now */
+  cardChrome.addEventListener('click', (event) => {
+    const navBtn = event.target.closest('.nav-btn');
+    if (navBtn) {
+      goToSlide(state.activeSlide + (navBtn.dataset.nav === 'next' ? 1 : -1));
+      return;
+    }
+  });
+
+  /* Settings button opens L0 */
+  settingsBtn.addEventListener('click', () => showLayer0(true));
+  l0Close.addEventListener('click', () => showLayer0(false));
+
+  /* Schema button toggles all tiles to back-face */
+  schemaBtn.addEventListener('click', function(){
+    if (!editMode) return;
+    schemaView = !schemaView;
+    schemaBtn.classList.toggle('is-active', schemaView);
+    canvas.querySelectorAll('.flip-card').forEach(function(card){
+      card.setAttribute('aria-pressed', String(schemaView));
+    });
+  });
+
+  /* View/Edit mode toggle */
+  modeToggle.addEventListener('click', function(event){
+    var btn = event.target.closest('button[data-mode]');
+    if (!btn) return;
+    setMode(btn.dataset.mode === 'edit');
+  });
+
+  /* Overlap mode toggle */
+  overlapToggle.addEventListener('click', function(event){
+    var btn = event.target.closest('button[data-overlap]');
+    if (!btn) return;
+    overlapMode = btn.dataset.overlap;
+    renderCanvas();
+  });
+  /* Click backdrop of L0 to close */
+  layer0.addEventListener('click', (event) => {
+    if (event.target === layer0) showLayer0(false);
+  });
+  /* Escape key closes L0 */
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && layer0.classList.contains('l0-visible')) {
+      showLayer0(false);
+      event.preventDefault();
+      return;
+    }
+  });
+
+  canvas.addEventListener('click', (event) => {
+    const copyButton = event.target.closest('.copy-btn');
+    if (copyButton) {
+      event.stopPropagation();
+      const pre = copyButton.closest('.flip-back').querySelector('pre');
+      if (!pre) return;
+      const original = copyButton.textContent;
+      copyToClipboard(pre.textContent).then(() => {
+        copyButton.textContent = 'Copied';
+        setTimeout(() => { copyButton.textContent = original; }, 1200);
+      });
+      return;
+    }
+    const card = event.target.closest('.flip-card');
+    if (!card) return;
+    if (editMode) {
+      const pressed = card.getAttribute('aria-pressed') === 'true';
+      card.setAttribute('aria-pressed', String(!pressed));
+    } else {
+      /* View mode: dispatch drill-through on tile body clicks */
+      var body = event.target.closest('.tile-body');
+      if (body) {
+        card.dispatchEvent(new CustomEvent('tile-drillthrough', {
+          bubbles: true,
+          detail: { title: card.getAttribute('aria-label'), element: body }
+        }));
+      }
+    }
+  });
+
+  canvas.addEventListener('keydown', (event) => {
+    if (!editMode) return;
+    const card = event.target.closest('.flip-card');
+    if (!card) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const pressed = card.getAttribute('aria-pressed') === 'true';
+      card.setAttribute('aria-pressed', String(!pressed));
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.target && ['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName)) return;
+    if (event.key === 'ArrowRight') goToSlide(state.activeSlide + 1);
+    if (event.key === 'ArrowLeft') goToSlide(state.activeSlide - 1);
+  });
+
+  window.addEventListener('resize', fitStage);
+  if ('ResizeObserver' in window) new ResizeObserver(() => fitStage()).observe(stageViewport);
+
+  updateStats();
+  themeButtonState();
+  goToSlide(0);
+})();
+</script>
+</body>
+</html>
